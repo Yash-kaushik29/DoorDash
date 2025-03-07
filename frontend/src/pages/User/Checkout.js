@@ -177,7 +177,7 @@ const Checkout = () => {
     }
     if (paymentMethod === "COD") {
       const { data } = await axios.post(
-        "${process.env.REACT_APP_API_URL}/api/order/create-order",
+        `${process.env.REACT_APP_API_URL}/api/order/create-order`,
         {
           userId: user._id,
           cartItems,
@@ -408,7 +408,7 @@ const Checkout = () => {
         </div>
         <button
           onClick={handleCheckout}
-          className="w-full bg-green-600 text-white py-2 mt-4 rounded-lg"
+          className="w-full bg-green-500 hover:bg-green-600 text-white py-2 mt-4 rounded-lg"
         >
           {paymentMethod === "Razorpay" ? "Proceed to Pay" : "Place Order"}
         </button>
