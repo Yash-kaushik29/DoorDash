@@ -27,7 +27,7 @@ const ProductForm = () => {
     try {
       setLoading(true);
       const { data } = await axios.get(
-        `http://localhost:5000/api/shop/getProduct/${productId}`,
+        `${process.env.REACT_APP_API_URL}/api/shop/getProduct/${productId}`,
         { withCredentials: true }
       );
 
@@ -77,8 +77,8 @@ const ProductForm = () => {
     try {
       setLoading(true);
       const apiUrl = productId
-        ? "http://localhost:5000/api/shop/edit-product"
-        : "http://localhost:5000/api/shop/add-product";
+        ? `${process.env.REACT_APP_API_URL}/api/shop/edit-product`
+        : `${process.env.REACT_APP_API_URL}/api/shop/add-product`;
 
       const { data } = await axios({
         method: productId ? "put" : "post",

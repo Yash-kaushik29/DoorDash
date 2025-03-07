@@ -19,7 +19,7 @@ const AdminOrders = () => {
     setError(null);
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/admin/getOrdersByMonth?page=${pageNum}&limit=10&filter=${statusFilter}`,
+        `${process.env.REACT_APP_API_URL}/api/admin/getOrdersByMonth?page=${pageNum}&limit=10&filter=${statusFilter}`,
         { withCredentials: true }
       );
       if (response.data.success) {

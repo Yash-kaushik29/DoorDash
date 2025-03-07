@@ -17,7 +17,7 @@ const Notifications = () => {
         if (!user || !user._id) return;
 
         const { data } = await axios.get(
-          `http://localhost:5000/api/notification/getNotifications/${user._id}`,
+          `${process.env.REACT_APP_API_URL}/api/notification/getNotifications/${user._id}`,
           { withCredentials: true }
         );
 
@@ -42,7 +42,7 @@ const Notifications = () => {
   }, [filter, notifications]);
 
   const showNotification = async(notif) => {
-    const {data} = await axios.post(`http://localhost:5000/api/notification/readNotification`, {userId: user._id, notificationId: notif._id}, {withCredentials: true});
+    const {data} = await axios.post(`${process.env.REACT_APP_API_URL}/api/notification/readNotification`, {userId: user._id, notificationId: notif._id}, {withCredentials: true});
     
     if(data.success) {
       setSelectedNotification(notif)

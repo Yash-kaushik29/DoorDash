@@ -10,7 +10,7 @@ export function UserContextProvider({ children }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/auth/getUser", { withCredentials: true });
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/auth/getUser`, { withCredentials: true });
         setUser(response.data.user);
       } catch (error) {
         console.error("Error fetching user:", error);

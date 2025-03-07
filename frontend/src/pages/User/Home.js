@@ -24,7 +24,7 @@ const Home = () => {
   const fetchPopularShops = async () => {
     try {
       const { data } = await axios.get(
-        `http://localhost:5000/api/home/get-popular-shops`,
+        `${process.env.REACT_APP_API_URL}/api/home/get-popular-shops`,
         { withCredentials: true }
       );
 
@@ -41,7 +41,7 @@ const Home = () => {
   const fetchPopularProducts = async () => {
     try {
       const { data } = await axios.get(
-        `http://localhost:5000/api/home/get-popular-products`,
+        `${process.env.REACT_APP_API_URL}/api/home/get-popular-products`,
         { withCredentials: true }
       );
 

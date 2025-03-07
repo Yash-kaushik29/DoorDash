@@ -28,7 +28,7 @@ export default function Signup() {
     }
   
     try {
-        const response = await axios.post("http://localhost:5000/api/auth/user-signup", {formData}, { withCredentials: true });
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/user-signup`, {formData}, { withCredentials: true });
       
       if(response.data.success) {
         toast.success("Signup Successful! 🎉");

@@ -14,7 +14,7 @@ const CartPage = () => {
   useEffect(() => {
     const fetchCartItems = async () => {
       const { data } = await axios.get(
-        "http://localhost:5000/api/cart/getCart",
+        `${process.env.REACT_APP_API_URL}/api/cart/getCart`,
         { withCredentials: true }
       );
       setCartItems(data.cart);
@@ -29,7 +29,7 @@ const CartPage = () => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/cart/incrementQty",
+        `${process.env.REACT_APP_API_URL}/api/cart/incrementQty`,
         { productId },
         { withCredentials: true }
       );
@@ -46,7 +46,7 @@ const CartPage = () => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/cart/decrementQty",
+        `${process.env.REACT_APP_API_URL}/api/cart/decrementQty`,
         { productId },
         { withCredentials: true }
       );
@@ -62,7 +62,7 @@ const CartPage = () => {
     setLoading(true);
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/cart/removeFromCart",
+        `${process.env.REACT_APP_API_URL}/api/cart/removeFromCart`,
         { productId },
         { withCredentials: true }
       );

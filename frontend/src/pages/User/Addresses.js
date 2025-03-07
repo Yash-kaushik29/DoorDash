@@ -40,7 +40,7 @@ const Addresses = () => {
   const fetchAddresses = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/user-profile/getAddresses",
+        `${process.env.REACT_APP_API_URL}/api/user-profile/getAddresses`,
         {
           params: { userId },
         }
@@ -86,7 +86,7 @@ const Addresses = () => {
         toast.warning("Please enter a 10 digit phone number!")
       } else {
         const { data } = await axios.post(
-          "http://localhost:5000/api/user-profile/saveAddress",
+          `${process.env.REACT_APP_API_URL}/api/user-profile/saveAddress`,
           { userId, address },
           { withCredentials: true }
         );
@@ -112,7 +112,7 @@ const Addresses = () => {
   const deleteAddress = async (addressId) => {
     try {
       const { data } = await axios.delete(
-        "http://localhost:5000/api/user-profile/deleteAddress",
+        `${process.env.REACT_APP_API_URL}/api/user-profile/deleteAddress`,
         {
           params: { userId, addressId },
           withCredentials: true,
@@ -133,7 +133,7 @@ const Addresses = () => {
   const setAsDefault = async (addressId) => {
     try {
       const { data } = await axios.put(
-        "http://localhost:5000/api/user-profile/setAsDefault",
+        `${process.env.REACT_APP_API_URL}/api/user-profile/setAsDefault`,
         {
           userId,
           addressId,

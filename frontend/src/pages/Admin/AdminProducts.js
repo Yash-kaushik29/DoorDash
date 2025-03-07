@@ -17,7 +17,7 @@ const AdminProducts = () => {
     setError('');
 
     try {
-      const res = await axios.get(`http://localhost:5000/api/admin/products?search=${search}&page=${page}`);
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/products?search=${search}&page=${page}`);
       if (res.data.success) {
         setProducts(res.data.products);
         setTotalPages(res.data.totalPages);

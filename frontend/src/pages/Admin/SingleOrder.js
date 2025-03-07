@@ -14,7 +14,7 @@ const SingleOrder = () => {
   const fetchOrderDetails = async (id) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/admin/getOrderById/${id}`,
+        `${process.env.REACT_APP_API_URL}/api/admin/getOrderById/${id}`,
         { withCredentials: true }
       );
       if (response.data.success) {
@@ -31,7 +31,7 @@ const SingleOrder = () => {
   const fetchDeliveryBoys = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/admin/getAllDeliveryBoys",
+        `${process.env.REACT_APP_API_URL}/api/admin/getAllDeliveryBoys`,
         { withCredentials: true }
       );
       if (response.data.success) {
@@ -63,7 +63,7 @@ const SingleOrder = () => {
     if (selectedDeliveryBoy) {
       try {
         const response = await axios.post(
-          "http://localhost:5000/api/admin/assignDeliveryBoy",
+          `${process.env.REACT_APP_API_URL}/api/admin/assignDeliveryBoy`,
           { orderId, deliveryBoyId: selectedDeliveryBoy },
           { withCredentials: true }
         );

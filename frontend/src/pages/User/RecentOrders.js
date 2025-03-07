@@ -16,7 +16,7 @@ const RecentOrders = () => {
     try {
       setLoading(true);
       const { data } = await axios.get(
-        `http://localhost:5000/api/order/getUserOrders?page=${page}&limit=10`, 
+        `${process.env.REACT_APP_API_URL}/api/order/getUserOrders?page=${page}&limit=10`, 
         { withCredentials: true }
       );
   

@@ -15,7 +15,7 @@ const ProductsList = () => {
   const onToggleStock = async (productId) => {
     try {
       const { data } = await axios.put(
-        "http://localhost:5000/api/shop/update-stock",
+        `${process.env.REACT_APP_API_URL}/api/shop/update-stock`,
         { productId },
         { withCredentials: true }
       );
@@ -43,7 +43,7 @@ const ProductsList = () => {
       setLoading(true);
       try {
         const { data } = await axios.get(
-          "http://localhost:5000/api/shop/get-products",
+          `${process.env.REACT_APP_API_URL}/api/shop/get-products`,
           { withCredentials: true }
         );
 

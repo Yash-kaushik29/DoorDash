@@ -12,7 +12,7 @@ const SellerList = () => {
   useEffect(() => {
     const fetchSellers = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/admin/sellers");
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/sellers`);
         setSellers(res.data);
         setFilteredSellers(res.data);
       } catch (err) {

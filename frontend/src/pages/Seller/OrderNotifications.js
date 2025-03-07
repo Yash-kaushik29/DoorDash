@@ -16,7 +16,7 @@ const OrderNotifications = () => {
       setError("");
       try {
         const { data } = await axios.get(
-          "http://localhost:5000/api/notification/getSellerNotifications",
+          `${process.env.REACT_APP_API_URL}/api/notification/getSellerNotifications`,
           { withCredentials: true }
         );
 
@@ -50,7 +50,7 @@ const OrderNotifications = () => {
   const markAsRead = async (notifId) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/notification/read/${notifId}`,
+        `${process.env.REACT_APP_API_URL}/api/notification/read/${notifId}`,
         {},
         { withCredentials: true }
       );

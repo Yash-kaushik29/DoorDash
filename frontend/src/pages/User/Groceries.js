@@ -16,7 +16,7 @@ const Groceries = () => {
   const fetchGroceries = async () => {
     try {
       const { data } = await axios.get(
-        `http://localhost:5000/api/common/groceries?page=${page}&limit=10`, {withCredentials: true}
+        `${process.env.REACT_APP_API_URL}/api/common/groceries?page=${page}&limit=10`, {withCredentials: true}
       );
       if (data.products.length === 0) {
         setHasMore(false);

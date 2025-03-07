@@ -12,12 +12,12 @@ const SellerDetails = () => {
     const fetchDetails = async () => {
       try {
         const sellerRes = await axios.get(
-          `http://localhost:5000/api/admin/seller/${sellerId}`
+          `${process.env.REACT_APP_API_URL}/api/admin/seller/${sellerId}`
         );
         setSeller(sellerRes.data);
 
         const productsRes = await axios.get(
-          `http://localhost:5000/api/admin/seller/${sellerId}/products`
+          `${process.env.REACT_APP_API_URL}/api/admin/seller/${sellerId}/products`
         );
         setProducts(productsRes.data);
       } catch (err) {

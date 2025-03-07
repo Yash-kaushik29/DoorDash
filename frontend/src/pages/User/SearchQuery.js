@@ -30,7 +30,7 @@ const SearchQuery = () => {
       setLoading(true);
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/common/search/${encodeURIComponent(query)}?page=${page}`
+          `${process.env.REACT_APP_API_URL}/api/common/search/${encodeURIComponent(query)}?page=${page}`
         );
 
         setProducts((prev) => (page === 1 ? data : [...prev, ...data]));

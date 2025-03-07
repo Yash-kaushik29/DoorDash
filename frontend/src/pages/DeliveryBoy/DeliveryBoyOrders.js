@@ -21,7 +21,7 @@ const DeliveryBoyOrders = () => {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/delivery/orders`, {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/delivery/orders`, {
         params: {
           page: currentPage,
           limit: 5,

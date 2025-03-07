@@ -16,7 +16,7 @@ const AdminHeader = () => {
 
       const handleLogout = async () => {
         try {
-          await axios.post('http://localhost:5000/api/admin/logout', {}, { withCredentials: true });
+          await axios.post(`${process.env.REACT_APP_API_URL}/api/admin/logout`, {}, { withCredentials: true });
           navigate('/admin/login');
         } catch (error) {
           console.error('Logout failed:', error);

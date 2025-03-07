@@ -16,7 +16,7 @@ const Orders = () => {
       setError("");
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/order/getAllOrders`,
+          `${process.env.REACT_APP_API_URL}/api/order/getAllOrders`,
           { withCredentials: true }
         );
         if (data.success) {

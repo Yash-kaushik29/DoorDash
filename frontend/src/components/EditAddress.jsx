@@ -37,7 +37,7 @@ const EditAddress = ({ address, closeModal, updateAddress }) => {
   const editAddress = async (e) => {
     e.preventDefault();
     const { data } = await axios.post(
-      "http://localhost:5000/api/user-profile/editAddress",
+      `${process.env.REACT_APP_API_URL}/api/user-profile/editAddress`,
       { userId: user._id, addressId: address._id, formData },
       { withCredentials: true }
     );

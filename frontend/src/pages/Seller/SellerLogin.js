@@ -31,7 +31,7 @@ export default function SellerLogin() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/seller-login",
+        `${process.env.REACT_APP_API_URL}/api/auth/seller-login`,
         formData,
         { withCredentials: true }
       );

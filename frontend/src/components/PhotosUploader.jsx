@@ -28,7 +28,7 @@ const PhotosUploader = ({ images, setImages }) => {
   
     try {
       const response = await axios.post(
-        "http://localhost:5000/upload",
+        `${process.env.REACT_APP_API_URL}/upload`,
         filedata,
         {
           headers: { "Content-Type": "multipart/form-data" },

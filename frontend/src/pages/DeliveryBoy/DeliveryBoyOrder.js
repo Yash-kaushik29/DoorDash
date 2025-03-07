@@ -17,7 +17,7 @@ const DeliveryBoyOrder = () => {
   useEffect(() => {
     const fetchOrderDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/delivery/order/${orderId}`, {withCredentials: true});
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/delivery/order/${orderId}`, {withCredentials: true});
         setOrder(response.data);
         console.log(response.data)
         setLoading(false);
@@ -32,7 +32,7 @@ const DeliveryBoyOrder = () => {
 
   const markAsOutForDelivery = async (productId) => {
     try {
-      await axios.put(`http://localhost:5000/api/delivery/order/confirm-pickup`, {orderId, productId}, {withCredentials: true});
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/delivery/order/confirm-pickup`, {orderId, productId}, {withCredentials: true});
       alert("Marked as Out For Delivery");
       window.location.reload();
     } catch (error) {
@@ -42,7 +42,7 @@ const DeliveryBoyOrder = () => {
 
   const confirmDelivery = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/delivery/order/confirm-delivery/${orderId}`, {withCredentials: true});
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/delivery/order/confirm-delivery/${orderId}`, {withCredentials: true});
       alert("Order marked as Delivered");
       window.location.reload();
     } catch (error) {

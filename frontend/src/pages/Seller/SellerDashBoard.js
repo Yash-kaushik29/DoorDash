@@ -15,7 +15,7 @@ const SellerDashboard = () => {
     setLoading(true);
     try {
       const { data } = await axios.get(
-        "http://localhost:5000/api/auth/getSellerDetails",
+        `${process.env.REACT_APP_API_URL}/api/auth/getSellerDetails`,
         { withCredentials: true }
       );
 

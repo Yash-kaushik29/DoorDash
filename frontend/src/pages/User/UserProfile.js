@@ -25,7 +25,7 @@ const UserProfile = () => {
 
   const handleLogout = async () => {
     const { data } = await axios.get(
-      "http://localhost:5000/api/user-profile/logout",
+      `${process.env.REACT_APP_API_URL}/api/user-profile/logout`,
       {
         withCredentials: true,
       }

@@ -30,7 +30,7 @@ const ShopDetailsForm = () => {
   const fetchShopDetails = async () => {
     try {
       const { data } = await axios.get(
-        `http://localhost:5000/api/shop/getShop/${shopId}`,
+        `${process.env.REACT_APP_API_URL}/api/shop/getShop/${shopId}`,
         { withCredentials: true }
       );
 
@@ -73,7 +73,7 @@ const ShopDetailsForm = () => {
     e.preventDefault();
     try {
       const { data } = await axios.put(
-        'http://localhost:5000/api/shop/edit-shop',
+        `${process.env.REACT_APP_API_URL}/api/shop/edit-shop`,
         { shop, shopId, images },
         { withCredentials: true }
       );
@@ -96,7 +96,7 @@ const ShopDetailsForm = () => {
     e.preventDefault();
     try {
       const { data } = await axios.post(
-        'http://localhost:5000/api/shop/add-shop',
+        `${process.env.REACT_APP_API_URL}/api/shop/add-shop`,
         { shop, images },
         { withCredentials: true }
       );

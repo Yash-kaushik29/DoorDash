@@ -34,7 +34,7 @@ const SellerOrder = () => {
       setLoading(true);
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/order/getorder/${orderId}`,
+          `${process.env.REACT_APP_API_URL}/api/order/getorder/${orderId}`,
           { withCredentials: true }
         );
         setOrder(data);
@@ -51,7 +51,7 @@ const SellerOrder = () => {
     setIsSubmitting(true);
     try {
       const { data } = await axios.put(
-        `http://localhost:5000/api/order/confirm-order/${orderId}`,
+        `${process.env.REACT_APP_API_URL}/api/order/confirm-order/${orderId}`,
         { selectedProducts },
         { withCredentials: true }
       );

@@ -30,7 +30,7 @@ const AccountSettings = () => {
     e.preventDefault();
     try {
       const { data } = await axios.put(
-        `http://localhost:5000/api/user-profile/updateDetails/${user._id}`,
+        `${process.env.REACT_APP_API_URL}/api/user-profile/updateDetails/${user._id}`,
         {
           name: updatedUser.name,
           email: updatedUser.email,
@@ -61,7 +61,7 @@ const AccountSettings = () => {
 
     try {
       const { data } = await axios.put(
-        `http://localhost:5000/api/user-profile/change-password/${user._id}`,
+        `${process.env.REACT_APP_API_URL}/api/user-profile/change-password/${user._id}`,
         {
           password: updatedUser.password,
           newPassword: updatedUser.newPassword,
@@ -81,7 +81,7 @@ const AccountSettings = () => {
 
   const handleLogout = async () => {
     const { data } = await axios.get(
-      "http://localhost:5000/api/user-profile/logout",
+      `${process.env.REACT_APP_API_URL}/api/user-profile/logout`,
       {
         withCredentials: true,
       }

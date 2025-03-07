@@ -23,7 +23,7 @@ const ShopPage = () => {
     const fetchShopDetails = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/shop/getShopAndProducts/${shopId}`
+          `${process.env.REACT_APP_API_URL}/api/shop/getShopAndProducts/${shopId}`
         );
         setShop(data.shop);
         setProducts(data.products);

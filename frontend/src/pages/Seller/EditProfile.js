@@ -17,7 +17,7 @@ const EditProfile = () => {
     const fetchProfile = async () => {
       try {
         const { data } = await axios.get(
-          "http://localhost:5000/api/shop/seller-profile",
+          `${process.env.REACT_APP_API_URL}/api/shop/seller-profile`,
           { withCredentials: true }
         );
 
@@ -39,7 +39,7 @@ const EditProfile = () => {
     e.preventDefault();
     try {
       await axios.put(
-        "http://localhost:5000/api/shop/update-profile",
+        `${process.env.REACT_APP_API_URL}/api/shop/update-profile`,
         { username, email },
         { withCredentials: true }
       );
@@ -61,7 +61,7 @@ const EditProfile = () => {
 
     try {
       const { data } = await axios.put(
-        `http://localhost:5000/api/user-profile/change-seller-password/${sellerId}`,
+        `${process.env.REACT_APP_API_URL}/api/user-profile/change-seller-password/${sellerId}`,
         {
           currentPassword,
           newPassword,

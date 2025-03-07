@@ -11,7 +11,7 @@ const DeliveryBoyLogin = () => {
   const handleLogin = async () => {
     setError("");
     try {
-      const res = await axios.post("http://localhost:5000/api/delivery/login", {
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/delivery/login`, {
         phone,
         password,
       });

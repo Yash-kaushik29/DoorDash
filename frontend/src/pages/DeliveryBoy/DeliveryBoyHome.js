@@ -34,7 +34,7 @@ const DeliveryBoyHome = () => {
       const fetchOrderStats = async () => {
         try {
           const response = await axios.get(
-            `http://localhost:5000/api/delivery/orders/${deliveryBoyId}`
+            `${process.env.REACT_APP_API_URL}/api/delivery/orders/${deliveryBoyId}`
           );
 
           if (isMounted) {

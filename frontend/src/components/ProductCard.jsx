@@ -19,7 +19,7 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/cart/addToCart",
+        `${process.env.REACT_APP_API_URL}/api/cart/addToCart`,
         { productId: product._id },
         { withCredentials: true }
       );
@@ -48,7 +48,7 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/cart/incrementQty",
+        `${process.env.REACT_APP_API_URL}/api/cart/incrementQty`,
         { productId },
         { withCredentials: true }
       );
@@ -78,7 +78,7 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/cart/decrementQty",
+        `${process.env.REACT_APP_API_URL}/api/cart/decrementQty`,
         { productId },
         { withCredentials: true }
       );
@@ -110,7 +110,7 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/cart/removeFromCart",
+        `${process.env.REACT_APP_API_URL}/api/cart/removeFromCart`,
         { productId },
         { withCredentials: true }
       );

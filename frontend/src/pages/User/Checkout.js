@@ -177,7 +177,7 @@ const Checkout = () => {
     }
     if (paymentMethod === "COD") {
       const { data } = await axios.post(
-        "http://localhost:5000/api/order/create-order",
+        "${process.env.REACT_APP_API_URL}/api/order/create-order",
         {
           userId: user._id,
           cartItems,
@@ -201,7 +201,7 @@ const Checkout = () => {
   const handlePayment = async () => {
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/payment/createOrder",
+        `${process.env.REACT_APP_API_URL}/api/payment/createOrder`,
         {
           orderId: 1,
           cart: cartItems,
@@ -218,7 +218,7 @@ const Checkout = () => {
         description: "Payment for Order",
         handler: async function (response) {
           const verifyRes = await axios.post(
-            "http://localhost:5000/api/payment/verify-payment",
+            `${process.env.REACT_APP_API_URL}/api/payment/verify-payment`,
             {
               order_id: response.razorpay_order_id,
               payment_id: response.razorpay_payment_id,
@@ -230,7 +230,7 @@ const Checkout = () => {
           if (verifyRes.data.success) {
             toast.success("🎉 Payment Verified!");
             const { data } = await axios.post(
-              "http://localhost:5000/api/order/create-order",
+              `${process.env.REACT_APP_API_URL}/api/order/create-order`,
               {
                 userId: user._id,
                 cartItems,
@@ -261,7 +261,7 @@ const Checkout = () => {
   const getDefaultAddress = async () => {
     try {
       const { data } = await axios.get(
-        `http://localhost:5000/api/user-profile/getDefaultAddress/${user._id}`,
+        `${process.env.REACT_APP_API_URL}/api/user-profile/getDefaultAddress/${user._id}`,
         { withCredentials: true }
       );
 

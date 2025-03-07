@@ -11,7 +11,6 @@ const SellerProfile = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Fetch Seller Profile
   useEffect(() => {
     const fetchSellerProfile = async () => {
       setLoading(true);
@@ -19,7 +18,7 @@ const SellerProfile = () => {
 
       try {
         const { data } = await axios.get(
-          "http://localhost:5000/api/shop/seller-profile",
+          `${process.env.REACT_APP_API_URL}/api/shop/seller-profile`,
           { withCredentials: true }
         );
 
@@ -42,12 +41,11 @@ const SellerProfile = () => {
     fetchSellerProfile();
   }, [navigate]);
 
-  // Toggle Shop Status (Open/Closed)
   const handleToggleShopStatus = async () => {
     try {
       const updatedStatus = !seller?.shop?.isOpen;
       await axios.put(
-        "http://localhost:5000/api/shop/update-status",
+        `${process.env.REACT_APP_API_URL}/api/shop/update-status`,
         { isOpen: updatedStatus },
         { withCredentials: true }
       );

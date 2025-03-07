@@ -17,7 +17,7 @@ const AdminSignup = () => {
     setSuccess('');
 
     try {
-      const { data } = await axios.post('http://localhost:5000/api/admin/signup', {
+      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/api/admin/signup`, {
         name,
         email,
         password,

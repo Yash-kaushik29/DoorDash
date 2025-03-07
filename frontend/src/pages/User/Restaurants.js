@@ -19,7 +19,7 @@ const Restaurants = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          "http://localhost:5000/api/shop/get-restaurants"
+          `${process.env.REACT_APP_API_URL}/api/shop/get-restaurants`
         );
         if (response.data.success) {
           setRestaurants(response.data.restaurants);
