@@ -2,7 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const Seller = require("../models/Seller")
+const Seller = require("../models/Seller");
 const router = express();
 
 router.post("/user-signup", async (req, res) => {
@@ -76,9 +76,9 @@ router.post("/user-login", async (req, res) => {
         res
           .cookie("token", token, {
             httpOnly: true,
-  secure: process.env.NODE_ENV === "production", 
-  sameSite: "strict",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
+            secure: true,
+            sameSite: "none",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
           })
           .send({
             success: true,
@@ -131,7 +131,7 @@ router.post("/seller-login", async (req, res) => {
           .send({
             success: true,
             message: "Logged In Successfully!",
-            token
+            token,
           });
       } else {
         res.send({ success: false, message: "Invalid credentails!" });
@@ -148,20 +148,27 @@ router.get("/getUser", (req, res) => {
   if (token) {
     jwt.verify(token, process.env.JWT_SECRET_KEY, {}, async (err, user) => {
       if (err) {
-        res.json({ success: false, message: "Please login first!"});
+        res.json({ success: false, message: "Please login first!" });
       } else {
         const currUser = await User.findOne({
           _id: user.userID,
         });
 
-        if(!currUser) {
-          return res.json({ success: false, message: "Please login again!"});
+        if (!currUser) {
+          return res.json({ success: false, message: "Please login again!" });
         }
-        res.json({user: { _id: currUser._id, name: currUser.username, cart: currUser.cart, phone: currUser.phone }});
+        res.json({
+          user: {
+            _id: currUser._id,
+            name: currUser.username,
+            cart: currUser.cart,
+            phone: currUser.phone,
+          },
+        });
       }
     });
   } else {
-    res.json({ success: false, message: "Internal server error!"});
+    res.json({ success: false, message: "Internal server error!" });
   }
 });
 
@@ -177,22 +184,26 @@ router.get("/getSellerDetails", async (req, res) => {
     // Verify token
     jwt.verify(sellerToken, process.env.JWT_SECRET_KEY, async (err, seller) => {
       if (err) {
-        return res.status(403).json({ success: false, message: "Invalid token" });
+        return res
+          .status(403)
+          .json({ success: false, message: "Invalid token" });
       }
 
       // Fetch Seller Details
       const sellerDetails = await Seller.findOne({ _id: seller.sellerID })
-        .select("username email shop sales products") 
+        .select("username email shop sales products")
         .populate({
           path: "orders",
-          match: { status: { $nin: ["Cancelled", "Delivered"] } }, 
-          select: "_id"
+          match: { status: { $nin: ["Cancelled", "Delivered"] } },
+          select: "_id",
         })
         .lean(); // Performance boost
 
       // If no seller is found
       if (!sellerDetails) {
-        return res.status(404).json({ success: false, message: "Seller not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "Seller not found" });
       }
 
       // Preparing response data
@@ -203,7 +214,7 @@ router.get("/getSellerDetails", async (req, res) => {
         shop: sellerDetails.shop,
         sales: sellerDetails.sales,
         productsCount: sellerDetails.products.length,
-        pendingOrdersCount: sellerDetails.orders.length
+        pendingOrdersCount: sellerDetails.orders.length,
       };
 
       res.status(200).json({ success: true, sellerDetails: responseData });
@@ -213,6 +224,5 @@ router.get("/getSellerDetails", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 module.exports = router;
