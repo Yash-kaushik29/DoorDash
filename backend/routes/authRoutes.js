@@ -76,8 +76,9 @@ router.post("/user-login", async (req, res) => {
         res
           .cookie("token", token, {
             httpOnly: true,
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+  secure: process.env.NODE_ENV === "production", 
+  sameSite: "strict",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
           })
           .send({
             success: true,
