@@ -6,6 +6,7 @@ import ProductCard from "../../components/ProductCard";
 import Navbar from "../../components/Navbar";
 import SearchPageSkeleton from "../../skeletons/SearchPageSkeleton";
 import { UserContext } from "../../context/userContext";
+import { ToastContainer } from "react-toastify";
 
 const SearchQuery = () => {
   const { query } = useParams();
@@ -47,6 +48,7 @@ const SearchQuery = () => {
 
   return (
     <div className="pb-16">
+      <ToastContainer position="top-right" autoClose={3000} />
       <Navbar />
       <InfiniteScroll
         dataLength={products.length} // Current product count

@@ -4,13 +4,32 @@ const Product = require('../models/Product');
 
 const router = express.Router();
 
-router.get("/get-groceries-shop", async (req, res) => {
+router.get("/groceries", async (req, res) => {
   try {
-    const shops = await Shop.find();
-    res.send({success: true, shops});
+    const { page = 1, limit = 10 } = req.query;
+
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
+    const query = { shopType: "Groceries" }; 
+    const options = {
+      skip: (pageNumber - 1) * limitNumber,
+      limit: limitNumber,
+      sort: { createdAt: -1 }, 
+    };
+
+    const products = await Product.find(query, null, options);
+    const total = await Product.countDocuments(query);
+
+    res.json({
+      success: true,
+      products,
+      total,
+      hasMore: pageNumber * limitNumber < total,
+    });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    console.error("Error fetching products:", error);
+    res.status(500).json({ success: false, message: "Internal server error." });
   }
 });
 
