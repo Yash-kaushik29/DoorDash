@@ -7,10 +7,10 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 
 router.post("/create-order", async (req, res) => {
-  const { userId, cartItems, address, paymentStatus } = req.body;
+  const { userId, cartItems, address, paymentStatus, deliveryCharge } = req.body;
 
   try {
-    let totalAmount = 0;
+    let totalAmount = deliveryCharge;
     let sellersNotified = [];
 
     // Create order items
