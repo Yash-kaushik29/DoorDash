@@ -16,7 +16,12 @@ const SellerSchema = new mongoose.Schema({
       createdAt: { type: Date, default: Date.now },
     },
   ],
-  sales: { type: Number, default: 0 },
+  salesHistory: [
+    {
+      date: { type: Date, default: Date.now },
+      amount: { type: Number, default: 0 },
+    },
+  ],
 }, { timestamps: true });
 
 const Seller = mongoose.model("Seller", SellerSchema);

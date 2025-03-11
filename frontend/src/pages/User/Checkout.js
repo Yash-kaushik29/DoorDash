@@ -116,8 +116,6 @@ const Checkout = () => {
   const navigate = useNavigate();
   const [showAreas, setShowAreas] = useState(false);
 
-  console.log(cartItems)
-
   const handleUseMyLocation = () => {
     setFetching(true);
     if (navigator.geolocation) {

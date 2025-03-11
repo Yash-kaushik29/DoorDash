@@ -23,6 +23,7 @@ const SellerProfile = () => {
         );
 
         if (data.success) {
+          console.log(data.seller)
           setSeller(data.seller);
         } else {
           setError(data.message || "Failed to load seller profile");
@@ -62,6 +63,10 @@ const SellerProfile = () => {
     }
   };
 
+  const calculateSales = () => {
+    return seller.salesHistory.reduce((sum, sale) => sum + sale.amount, 0);
+  }
+
   if (loading) return <div className="text-center text-lg">Loading...</div>;
 
   if (error)
@@ -90,7 +95,7 @@ const SellerProfile = () => {
             <strong>Email:</strong> {seller?.email || "N/A"}
           </p>
           <p>
-            <strong>Sales:</strong> ₹{seller?.sales ?? 0}
+            <strong>Sales:</strong> ₹{calculateSales()}
           </p>
 
           <Link

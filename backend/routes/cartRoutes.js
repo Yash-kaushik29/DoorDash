@@ -134,7 +134,7 @@ router.get("/getCart", authenticateUser, async (req, res) => {
     const productIds = currUser.cart.map((item) => item.productId);
 
     // Fetch all products in one go using $in operator
-    const products = await Product.find({ _id: { $in: productIds } });
+    const products = await Product.find({ _id: { $in: productIds } }).populate("shop", "isOpen");
 
     // Map products to cart items with corresponding quantities
     const cart = currUser.cart.map((cartItem) => {

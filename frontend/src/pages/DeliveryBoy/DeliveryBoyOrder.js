@@ -19,7 +19,6 @@ const DeliveryBoyOrder = () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/delivery/order/${orderId}`, {withCredentials: true});
         setOrder(response.data);
-        console.log(response.data)
         setLoading(false);
       } catch (error) {
         console.error("Error fetching order details:", error);
@@ -114,8 +113,8 @@ const DeliveryBoyOrder = () => {
         </p>
         <p className="text-gray-600 dark:text-gray-300">
           <span className="font-semibold">Address:</span>{" "}
-          {order?.shippingAddress?.addressLine}
-          <spam className="font-semibold" >{order?.shippingAddress?.area}</spam>
+          {order?.shippingAddress?.addressLine},  
+          <span className="font-semibold" > {order?.shippingAddress?.area}</span>
         </p>
       </div>
     </div>

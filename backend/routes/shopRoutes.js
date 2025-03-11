@@ -279,7 +279,7 @@ router.get("/seller-profile", async (req, res) => {
     const decoded = jwt.verify(sellerToken, process.env.JWT_SECRET_KEY);
 
     const existingSeller = await Seller.findById(decoded.sellerID)
-      .select("username email sales shop")
+      .select("username email salesHistory shop")
       .populate({
         path: "shop",
         select: "name category productCategories address isOpen images",

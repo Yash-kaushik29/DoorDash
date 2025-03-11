@@ -9,11 +9,11 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
   const addProductToCart = async () => {
     if (loading) return;
 
-    console.log(user)
+    console.log(user);
 
-    if(!user) {
+    if (!user) {
       toast.warning("Please login first");
-      return ;
+      return;
     }
     setLoading(true);
 
@@ -131,58 +131,73 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transform transition duration-300 hover:scale-105">
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transform transition duration-300 hover:scale-105 relative">
       {bestSeller && (
         <span className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-b-lg z-10">
           Bestseller
         </span>
       )}
+
       <div className="relative">
         <img
-          className="w-full h-32 object-cover rounded-md"
+          className={`w-full h-32 object-cover rounded-md ${
+            !product.inStock ? "opacity-50" : ""
+          }`}
           src={product.images?.[0] || "https://via.placeholder.com/150"}
           alt={product.name || "Product"}
           onError={(e) => (e.target.src = "https://via.placeholder.com/150")}
         />
-        {user?.cart?.some((item) => item.productId === product._id) ? (
-          user.cart.map((item) =>
-            item.productId === product._id ? (
-              <div
-                key={item.productId}
-                className="absolute bottom-0 w-full bg-green-500 flex items-center justify-evenly px-3 rounded-b-md text-white"
-              >
-                <button
-                  className="text-white font-bold"
-                  onClick={() =>
-                    item.quantity === 1
-                      ? removeFromCart(product._id)
-                      : handleDecrement(product._id)
-                  }
-                  disabled={loading}
-                >
-                  −
-                </button>
-                <span className="text-sm font-semibold">{item.quantity}</span>
-                <button
-                  className="text-white font-bold"
-                  onClick={() => handleIncrement(product._id)}
-                  disabled={loading}
-                >
-                  +
-                </button>
-              </div>
-            ) : null
-          )
-        ) : (
-          <button
-            className="absolute bottom-0 mt-2 w-full bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-b-md hover:bg-green-600 transition cursor-pointer"
-            onClick={() => addProductToCart(product._id)}
-            disabled={loading}
-          >
-            {loading ? "Adding..." : "Add"}
-          </button>
+
+        {!product.inStock && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 rounded-md">
+            <span className="text-white font-semibold text-sm">
+              Out of Stock
+            </span>
+          </div>
         )}
+
+        {product.inStock ? (
+          user?.cart?.some((item) => item.productId === product._id) ? (
+            user.cart.map((item) =>
+              item.productId === product._id ? (
+                <div
+                  key={item.productId}
+                  className="absolute bottom-0 w-full bg-green-500 flex items-center justify-evenly px-3 rounded-b-md text-white"
+                >
+                  <button
+                    className="text-white font-bold"
+                    onClick={() =>
+                      item.quantity === 1
+                        ? removeFromCart(product._id)
+                        : handleDecrement(product._id)
+                    }
+                    disabled={loading}
+                  >
+                    −
+                  </button>
+                  <span className="text-sm font-semibold">{item.quantity}</span>
+                  <button
+                    className="text-white font-bold"
+                    onClick={() => handleIncrement(product._id)}
+                    disabled={loading}
+                  >
+                    +
+                  </button>
+                </div>
+              ) : null
+            )
+          ) : (
+            <button
+              className="absolute bottom-0 mt-2 w-full bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-b-md hover:bg-green-600 transition cursor-pointer"
+              onClick={() => addProductToCart(product._id)}
+              disabled={loading}
+            >
+              {loading ? "Adding..." : "Add"}
+            </button>
+          )
+        ) : null}
       </div>
+
       <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
         {product.name || "Product Name"}
       </h3>

@@ -54,61 +54,80 @@ const ShopPage = () => {
       <ToastContainer position="top-right" autoClose={3000} />
       <Navbar />
       <div className="max-w-6xl mx-auto p-4 mb-16 lg:mb-0">
+        {/* Shop Image */}
         {loading ? (
           <div className="animate-pulse bg-gray-300 h-48 rounded-md mb-4"></div>
         ) : (
-          <div className="w-full h-48 bg-gray-200 rounded-md mb-4 overflow-hidden">
+          <div
+            className={`w-full h-48 bg-gray-200 rounded-md mb-4 overflow-hidden relative ${
+              shop?.isOpen === false ? "opacity-50" : ""
+            }`}
+          >
             <img
-              src={shop?.images[0]}
-              alt={shop?.name}
+              src={shop?.images?.[0] || "https://via.placeholder.com/300"}
+              alt={shop?.name || "Shop Image"}
               className="w-full h-full object-cover"
             />
+            {shop?.isOpen === false && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-lg font-bold">
+                Shop is Closed Right Now
+              </div>
+            )}
           </div>
         )}
 
-        <h1 className="text-2xl font-bold">{shop?.name}</h1>
-        <p className="text-gray-600">{shop?.description}</p>
+        {/* Shop Details */}
+        {!loading && (
+          <>
+            <h1 className="text-2xl font-bold">{shop?.name}</h1>
+            <p className="text-gray-600">{shop?.description}</p>
 
-        {/* Category Filter - Horizontal Scroll Slider */}
-        <div className="relative w-full mt-6">
-          <div className="overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-3 p-2">
-            {shop?.productCategories?.map((category) => (
-              <button
-                key={category}
-                onClick={() => handleButtonClick(category)}
-                className={`${
-                  selectedCategory === category
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white"
-                } px-4 py-2 rounded-lg text-sm font-medium transition-all`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div>
+            {/* Show Categories & Products Only If Shop is Open */}
+            {shop?.isOpen ? (
+              <>
+                {/* Category Filter */}
+                <div className="relative w-full mt-6">
+                  <div className="overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-3 p-2">
+                    {shop?.productCategories?.map((category) => (
+                      <button
+                        key={category}
+                        onClick={() => handleButtonClick(category)}
+                        className={`${
+                          selectedCategory === category
+                            ? "bg-green-500 text-white"
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white"
+                        } px-4 py-2 rounded-lg text-sm font-medium transition-all`}
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-        <div className="h-[1px] bg-gray-900 dark:bg-white"></div>
+                <div className="h-[1px] bg-gray-900 dark:bg-white"></div>
 
-        {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-            Loading...
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-            {filteredProducts.length > 0 ? (
-              filteredProducts.map((product) => (
-                <ProductCard
-                  key={product._id}
-                  product={product}
-                  user={user}
-                  setUser={setUser}
-                />
-              ))
+                {/* Products List */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+                  {filteredProducts.length > 0 ? (
+                    filteredProducts.map((product) => (
+                      <ProductCard
+                        key={product._id}
+                        product={product}
+                        user={user}
+                        setUser={setUser}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No products available.</p>
+                  )}
+                </div>
+              </>
             ) : (
-              <p className="text-gray-500">No products available.</p>
+              <p className="text-red-500 text-lg font-semibold mt-4">
+                This shop is currently closed. Please check back later.
+              </p>
             )}
-          </div>
+          </>
         )}
       </div>
     </>

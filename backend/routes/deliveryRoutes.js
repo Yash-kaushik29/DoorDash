@@ -3,6 +3,7 @@ const Order = require("../models/Order");
 const DeliveryBoy = require("../models/DeliveryBoy");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const Seller = require('../models/Seller')
 const Product = require("../models/Product");
 const User = require("../models/User");
 const mongoose = require("mongoose");
@@ -92,7 +93,6 @@ router.get("/orders/:deliveryBoyId", async (req, res) => {
   }
 });
 
-// Get Orders with Pagination and Filter
 router.get("/orders", async (req, res) => {
   const { page = 1, limit = 10, status, deliveryBoyId } = req.query;
   const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -186,17 +186,43 @@ router.put("/order/confirm-pickup", async (req, res) => {
 router.put("/order/confirm-delivery/:orderId", async (req, res) => {
   try {
     const { orderId } = req.params;
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(orderId).populate("items.product");
+
     if (!order) return res.status(404).json({ message: "Order not found" });
 
+    // Update order delivery and payment status
     order.deliveryStatus = "Delivered";
+    order.paymentStatus = "Paid";
     order.items = order.items.map(item => ({
       ...item,
       status: item.status !== "Cancelled" ? "Delivered" : item.status,
     }));
 
+    // Calculate sales per seller
+    const sellerSalesMap = {};
+
+    for (const item of order.items) {
+      if (item.status !== "Cancelled" && item.product.seller) {
+        const sellerId = item.product.seller.toString();
+        const amount = item.quantity * parseFloat(item.product.price);
+
+        if (!sellerSalesMap[sellerId]) {
+          sellerSalesMap[sellerId] = 0;
+        }
+        sellerSalesMap[sellerId] += amount;
+      }
+    }
+
+    // Update each seller's salesHistory
+    for (const sellerId in sellerSalesMap) {
+      await Seller.findByIdAndUpdate(sellerId, {
+        $push: { salesHistory: { orderId, amount: sellerSalesMap[sellerId], date: new Date() } }
+      });
+    }
+
     await order.save();
-    res.json({ success: true, message: "Order confirmed as delivered" });
+    res.json({ success: true, message: "Order confirmed as delivered, and sales updated" });
+
   } catch (error) {
     console.error("Error confirming order delivery:", error);
     res.status(500).json({ message: "Internal server error" });
