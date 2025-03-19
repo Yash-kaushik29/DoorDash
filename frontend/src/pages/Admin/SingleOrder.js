@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import AdminHeader from "../../components/AdminHeader";
+import { toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 
 const SingleOrder = () => {
   const { orderId: paramOrderId } = useParams();
@@ -9,6 +11,7 @@ const SingleOrder = () => {
   const [order, setOrder] = useState(null);
   const [deliveryBoys, setDeliveryBoys] = useState([]);
   const [selectedDeliveryBoy, setSelectedDeliveryBoy] = useState("");
+  const [showCancelPopup, setShowCancelPopup] = useState(false);
 
   // Fetch Order Details
   const fetchOrderDetails = async (id) => {
@@ -81,6 +84,26 @@ const SingleOrder = () => {
     }
   };
 
+  const handleCancelOrder = async () => {
+    try {
+      const response = await axios.put(
+        `${process.env.REACT_APP_API_URL}/api/admin/cancelOrder`,
+        { orderId: order._id },
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        toast.success("Order cancelled successfully!");
+        fetchOrderDetails(orderId);
+        setShowCancelPopup(false);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error("Error cancelling order:", error)
+      console.error("Error cancelling order:", error);
+    }
+  };
+
   // Get Status Color
   const getStatusColor = (status) => {
     switch (status) {
@@ -92,6 +115,8 @@ const SingleOrder = () => {
         return "text-orange-600 bg-orange-100";
       case "Delivered":
         return "text-green-600 bg-green-100";
+      case "Cancelled": 
+        return "text-red-600 bg-red-100";  
       default:
         return "text-gray-600 bg-gray-200";
     }
@@ -99,6 +124,7 @@ const SingleOrder = () => {
 
   return (
     <div className="p-4 bg-gray-100 text-black dark:bg-gray-900 dark:text-white min-h-screen">
+            <ToastContainer position="top-right" autoClose={3000} />
       <AdminHeader />
       <div className="max-w-4xl mx-auto">
         <h2 className="text-2xl font-bold my-4">Order Details</h2>
@@ -126,11 +152,27 @@ const SingleOrder = () => {
             <h3 className="text-xl font-bold mb-2">
               Order ID: <span className="text-green-600">#{order.id}</span>
             </h3>
-            <p className="mb-1">Status: <span className="font-semibold">{order.deliveryStatus}</span></p>
+            <p className="mb-1">
+              Status:{" "}
+              <span className={`font-semibold ${getStatusColor(order.deliveryStatus)} px-1 py-1 rounded-lg`}>{order.deliveryStatus}</span>
+            </p>
+            <p className="mb-1">
+              Payment Status:{" "}
+              <span className={`${order.paymentStatus === 'Paid' ? "text-green-500" : "text-red-500"} font-semibold`}>{order.paymentStatus}</span>
+            </p>
             <p className="mb-1">Total Price: ₹{order.amount}</p>
             <p>
-              Delivery Boy: <span className="font-semibold">{order.deliveryBoy?.name || "Not Assigned"}</span>
+              Delivery Boy:{" "}
+              <span className="font-semibold">
+                {order.deliveryBoy?.name || "Not Assigned"}
+              </span>
             </p>
+            <button
+              onClick={() => setShowCancelPopup(true)}
+              className="mt-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+            >
+              Cancel Order
+            </button>
 
             <h4 className="mt-4 text-lg font-semibold">Products:</h4>
             <table className="w-full mt-2 bg-white dark:bg-gray-800 border rounded-md">
@@ -152,7 +194,9 @@ const SingleOrder = () => {
                     <td className="py-2 px-4">{item.product?.shopName}</td>
                     <td className="py-2 px-4">
                       <span
-                        className={`px-2 py-1 rounded-md text-sm font-medium ${getStatusColor(item.status)}`}
+                        className={`px-2 py-1 rounded-md text-sm font-medium ${getStatusColor(
+                          item.status
+                        )}`}
                       >
                         {item.status}
                       </span>
@@ -161,12 +205,37 @@ const SingleOrder = () => {
                 ))}
               </tbody>
             </table>
+            {showCancelPopup && (
+              <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+                <div className="bg-white p-6 rounded-md shadow-lg text-center dark:bg-gray-700">
+                  <p className="text-lg font-bold">
+                    Are you sure you want to cancel this order?
+                  </p>
+                  <div className="mt-4 flex justify-center gap-4">
+                    <button
+                      onClick={handleCancelOrder}
+                      className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                    >
+                      Yes, Cancel
+                    </button>
+                    <button
+                      onClick={() => setShowCancelPopup(false)}
+                      className="px-4 py-2 bg-gray-300 dark:bg-gray-800 rounded-md hover:bg-gray-400"
+                    >
+                      No, Go Back
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
         {/* Assign Delivery Boy */}
         <div className="mt-6">
-          <h3 className="text-lg font-bold mb-2">Assign/Change Delivery Boy:</h3>
+          <h3 className="text-lg font-bold mb-2">
+            Assign/Change Delivery Boy:
+          </h3>
           <div className="flex gap-2">
             <select
               value={selectedDeliveryBoy}
@@ -176,7 +245,9 @@ const SingleOrder = () => {
               <option value="">Select Delivery Boy</option>
               {deliveryBoys.length > 0 ? (
                 deliveryBoys.map((boy) => (
-                  <option key={boy._id} value={boy._id}>{boy.name}</option>
+                  <option key={boy._id} value={boy._id}>
+                    {boy.name}
+                  </option>
                 ))
               ) : (
                 <option disabled>No delivery boys available</option>
@@ -184,7 +255,11 @@ const SingleOrder = () => {
             </select>
             <button
               onClick={handleAssignDeliveryBoy}
-              className={`px-4 py-2 rounded-md ${selectedDeliveryBoy ? "bg-green-500 text-white hover:bg-green-600" : "bg-gray-300 text-gray-600 cursor-not-allowed"}`}
+              className={`px-4 py-2 rounded-md ${
+                selectedDeliveryBoy
+                  ? "bg-green-500 text-white hover:bg-green-600"
+                  : "bg-gray-300 text-gray-600 cursor-not-allowed"
+              }`}
               disabled={!selectedDeliveryBoy}
             >
               Assign

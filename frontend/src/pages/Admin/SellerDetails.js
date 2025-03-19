@@ -7,6 +7,8 @@ const SellerDetails = () => {
   const { sellerId } = useParams();
   const [seller, setSeller] = useState(null);
   const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState([])
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -20,6 +22,7 @@ const SellerDetails = () => {
           `${process.env.REACT_APP_API_URL}/api/admin/seller/${sellerId}/products`
         );
         setProducts(productsRes.data);
+        setFilteredProducts(productsRes.data)
       } catch (err) {
         console.error("Error fetching seller details:", err);
       }
@@ -27,6 +30,18 @@ const SellerDetails = () => {
 
     fetchDetails();
   }, [sellerId]);
+
+  useEffect(() => {
+    const handleSearch = () => {
+      const updatedProducts = products.filter((product) =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+  
+      setFilteredProducts(updatedProducts)
+    }
+
+    handleSearch()
+  }, [searchTerm])
 
   if (!seller) {
     return <div>Loading...</div>;
@@ -69,6 +84,16 @@ const SellerDetails = () => {
         <h2 className="text-2xl font-bold mt-6 mb-2 text-gray-800 dark:text-gray-100">
           Products
         </h2>
+
+        {/* Search Bar */}
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="mb-4 w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
+
         <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
           <thead>
             <tr className="border-b bg-gray-50 dark:bg-gray-700">
@@ -84,28 +109,39 @@ const SellerDetails = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
-              <tr
-                key={product._id}
-                className="border-b hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-300"
-              >
-                <td className="py-3 px-4 text-gray-600 dark:text-gray-300">
-                  {product.name}
-                </td>
-                <td className="py-3 px-4 text-gray-600 dark:text-gray-300">
-                  {product.price}
-                </td>
-                <td className="py-3 px-4">
-                  <span
-                    className={`px-2 py-1 rounded-full text-white ${
-                      product.inStock ? "bg-green-500" : "bg-red-500"
-                    }`}
-                  >
-                    {product.inStock ? "In Stock" : "Out of Stock"}
-                  </span>
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => (
+                <tr
+                  key={product._id}
+                  className="border-b hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-300"
+                >
+                  <td className="py-3 px-4 text-gray-600 dark:text-gray-300">
+                    {product.name}
+                  </td>
+                  <td className="py-3 px-4 text-gray-600 dark:text-gray-300">
+                    {product.price}
+                  </td>
+                  <td className="py-3 px-4">
+                    <span
+                      className={`px-2 py-1 rounded-full text-white ${
+                        product.inStock ? "bg-green-500" : "bg-red-500"
+                      }`}
+                    >
+                      {product.inStock ? "In Stock" : "Out of Stock"}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="3"
+                  className="py-4 text-center text-gray-500 dark:text-gray-400"
+                >
+                  No products found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

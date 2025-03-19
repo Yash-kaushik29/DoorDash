@@ -67,10 +67,10 @@ router.post('/login', async (req, res) => {
 
         // Send token as an HTTP-only cookie
         res.cookie('adminToken', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', 
-            sameSite: 'strict',
-            maxAge: 15* 24 * 60 * 60 * 1000 // 1 day
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+          maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
         res.status(200).json({ success: true, message: "Logged in successfully!" });
@@ -372,5 +372,35 @@ router.get('/user/:id', async (req, res) => {
   }
 });
 
+router.put("/cancelOrder", async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.json({ success: false, message: "Order not found" });
+    }
+
+    if (order.deliveryStatus === "Delivered") {
+      return res.json({ success: false, message: "Delivered orders cannot be cancelled" });
+    }
+
+    order.deliveryStatus = "Cancelled";
+    order.paymentStatus = "--"; // Adjust as needed
+
+    // Update item statuses
+    order.items = order.items.map(item => ({
+      ...item,
+      status: item.status !== "Delivered" ? "Cancelled" : item.status,
+    }));
+
+    await order.save();
+
+    res.json({ success: true, message: "Order has been cancelled successfully" });
+  } catch (error) {
+    console.error("Error canceling order:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
 
 module.exports = router;

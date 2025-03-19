@@ -93,7 +93,7 @@ const App = () => {
       <Routes>
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/signup" element={<AdminSignup />} />
-        <Route path="/admin" exact element={<AdminDashboard />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/all-orders" element={<AdminOrders />} />
         <Route path="/viewOrder/:orderId" element={<SingleOrder />} />
         <Route path="/admin/seller/:sellerId" element={<SellerDetails />} />
