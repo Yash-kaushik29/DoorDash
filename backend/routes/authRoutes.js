@@ -125,8 +125,9 @@ router.post("/seller-login", async (req, res) => {
         res
           .cookie("sellerToken", token, {
             httpOnly: true,
-            sameSite: "strict",
-            maxAge: 15 * 24 * 60 * 60 * 1000,
+            secure: true,
+            sameSite: "none",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
           })
           .send({
             success: true,
