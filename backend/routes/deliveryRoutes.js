@@ -3,7 +3,7 @@ const Order = require("../models/Order");
 const DeliveryBoy = require("../models/DeliveryBoy");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const Seller = require('../models/Seller')
+const Seller = require("../models/Seller");
 const Product = require("../models/Product");
 const User = require("../models/User");
 const mongoose = require("mongoose");
@@ -74,19 +74,30 @@ router.get("/orders/:deliveryBoyId", async (req, res) => {
   try {
     const { deliveryBoyId } = req.params;
 
+    const deliveryBoy = await DeliveryBoy.findById(deliveryBoyId);
+
     const orders = await Order.find({ deliveryBoy: deliveryBoyId })
       .select("deliveryStatus")
       .lean(); // Optimize performance
 
     if (!orders.length) {
-      return res.json({ assignedOrders: 0, deliveredOrders: 0, pendingOrders: 0 });
+      return res.json({
+        assignedOrders: 0,
+        deliveredOrders: 0,
+        pendingOrders: 0,
+        commission: deliveryBoy.commission || 0,
+      });
     }
 
     const assignedOrders = orders.length;
-    const deliveredOrders = orders.filter(order => order.deliveryStatus === "Delivered").length;
-    const pendingOrders = orders.filter(order => !["Delivered", "Cancelled"].includes(order.deliveryStatus)).length; // Fix condition
+    const deliveredOrders = orders.filter(
+      (order) => order.deliveryStatus === "Delivered"
+    ).length;
+    const pendingOrders = orders.filter(
+      (order) => !["Delivered", "Cancelled"].includes(order.deliveryStatus)
+    ).length; // Fix condition
 
-    res.json({ assignedOrders, deliveredOrders, pendingOrders });
+    res.json({ assignedOrders, deliveredOrders, pendingOrders, commission: deliveryBoy.commission });
   } catch (error) {
     console.error("Error fetching delivery boy orders:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -134,7 +145,9 @@ router.get("/order/:orderId", async (req, res) => {
   try {
     const { orderId } = req.params;
     const order = await Order.findById(orderId)
-      .select("items user deliveryStatus createdAt shippingAddress id amount paymentStatus")
+      .select(
+        "items user deliveryStatus createdAt shippingAddress id amount paymentStatus"
+      )
       .populate("items.product", "name shopName")
       .populate("user", "name email")
       .lean();
@@ -170,7 +183,9 @@ router.put("/order/confirm-pickup", async (req, res) => {
     });
 
     if (!updated) {
-      return res.status(404).json({ success: false, message: "Product not found in order" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found in order" });
     }
 
     if (count === order.items.length) order.deliveryStatus = "Out For Delivery";
@@ -186,26 +201,26 @@ router.put("/order/confirm-pickup", async (req, res) => {
 router.put("/order/confirm-delivery/:orderId", async (req, res) => {
   try {
     const { orderId } = req.params;
-    const order = await Order.findById(orderId).populate("items.product");
+    const order = await Order.findById(orderId)
+      .populate("items.product")
+      .populate("deliveryBoy"); // Ensure deliveryBoy is populated
 
     if (!order) return res.status(404).json({ message: "Order not found" });
 
     // Update order delivery and payment status
     order.deliveryStatus = "Delivered";
     order.paymentStatus = "Paid";
-    order.items = order.items.map(item => ({
+    order.items = order.items.map((item) => ({
       ...item,
       status: item.status !== "Cancelled" ? "Delivered" : item.status,
     }));
 
     // Calculate sales per seller
     const sellerSalesMap = {};
-
     for (const item of order.items) {
       if (item.status !== "Cancelled" && item.product.seller) {
         const sellerId = item.product.seller.toString();
         const amount = item.quantity * parseFloat(item.product.price);
-
         if (!sellerSalesMap[sellerId]) {
           sellerSalesMap[sellerId] = 0;
         }
@@ -216,18 +231,34 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
     // Update each seller's salesHistory
     for (const sellerId in sellerSalesMap) {
       await Seller.findByIdAndUpdate(sellerId, {
-        $push: { salesHistory: { orderId, amount: sellerSalesMap[sellerId], date: new Date() } }
+        $push: {
+          salesHistory: {
+            orderId,
+            amount: sellerSalesMap[sellerId],
+            date: new Date(),
+          },
+        },
+      });
+    }
+
+    // ✅ Update delivery boy commission
+    if (order.deliveryBoy && order.deliveryCharge) {
+      await DeliveryBoy.findByIdAndUpdate(order.deliveryBoy._id, {
+        $inc: { commission: order.deliveryCharge },
       });
     }
 
     await order.save();
-    res.json({ success: true, message: "Order confirmed as delivered, and sales updated" });
 
+    res.json({
+      success: true,
+      message:
+        "Order confirmed as delivered, sales updated, and commission added",
+    });
   } catch (error) {
     console.error("Error confirming order delivery:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 module.exports = router;

@@ -3,13 +3,57 @@ import { Link, useNavigate } from "react-router-dom";
 import SellerHeader from "../../components/SellerHeader";
 import axios from "axios";
 import SellerDashboardSkeleton from "../../skeletons/SellerDashboardSkeleton ";
+import notificationSound from "../../sound/notificationSound.mp3";
+import { ToastContainer, toast } from "react-toastify";
+
+const audio = new Audio(notificationSound)
 
 const SellerDashboard = () => {
   const [seller, setSeller] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [newOrders, setNewOrders] = useState(0);
   const navigate = useNavigate();
   const token = localStorage.getItem("doordash-seller");
+
+  useEffect(() => {
+    const unlockAudio = () => {
+      audio.play().then(() => {
+        audio.pause(); 
+        audio.currentTime = 0;
+        document.removeEventListener("click", unlockAudio);
+      }).catch(() => {});
+    };
+    document.addEventListener("click", unlockAudio);
+    return () => document.removeEventListener("click", unlockAudio);
+  }, []);
+
+  useEffect(() => {
+    if (!token) return;
+
+    const pollNotifications = async () => {
+      try {
+        const { data } = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/notification/unread-order-notifications`,
+          { withCredentials: true }
+        );
+
+        if (data.success && data.count > 0) {
+          console.log(data.count)
+          audio.play();
+          setNewOrders(data.count)
+          // new Audio(notificationSound).play();
+          toast.info(`📦 ${data.count} new orders`);
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
+      }
+    };
+
+    const interval = setInterval(pollNotifications, 60 * 1000);
+
+    return () => clearInterval(interval); 
+  }, [token]);
 
   const fetchSeller = async () => {
     setLoading(true);
@@ -43,7 +87,7 @@ const SellerDashboard = () => {
   const takeToLogin = () => {
     localStorage.setItem("doordash-seller", "");
     window.location.reload();
-  }
+  };
 
   if (loading) return <SellerDashboardSkeleton />;
   if (error)
@@ -63,7 +107,7 @@ const SellerDashboard = () => {
             </div>
             <div>
               <button
-                 onClick={takeToLogin}
+                onClick={takeToLogin}
                 className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
               >
                 Back to login
@@ -76,6 +120,7 @@ const SellerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <ToastContainer />
       <SellerHeader />
 
       {/* Welcome Section */}
@@ -131,7 +176,7 @@ const SellerDashboard = () => {
           <h2 className="text-lg font-semibold text-gray-700 dark:text-white">
             Total Sales
           </h2>
-          <p className="text-2xl font-bold text-green-500">₹{seller.sales}</p>
+          <p className="text-2xl font-bold text-green-500">₹{seller.todaySalesTotal}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
           <h2 className="text-lg font-semibold text-gray-700 dark:text-white">

@@ -19,6 +19,7 @@ const AWS = require("aws-sdk");
 const multer = require("multer");
 const fs = require("fs");
 const util = require("util");
+const axios = require("axios");
 
 const app = express();
 dotenv.config();
@@ -85,6 +86,26 @@ app.use('/api/notification', notificationsRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.use('/api/delivery', deliveryRoutes);
+
+app.get("/api/location/reverse-geocode", async (req, res) => {
+  const { lat, lon } = req.query;
+
+  try {
+    const { data } = await axios.get(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+      {
+        headers: {
+          "User-Agent": "YourAppName/1.0 (your@email.com)",
+        },
+      }
+    );
+
+    res.json({ success: true, address: data.display_name });
+  } catch (err) {
+    console.error("Nominatim error:", err.message);
+    res.status(500).json({ success: false, message: "Reverse geocoding failed" });
+  }
+});
 
 app.post("/upload", upload.array("photos"), async (req, res) => {
   try {

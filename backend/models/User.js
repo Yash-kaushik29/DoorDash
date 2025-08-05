@@ -1,22 +1,28 @@
 const mongoose = require("mongoose");
 
 const addressSchema = new mongoose.Schema({
+  lat: {type: String, required: true},
+  long: {type: String, required: true},
   fullName: { type: String, required: true },
   phone: {type: String, required: true},
   addressLine: { type: String, required: true },
   area: {type: String, required: true},
+  landMark: {type: String},
   isDefault: { type: Boolean, default: false },
 });
 
 const UserSchema = new mongoose.Schema(
   {
     username: { type: String, required: true },
-    email: {
+    phone: {
       type: String,
       required: true,
       unique: true,
     },
-    password: { type: String, required: true },
+    email: {
+      type: String,
+      default: "",
+    },
     addresses: [addressSchema],
     wishlist: { type: [String] },
     cart: [

@@ -43,6 +43,7 @@ router.post("/create-order", async (req, res) => {
       shippingAddress: address,
       amount: totalAmount,
       deliveryStatus: "Processing",
+      deliveryCharge,
       paymentStatus,
       sellersNotified,
     });

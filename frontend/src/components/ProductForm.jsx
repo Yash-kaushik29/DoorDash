@@ -151,23 +151,7 @@ const ProductForm = () => {
         </div>
 
         {/* Diet-Type */}
-        <div>
-          <label className="block text-gray-600 dark:text-gray-300 mb-2">
-            Diet Type <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={product.dietType}
-            onChange={(e) =>
-              setProduct({ ...product, dietType: e.target.value })
-            }
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-            required
-          >
-            <option value="Veg">Veg</option>
-            <option value="Non-Veg">Non-Veg</option>
-            <option value="Egg">Egg</option>
-          </select>
-        </div>
+        
 
         {/* Categories */}
         <div>
@@ -180,14 +164,14 @@ const ProductForm = () => {
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-100"
-              placeholder="Enter Tag (Indian, Chinese, Cakes, Sweets)"
+              placeholder="Enter Category"
             />
             <button
               type="button"
               onClick={handleAddCategory}
               className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700"
             >
-              Add Tag
+              Add Category
             </button>
           </div>
           <div className="mt-2 text-gray-600 dark:text-white">

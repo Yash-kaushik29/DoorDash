@@ -3,31 +3,15 @@ import React, { useContext, useState } from "react";
 import { UserContext } from "../context/userContext";
 import { toast } from "react-toastify";
 
-const areas = [
-  { name: "Jubilant" },
-  { name: "Atal ji Nagar" },
-  { name: "Choupla, Gajraula" },
-  { name: "Sultan Nagar" },
-  { name: "MDA Colony" },
-  { name: "Bhanpur" },
-  { name: "Railway Station" },
-  { name: "Mansarovar Colony" },
-  { name: "Basti" },
-  { name: "Atarpura" },
-  { name: "TEVA Ltd." },
-  { name: "KhadGujjar Road" },
-  { name: "Saraswati Vihar" },
-  { name: "Salempur Road" },
-  { name: "Venkateshwara Institute" },
-];
-
 const EditAddress = ({ address, closeModal, updateAddress }) => {
   const [formData, setFormData] = useState({
-    fullName: address.fullName,
-    phone: address.phone,
-    addressLine: address.addressLine,
-    area: address.area,
+    fullName: address.fullName || "",
+    phone: address.phone || "",
+    addressLine: address.addressLine || "",
+    area: address.area || "",
+    landmark: address.landmark || "",
   });
+
   const { user } = useContext(UserContext);
 
   const handleChange = (e) => {
@@ -36,20 +20,28 @@ const EditAddress = ({ address, closeModal, updateAddress }) => {
 
   const editAddress = async (e) => {
     e.preventDefault();
-    const { data } = await axios.post(
-      `${process.env.REACT_APP_API_URL}/api/user-profile/editAddress`,
-      { userId: user._id, addressId: address._id, formData },
-      { withCredentials: true }
-    );
 
-    if (data.success) {
-      toast.success(data.message);
-      updateAddress(address._id, formData)
-    } else {
-      toast.error(data.message);
+    try {
+      const { data } = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/user-profile/editAddress`,
+        {
+          userId: user._id,
+          addressId: address._id,
+          formData, // formData doesn't include lat/lng — backend should preserve them
+        },
+        { withCredentials: true }
+      );
+
+      if (data.success) {
+        toast.success(data.message);
+        updateAddress(address._id, { ...address, ...formData });
+        closeModal();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (err) {
+      toast.error("Something went wrong!");
     }
-
-    closeModal();
   };
 
   return (
@@ -61,7 +53,7 @@ const EditAddress = ({ address, closeModal, updateAddress }) => {
         <form onSubmit={editAddress}>
           {/* Full Name */}
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Full Name
             </label>
             <input
@@ -69,14 +61,14 @@ const EditAddress = ({ address, closeModal, updateAddress }) => {
               name="fullName"
               value={formData.fullName}
               onChange={handleChange}
-              className="w-full p-2 border rounded border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               required
+              className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           {/* Phone */}
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Phone
             </label>
             <input
@@ -84,14 +76,14 @@ const EditAddress = ({ address, closeModal, updateAddress }) => {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full p-2 border rounded border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               required
+              className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           {/* Address Line */}
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Address Line
             </label>
             <input
@@ -99,38 +91,45 @@ const EditAddress = ({ address, closeModal, updateAddress }) => {
               name="addressLine"
               value={formData.addressLine}
               onChange={handleChange}
-              className="w-full p-2 border rounded border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               required
+              className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
             />
           </div>
 
           {/* Area Dropdown */}
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Area
             </label>
-            <select
+            <input
               name="area"
               value={formData.area}
               onChange={handleChange}
-              className="w-full p-2 border rounded border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               required
-            >
-              <option value="" disabled>Select Area</option>
-              {areas.map((area, index) => (
-                <option key={index} value={area.name}>
-                  {area.name}
-                </option>
-              ))}
-            </select>
+              className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+            />
+          </div>
+
+          {/* Landmark */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Landmark
+            </label>
+            <input
+              type="text"
+              name="landmark"
+              value={formData.landmark}
+              onChange={handleChange}
+              className="w-full p-2 border rounded bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+            />
           </div>
 
           {/* Buttons */}
           <div className="flex justify-end gap-4">
             <button
               type="button"
-              className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
               onClick={closeModal}
+              className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
             >
               Cancel
             </button>

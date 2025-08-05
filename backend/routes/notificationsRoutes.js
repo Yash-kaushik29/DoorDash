@@ -1,9 +1,42 @@
 const express = require("express");
 const User = require("../models/User");
-const Seller = require('../models/Seller');
-const jwt = require('jsonwebtoken')
+const Seller = require("../models/Seller");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
+
+router.get("/unread-order-notifications", async (req, res) => {
+  const { sellerToken } = req.cookies;
+
+  if (!sellerToken) {
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized access" });
+  }
+
+  try {
+    const decoded = jwt.verify(sellerToken, process.env.JWT_SECRET_KEY);
+    const existingSeller = await Seller.findById(
+      decoded.sellerID,
+      "notifications"
+    );
+
+    if (!existingSeller) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
+    }
+
+    const unread = existingSeller.notifications.filter(
+      (notif) => notif.read === false && notif.order
+    );
+
+    res.json({ success: true, count: unread.length });
+  } catch (err) {
+    console.error("Error fetching unread notifications:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
 
 router.get("/getNotifications/:userId", async (req, res) => {
   try {
@@ -68,7 +101,10 @@ router.get("/getSellerNotifications", async (req, res) => {
 
   try {
     const decoded = jwt.verify(sellerToken, process.env.JWT_SECRET_KEY);
-    const existingSeller = await Seller.findById(decoded.sellerID, "notifications");
+    const existingSeller = await Seller.findById(
+      decoded.sellerID,
+      "notifications"
+    );
 
     if (!existingSeller) {
       return res
@@ -76,18 +112,17 @@ router.get("/getSellerNotifications", async (req, res) => {
         .json({ success: false, message: "Seller not found" });
     }
 
-    const sortedNotifications = existingSeller.notifications
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const sortedNotifications = existingSeller.notifications.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
 
     res.status(200).json({
       success: true,
-      notifications: sortedNotifications
+      notifications: sortedNotifications,
     });
   } catch (error) {
     console.error("Error fetching notifications:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
@@ -149,6 +184,5 @@ router.put("/read/:id", async (req, res) => {
     }
   );
 });
-
 
 module.exports = router;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Truck, CheckCircle, Clock } from "lucide-react";
+import { Truck, CheckCircle, Clock, DollarSign } from "lucide-react";
 import DeliveryBoyHeader from "../../components/DeliveryBoyHeader";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
@@ -10,12 +10,12 @@ const DeliveryBoyHome = () => {
     assignedOrders: 0,
     deliveredOrders: 0,
     pendingOrders: 0,
+    commission: 0,
   });
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-  // Redirect if token is missing
   useEffect(() => {
     if (!token) {
       navigate("/delivery/login");
@@ -25,7 +25,7 @@ const DeliveryBoyHome = () => {
   useEffect(() => {
     if (!token) return;
 
-    let isMounted = true; // To prevent memory leaks
+    let isMounted = true;
 
     try {
       const decoded = jwtDecode(token);
@@ -38,6 +38,7 @@ const DeliveryBoyHome = () => {
           );
 
           if (isMounted) {
+            console.log(response.data)
             setOrderStats(response.data);
           }
         } catch (error) {
@@ -53,7 +54,7 @@ const DeliveryBoyHome = () => {
     }
 
     return () => {
-      isMounted = false; // Cleanup function to avoid setting state on unmounted component
+      isMounted = false;
     };
   }, [token, navigate]);
 
@@ -61,7 +62,7 @@ const DeliveryBoyHome = () => {
     <div>
       <DeliveryBoyHeader />
       <div className="min-h-screen bg-gray-100 p-4 dark:bg-gray-800">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
           <Link to="/delivery/orders/all">
             <div className="bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg rounded-2xl p-4 text-white">
               <div className="flex items-center justify-between">
@@ -103,6 +104,16 @@ const DeliveryBoyHome = () => {
               </div>
             </div>
           </Link>
+
+          <div className="bg-gradient-to-br from-purple-600 to-purple-800 shadow-lg rounded-2xl p-4 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold">Commission Earned</h2>
+                <p className="text-3xl font-semibold">₹{orderStats.commission}</p>
+              </div>
+              <DollarSign className="w-12 h-12 text-white opacity-80" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
