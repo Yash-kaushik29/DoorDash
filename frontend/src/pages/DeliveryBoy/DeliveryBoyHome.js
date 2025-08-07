@@ -4,6 +4,8 @@ import DeliveryBoyHeader from "../../components/DeliveryBoyHeader";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { Link, useNavigate } from "react-router-dom";
+import notificationSound from "../../sound/notificationSound.mp3";
+import { ToastContainer, toast } from "react-toastify";
 
 const DeliveryBoyHome = () => {
   const [orderStats, setOrderStats] = useState({
@@ -13,8 +15,30 @@ const DeliveryBoyHome = () => {
     commission: 0,
   });
 
+  const [canPlayAudio, setCanPlayAudio] = useState(true);
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const unlockAudio = () => {
+      const tempAudio = new Audio(notificationSound);
+      tempAudio
+        .play()
+        .then(() => {
+          tempAudio.pause();
+          tempAudio.currentTime = 0;
+          setCanPlayAudio(true);
+        })
+        .catch((err) => {
+          console.warn("Audio unlock failed:", err);
+        });
+
+      document.removeEventListener("click", unlockAudio);
+    };
+
+    document.addEventListener("click", unlockAudio);
+    return () => document.removeEventListener("click", unlockAudio);
+  }, []);
 
   useEffect(() => {
     if (!token) {
@@ -26,6 +50,7 @@ const DeliveryBoyHome = () => {
     if (!token) return;
 
     let isMounted = true;
+    let intervalId;
 
     try {
       const decoded = jwtDecode(token);
@@ -37,8 +62,20 @@ const DeliveryBoyHome = () => {
             `${process.env.REACT_APP_API_URL}/api/delivery/orders/${deliveryBoyId}`
           );
 
+          if (response.data.pendingOrders > 0) {
+            if (canPlayAudio) {
+              const notificationAudio = new Audio(notificationSound);
+              notificationAudio
+                .play()
+                .catch((err) => console.error("Audio play error:", err));
+            }
+            toast.info(
+              `You have ${response.data.pendingOrders} new deliveries.`
+            );
+          }
+
           if (isMounted) {
-            console.log(response.data)
+            console.log("Polled:", response.data);
             setOrderStats(response.data);
           }
         } catch (error) {
@@ -46,7 +83,11 @@ const DeliveryBoyHome = () => {
         }
       };
 
+      // Initial fetch
       fetchOrderStats();
+
+      // Polling every 5 minutes
+      intervalId = setInterval(fetchOrderStats, 10000);
     } catch (error) {
       console.error("Invalid token, logging out...");
       localStorage.removeItem("token");
@@ -55,11 +96,13 @@ const DeliveryBoyHome = () => {
 
     return () => {
       isMounted = false;
+      if (intervalId) clearInterval(intervalId); // Clear the interval on unmount
     };
   }, [token, navigate]);
 
   return (
     <div>
+      <ToastContainer />
       <DeliveryBoyHeader />
       <div className="min-h-screen bg-gray-100 p-4 dark:bg-gray-800">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
@@ -109,7 +152,9 @@ const DeliveryBoyHome = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold">Commission Earned</h2>
-                <p className="text-3xl font-semibold">₹{orderStats.commission}</p>
+                <p className="text-3xl font-semibold">
+                  ₹{orderStats.commission}
+                </p>
               </div>
               <DollarSign className="w-12 h-12 text-white opacity-80" />
             </div>

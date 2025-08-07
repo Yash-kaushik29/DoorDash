@@ -42,7 +42,6 @@ const SellerDashboard = () => {
           console.log(data.count)
           audio.play();
           setNewOrders(data.count)
-          // new Audio(notificationSound).play();
           toast.info(`📦 ${data.count} new orders`);
         }
       } catch (err) {
@@ -50,7 +49,7 @@ const SellerDashboard = () => {
       }
     };
 
-    const interval = setInterval(pollNotifications, 60 * 1000);
+    const interval = setInterval(pollNotifications, 5 * 60 * 1000);
 
     return () => clearInterval(interval); 
   }, [token]);
@@ -90,6 +89,7 @@ const SellerDashboard = () => {
   };
 
   if (loading) return <SellerDashboardSkeleton />;
+
   if (error)
     return (
       <div className="min-h-screen flex items-center justify-center">

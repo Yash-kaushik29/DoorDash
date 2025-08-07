@@ -7,7 +7,8 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 
 router.post("/create-order", async (req, res) => {
-  const { userId, cartItems, address, paymentStatus, deliveryCharge } = req.body;
+  const { userId, cartItems, address, paymentStatus, deliveryCharge } =
+    req.body;
 
   try {
     let totalAmount = deliveryCharge;
@@ -141,6 +142,7 @@ router.get("/getOrder/:orderId", async (req, res) => {
 
       try {
         const existingSeller = await Seller.findById(seller.sellerID);
+
         if (!existingSeller) {
           return res
             .status(404)
@@ -169,6 +171,16 @@ router.get("/getOrder/:orderId", async (req, res) => {
             quantity: item.quantity,
             status: item.status,
           }));
+
+        await Seller.updateOne(
+          {
+            _id: seller.sellerID,
+            "notifications.order": orderId,
+          },
+          {
+            $set: { "notifications.$.read": true },
+          }
+        );
 
         res.status(200).json({
           success: true,
