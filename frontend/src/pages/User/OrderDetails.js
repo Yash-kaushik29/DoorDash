@@ -78,7 +78,7 @@ const OrderDetails = () => {
                 
                 <p className="text-lg text-gray-600 dark:text-gray-400 font-semibold">x{item?.quantity}</p>
                 <p className="text-lg font-semibold text-green-600 dark:text-green-400">
-                  ₹{item?.product?.price * item?.quantity}
+                  {item.status === "Cancelled" ? "--" : `₹${item?.product?.price * item?.quantity}`}
                   </p>
               </li>
             ))}

@@ -227,7 +227,8 @@ router.put("/confirm-order/:orderId", async (req, res) => {
             .json({ success: false, message: "Seller not found" });
         }
 
-        const order = await Order.findById(orderId);
+        // Populate products to access price
+        const order = await Order.findById(orderId).populate("items.product");
         if (!order) {
           return res
             .status(404)
@@ -235,18 +236,22 @@ router.put("/confirm-order/:orderId", async (req, res) => {
         }
 
         let isUpdated = false;
+        let cancelledAmount = 0;
+
         order.items.forEach((item) => {
           if (item.seller.toString() === seller.sellerID.toString()) {
-            if (selectedProducts.includes(item.product.toString())) {
+            if (selectedProducts.includes(item.product._id.toString())) {
               item.status = "Preparing";
             } else {
               item.status = "Cancelled";
+              cancelledAmount += (item.product?.price || 0) * item.quantity;
             }
             isUpdated = true;
           }
         });
 
         if (isUpdated) {
+          order.amount = Math.max(0, (order.amount || 0) - cancelledAmount);
           await order.save();
         }
 
@@ -262,6 +267,7 @@ router.put("/confirm-order/:orderId", async (req, res) => {
     }
   );
 });
+
 
 router.get("/getAllOrders", async (req, res) => {
   const { sellerToken } = req.cookies;

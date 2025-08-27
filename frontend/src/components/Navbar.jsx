@@ -1,16 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { IoIosCart, IoIosHeart } from "react-icons/io";
+import { IoIosCart } from "react-icons/io";
 import { RiAccountCircleLine } from "react-icons/ri";
 import { FaSun, FaMoon, FaHistory, FaHome } from "react-icons/fa";
+import { MdDownload } from "react-icons/md";
 import { UserContext } from "../context/userContext";
-import { MdDeliveryDining } from "react-icons/md";
-import "react-loading-skeleton/dist/skeleton.css";
 
 const Navbar = () => {
-  const { user, ready } = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
 
+  // Theme loading
   useEffect(() => {
     const storedTheme = localStorage.getItem("doordashTheme");
     if (storedTheme) {
@@ -30,6 +31,31 @@ const Navbar = () => {
       document.documentElement.classList.remove("dark");
       localStorage.setItem("doordashTheme", "light");
     }
+  };
+
+  // PWA Install prompt listener
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event) => {
+      event.preventDefault();
+      setInstallPrompt(event);
+    };
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () =>
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const choiceResult = await installPrompt.userChoice;
+    if (choiceResult.outcome === "accepted") {
+      console.log("PWA installed");
+    }
+    setInstallPrompt(null);
   };
 
   return (
@@ -53,6 +79,15 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-6">
+            {/* Install button on desktop */}
+            {installPrompt && (
+              <button
+                onClick={handleInstallClick}
+                className="px-3 py-1 bg-green-500 text-white rounded-full hover:bg-green-600 transition flex items-center gap-1"
+              >
+                <MdDownload size={16} /> Install
+              </button>
+            )}
             <Link to="/recentOrders">
               <button className="p-2 hover:text-green-600 transition">
                 <FaHistory size={20} />
@@ -63,6 +98,7 @@ const Navbar = () => {
                 <IoIosCart size={22} />
               </button>
             </Link>
+
             <button onClick={toggleTheme} className="p-2 transition">
               {isDarkMode ? (
                 <FaSun className="hover:text-yellow-400" size={20} />
@@ -86,8 +122,7 @@ const Navbar = () => {
         </div>
       </header>
 
-      {/* Push content down to avoid overlap */}
-      <main className="lg:pt-16">{/* Your page content goes here */}</main>
+      <main className="lg:pt-16"></main>
 
       {/* Mobile Bottom Navigation */}
       <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white dark:bg-gray-900 shadow-md flex justify-around py-1 border-t dark:border-gray-700 z-10">
@@ -106,6 +141,7 @@ const Navbar = () => {
           <FaHistory size={22} />
           <span className="text-xs">Orders</span>
         </Link>
+
         <Link
           to="/cart"
           className="p-2 flex flex-col items-center text-gray-600 dark:text-white hover:text-green-500 transition"
@@ -113,6 +149,7 @@ const Navbar = () => {
           <IoIosCart size={22} />
           <span className="text-xs">Cart</span>
         </Link>
+
         <button
           onClick={toggleTheme}
           className="p-2 flex flex-col items-center text-gray-600 dark:text-white hover:text-yellow-400 transition"
@@ -120,6 +157,7 @@ const Navbar = () => {
           {isDarkMode ? <FaSun size={20} /> : <FaMoon size={20} />}
           <span className="text-xs">Theme</span>
         </button>
+
         {user ? (
           <Link
             to="/user/profile"
@@ -136,6 +174,17 @@ const Navbar = () => {
             <RiAccountCircleLine size={22} />
             <span className="text-xs">Login</span>
           </Link>
+        )}
+
+        {/* Install button in mobile nav */}
+        {installPrompt && (
+          <button
+            onClick={handleInstallClick}
+            className="p-2 flex flex-col items-center text-gray-600 dark:text-white hover:text-green-500 transition"
+          >
+            <MdDownload size={20} />
+            <span className="text-xs">Install</span>
+          </button>
         )}
       </nav>
     </div>

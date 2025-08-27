@@ -99,7 +99,6 @@ router.get("/dashboard-overview", async (req, res) => {
           return res.status(404).json({ success: false, message: "Admin not found" });
         }
 
-        // Run multiple queries concurrently for efficiency
         const [orders, activeDeliveryBoys, availableDeliveryBoys] = await Promise.all([
           Order.find({}, "amount createdAt deliveryStatus"),
           DeliveryBoy.countDocuments({}),
@@ -308,6 +307,54 @@ router.get('/seller/:id/products', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+router.get("/seller/:sellerId/sales", async (req, res) => {
+  try {
+    const { sellerId } = req.params;
+    let { date } = req.query;
+
+    // If date not provided, use today's date
+    if (!date) {
+      date = new Date().toISOString().split("T")[0];
+    }
+
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const seller = await Seller.findById(sellerId);
+
+    if (!seller) {
+      return res.status(404).json({ success: false, message: "Seller not found" });
+    }
+
+    // Filter sales for that date
+    const filteredSales = seller.salesHistory.filter(
+      (sale) => {
+        const saleDate = new Date(sale.date);
+        return saleDate >= startOfDay && saleDate <= endOfDay;
+      }
+    );
+
+    // Map to return only date & amount
+    const salesData = filteredSales.map((sale) => ({
+      date: sale.date,
+      amount: sale.amount || 0,
+    }));
+
+    res.json({
+      success: true,
+      date,
+      totalEarnings: salesData,
+    });
+
+  } catch (error) {
+    console.error("Error fetching seller sales:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 

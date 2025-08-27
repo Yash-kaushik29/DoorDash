@@ -1,10 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import SearchBar from "../../components/SearchBar";
-import {
-  MdDeliveryDining,
-  MdDinnerDining,
-} from "react-icons/md";
+import { MdDeliveryDining, MdDinnerDining } from "react-icons/md";
 import { GiFruitBowl } from "react-icons/gi";
 import { GiMedicines } from "react-icons/gi";
 import { UserContext } from "../../context/userContext";
@@ -67,6 +64,7 @@ const Home = () => {
       <ToastContainer position="top-right" autoClose={3000} />
       <Navbar />
 
+      {/* Mobile Title */}
       <div className="flex flex-col items-center pt-4 lg:hidden">
         <div className="flex items-center gap-2 text-3xl">
           <span className="font-extrabold text-green-500">DoorDash</span>

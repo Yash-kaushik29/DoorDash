@@ -8,21 +8,26 @@ const SellerDetails = () => {
   const [seller, setSeller] = useState(null);
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredProducts, setFilteredProducts] = useState([])
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [sales, setSales] = useState([]);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [totalEarnings, setTotalEarnings] = useState(0);
 
   useEffect(() => {
     const fetchDetails = async () => {
       try {
+        // 1. Seller info
         const sellerRes = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/admin/seller/${sellerId}`
         );
         setSeller(sellerRes.data);
 
+        // 2. Products
         const productsRes = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/admin/seller/${sellerId}/products`
         );
         setProducts(productsRes.data);
-        setFilteredProducts(productsRes.data)
+        setFilteredProducts(productsRes.data);
       } catch (err) {
         console.error("Error fetching seller details:", err);
       }
@@ -31,17 +36,33 @@ const SellerDetails = () => {
     fetchDetails();
   }, [sellerId]);
 
+  // Product search filter
   useEffect(() => {
-    const handleSearch = () => {
-      const updatedProducts = products.filter((product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-  
-      setFilteredProducts(updatedProducts)
-    }
+    const updatedProducts = products.filter((product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredProducts(updatedProducts);
+  }, [searchTerm, products]);
 
-    handleSearch()
-  }, [searchTerm])
+  const fetchEarnings = async () => {
+    try {
+      const dateToSend = selectedDate || new Date().toISOString().split("T")[0];
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/admin/seller/${sellerId}/sales`,
+        { params: { date: dateToSend } }
+      );
+
+      if (res.data.success) {
+        setTotalEarnings(res.data.totalEarnings);
+      }
+    } catch (error) {
+      console.error("Error fetching earnings:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEarnings();
+  }, [selectedDate]);
 
   if (!seller) {
     return <div>Loading...</div>;
@@ -81,11 +102,74 @@ const SellerDetails = () => {
           </span>
         </p>
 
+        {/* Sales Section */}
+        <h2 className="text-2xl font-bold mt-6 mb-4 text-gray-800 dark:text-gray-100">
+          Sales History
+        </h2>
+        <div className="mb-4 flex items-center gap-3">
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+          <span className="text-gray-600 dark:text-gray-300 font-semibold text-lg">
+            Total: <span className="text-green-600">
+              ₹
+            {totalEarnings
+              .reduce((sum, sale) => sum + sale.amount, 0)
+              .toFixed(2)}
+            </span>
+          </span>
+        </div>
+
+        <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <thead>
+            <tr className="border-b bg-gray-50 dark:bg-gray-700">
+              <th className="py-3 px-4 text-left text-gray-800 dark:text-gray-100">
+                Time
+              </th>
+              <th className="py-3 px-4 text-left text-gray-800 dark:text-gray-100">
+                Amount
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {totalEarnings.length > 0 ? (
+              totalEarnings.map((sale, idx) => (
+                <tr
+                  key={idx}
+                  className="border-b hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-300"
+                >
+                  <td className="py-3 px-4 text-blue-600 font-semibold">
+                    {new Date(sale.date).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </td>
+
+                  <td className="py-3 px-4 text-green-600 font-semibold">
+                    ₹{sale.amount}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="2"
+                  className="py-4 text-center text-gray-500 dark:text-gray-400"
+                >
+                  No sales found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        {/* Products Section */}
         <h2 className="text-2xl font-bold mt-6 mb-2 text-gray-800 dark:text-gray-100">
           Products
         </h2>
-
-        {/* Search Bar */}
         <input
           type="text"
           placeholder="Search products..."
@@ -93,8 +177,7 @@ const SellerDetails = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="mb-4 w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
         />
-
-        <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+        <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden mb-6">
           <thead>
             <tr className="border-b bg-gray-50 dark:bg-gray-700">
               <th className="py-3 px-4 text-left text-gray-800 dark:text-gray-100">
@@ -119,7 +202,7 @@ const SellerDetails = () => {
                     {product.name}
                   </td>
                   <td className="py-3 px-4 text-gray-600 dark:text-gray-300">
-                    {product.price}
+                    ₹{product.price}
                   </td>
                   <td className="py-3 px-4">
                     <span
