@@ -5,6 +5,7 @@ import { RiAccountCircleLine } from "react-icons/ri";
 import { FaSun, FaMoon, FaHistory, FaHome } from "react-icons/fa";
 import { MdDownload } from "react-icons/md";
 import { UserContext } from "../context/userContext";
+import { GiNoodles } from "react-icons/gi";
 
 const Navbar = () => {
   const { user } = useContext(UserContext);
@@ -67,12 +68,12 @@ const Navbar = () => {
           <Link to="/">
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-green-500 text-xl">
-                  DoorDash
+                <span className="flex gap-1 items-center font-extrabold text-green-500 text-xl">
+                  GullyFoods <GiNoodles />
                 </span>
               </div>
               <span className="italic text-gray-600 font-semibold dark:text-white">
-                Delivery at your Doorstep
+                Your lane, your taste, your GullyFoods ✨
               </span>
             </div>
           </Link>
@@ -85,7 +86,7 @@ const Navbar = () => {
                 onClick={handleInstallClick}
                 className="px-3 py-1 bg-green-500 text-white rounded-full hover:bg-green-600 transition flex items-center gap-1"
               >
-                <MdDownload size={16} /> Install
+                <MdDownload size={16} /> Install GullyFoods
               </button>
             )}
             <Link to="/recentOrders">

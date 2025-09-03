@@ -2,8 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import SearchBar from "../../components/SearchBar";
 import { MdDeliveryDining, MdDinnerDining } from "react-icons/md";
-import { GiFruitBowl } from "react-icons/gi";
-import { GiMedicines } from "react-icons/gi";
+import { GiMedicines, GiNoodles, GiFruitBowl } from "react-icons/gi";
 import { UserContext } from "../../context/userContext";
 import HomePageSkeleton from "../../skeletons/HomePageSkeleton";
 import axios from "axios";
@@ -67,11 +66,11 @@ const Home = () => {
       {/* Mobile Title */}
       <div className="flex flex-col items-center pt-4 lg:hidden">
         <div className="flex items-center gap-2 text-3xl">
-          <span className="font-extrabold text-green-500">DoorDash</span>
-          <MdDeliveryDining className="font-extrabold text-green-500 mt-1" />
+          <span className="font-extrabold text-green-500">GullyFoods</span>
+          <GiNoodles className="font-extrabold text-green-500 -mt-1" />
         </div>
-        <span className="italic text-gray-600 font-semibold dark:text-white text-lg">
-          Delivery at your Doorstep
+        <span className="italic text-gray-600 font-semibold dark:text-white text-lg text-center">
+          Your lane, your taste, your GullyFoods ✨
         </span>
       </div>
 
