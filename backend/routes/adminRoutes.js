@@ -258,7 +258,7 @@ router.post("/assignDeliveryBoy", async (req, res) => {
     }
 
     try {
-      await Order.updateOne({ id: orderId }, { deliveryBoy: deliveryBoyId });
+      await Order.updateOne({ _id: orderId }, { deliveryBoy: deliveryBoyId, deliveryBoyAssigned: true });
       res.json({ success: true, message: "Delivery boy assigned successfully" });
     } catch (error) {
       console.error(error);

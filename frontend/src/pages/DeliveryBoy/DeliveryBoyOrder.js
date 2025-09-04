@@ -8,7 +8,7 @@ const DeliveryBoyOrder = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("GullyFoodsDeliveryToken");
 
   if (!token) {
     navigate("/delivery/login");

@@ -17,7 +17,7 @@ const DeliveryBoyHome = () => {
 
   const [canPlayAudio, setCanPlayAudio] = useState(true);
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("GullyFoodsDeliveryToken");
 
   useEffect(() => {
     const unlockAudio = () => {
@@ -49,9 +49,6 @@ const DeliveryBoyHome = () => {
   useEffect(() => {
     if (!token) return;
 
-    let isMounted = true;
-    let intervalId;
-
     try {
       const decoded = jwtDecode(token);
       const deliveryBoyId = decoded.id;
@@ -73,37 +70,33 @@ const DeliveryBoyHome = () => {
               `You have ${response.data.pendingOrders} new deliveries.`
             );
           }
-
-          if (isMounted) {
-            console.log("Polled:", response.data);
-            setOrderStats(response.data);
-          }
+          setOrderStats(response.data);
         } catch (error) {
           console.error("Error fetching order stats:", error);
         }
       };
 
-      // Initial fetch
       fetchOrderStats();
-
-      // Polling every 5 minutes
-      intervalId = setInterval(fetchOrderStats, 10000);
     } catch (error) {
       console.error("Invalid token, logging out...");
       localStorage.removeItem("token");
       navigate("/delivery/login");
     }
-
-    return () => {
-      isMounted = false;
-      if (intervalId) clearInterval(intervalId); // Clear the interval on unmount
-    };
   }, [token, navigate]);
 
   return (
     <div>
       <ToastContainer />
       <DeliveryBoyHeader />
+
+      {/* Find Orders Button */}
+      <div className="my-6 flex justify-center">
+        <Link to="/delivery/orders">
+          <button className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg transition duration-300">
+            🔍 Find Orders
+          </button>
+        </Link>
+      </div>
       <div className="min-h-screen bg-gray-100 p-4 dark:bg-gray-800">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
           <Link to="/delivery/orders/all">
@@ -157,6 +150,16 @@ const DeliveryBoyHome = () => {
                 </p>
               </div>
               <DollarSign className="w-12 h-12 text-white opacity-80" />
+            </div>
+
+            {/* Small link */}
+            <div className="mt-2 text-right">
+              <a
+                href="/delivery/commissionHistory"
+                className="text-sm text-purple-200 underline hover:text-white transition"
+              >
+                View History →
+              </a>
             </div>
           </div>
         </div>

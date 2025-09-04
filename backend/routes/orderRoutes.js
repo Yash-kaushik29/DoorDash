@@ -37,7 +37,6 @@ router.post("/create-order", async (req, res) => {
       })
     );
 
-    // Create a single order for the user
     const newOrder = new Order({
       user: userId,
       items: orderItems,

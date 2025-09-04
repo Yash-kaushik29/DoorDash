@@ -36,6 +36,7 @@ const OrderSchema = new mongoose.Schema(
     deliveryCharge: {type: Number, required: true},
     paymentStatus: { type: String, default: "Unpaid" },
     deliveryBoy: { type: mongoose.Schema.Types.ObjectId, ref: "DeliveryBoy" },
+    deliveryBoyAssigned: {type: Boolean, default: false},
     sellersNotified: [{ type: mongoose.Schema.Types.ObjectId, ref: "Seller" }],
   },
   { timestamps: true }

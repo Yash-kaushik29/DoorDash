@@ -76,16 +76,21 @@ router.get("/orders/:deliveryBoyId", async (req, res) => {
 
     const deliveryBoy = await DeliveryBoy.findById(deliveryBoyId);
 
+    if (!deliveryBoy) {
+      return res.status(404).json({ message: "Delivery boy not found" });
+    }
+
     const orders = await Order.find({ deliveryBoy: deliveryBoyId })
       .select("deliveryStatus")
-      .lean(); // Optimize performance
+      .lean();
 
+    // Default response if no orders
     if (!orders.length) {
       return res.json({
         assignedOrders: 0,
         deliveredOrders: 0,
         pendingOrders: 0,
-        commission: deliveryBoy.commission || 0,
+        commission: 0, // nothing earned
       });
     }
 
@@ -95,9 +100,30 @@ router.get("/orders/:deliveryBoyId", async (req, res) => {
     ).length;
     const pendingOrders = orders.filter(
       (order) => !["Delivered", "Cancelled"].includes(order.deliveryStatus)
-    ).length; // Fix condition
+    ).length;
 
-    res.json({ assignedOrders, deliveredOrders, pendingOrders, commission: deliveryBoy.commission });
+    // ---- Calculate today's commission ----
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const todaysCommissions = deliveryBoy.commissionHistory.filter(
+      (entry) => entry.time >= startOfDay && entry.time <= endOfDay
+    );
+
+    const todayCommission = todaysCommissions.reduce(
+      (sum, entry) => sum + (entry.commission || 0),
+      0
+    );
+
+    res.json({
+      assignedOrders,
+      deliveredOrders,
+      pendingOrders,
+      commission: todayCommission,
+    });
   } catch (error) {
     console.error("Error fetching delivery boy orders:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -140,7 +166,55 @@ router.get("/orders", async (req, res) => {
   }
 });
 
-// routes/orderRoutes.js
+router.get("/get-available-orders", async (req, res) => {
+  try {
+    const availableOrders = await Order.find({
+      deliveryBoyAssigned: false,
+    })
+      .populate("user", "username phone")
+      .populate("items.product", "name")
+      .populate("items.seller", "username shop");
+
+    res.json({
+      success: true,
+      orders: availableOrders,
+    });
+  } catch (error) {
+    console.error("Error fetching available orders:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+router.post("/orders/:orderId/accept", async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { deliveryBoyId } = req.body;
+
+    const order = await Order.findById(orderId);
+    if (!order)
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+
+    if (order.deliveryBoyAssigned || order.deliveryBoy) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Order already assigned" });
+    }
+
+    await Order.updateOne(
+      { _id: orderId },
+      { deliveryBoy: deliveryBoyId, deliveryBoyAssigned: true }
+    );
+    await order.save();
+
+    res.json({ success: true, message: "Order accepted", order });
+  } catch (error) {
+    console.error("Error accepting order:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 router.get("/order/:orderId", async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -203,11 +277,10 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
     const { orderId } = req.params;
     const order = await Order.findById(orderId)
       .populate("items.product")
-      .populate("deliveryBoy"); // Ensure deliveryBoy is populated
+      .populate("deliveryBoy");
 
     if (!order) return res.status(404).json({ message: "Order not found" });
 
-    // Update order delivery and payment status
     order.deliveryStatus = "Delivered";
     order.paymentStatus = "Paid";
     order.items = order.items.map((item) => ({
@@ -215,7 +288,6 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
       status: item.status !== "Cancelled" ? "Delivered" : item.status,
     }));
 
-    // Calculate sales per seller
     const sellerSalesMap = {};
     for (const item of order.items) {
       if (item.status !== "Cancelled" && item.product.seller) {
@@ -228,7 +300,6 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
       }
     }
 
-    // Update each seller's salesHistory
     for (const sellerId in sellerSalesMap) {
       await Seller.findByIdAndUpdate(sellerId, {
         $push: {
@@ -241,10 +312,14 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
       });
     }
 
-    // ✅ Update delivery boy commission
     if (order.deliveryBoy && order.deliveryCharge) {
       await DeliveryBoy.findByIdAndUpdate(order.deliveryBoy._id, {
-        $inc: { commission: order.deliveryCharge },
+        $push: {
+          commissionHistory: {
+            commission: order.deliveryCharge,
+            time: new Date(),
+          },
+        },
       });
     }
 
@@ -257,6 +332,28 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
     });
   } catch (error) {
     console.error("Error confirming order delivery:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/:deliveryBoyId/commissionHistory", async (req, res) => {
+  try {
+    const { deliveryBoyId } = req.params;
+    const deliveryBoy = await DeliveryBoy.findById(deliveryBoyId).select(
+      "commissionHistory"
+    );
+
+    if (!deliveryBoy) {
+      return res.status(404).json({ message: "Delivery boy not found" });
+    }
+
+    const sortedHistory = deliveryBoy.commissionHistory.sort(
+      (a, b) => new Date(b.time) - new Date(a.time)
+    );
+
+    res.json({ commissionHistory: sortedHistory });
+  } catch (error) {
+    console.error("Error fetching commission history:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });

@@ -11,24 +11,27 @@ const DeliveryBoyOrders = () => {
   const [totalPages, setTotalPages] = useState(1);
   const filters = ["All", "Pending", "Delivered"];
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("GullyFoodsDeliveryToken");
   const decoded = jwtDecode(token);
   const deliveryBoyId = decoded.id;
-  
-    if(!token) {
-      navigate('/delivery/login');
-    }
+
+  if (!token) {
+    navigate("/delivery/login");
+  }
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/delivery/orders`, {
-        params: {
-          page: currentPage,
-          limit: 5,
-          status: status || "all",
-          deliveryBoyId,
-        },
-      });
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/delivery/orders`,
+        {
+          params: {
+            page: currentPage,
+            limit: 5,
+            status: status || "all",
+            deliveryBoyId,
+          },
+        }
+      );
       setOrders(res.data.orders);
       setTotalPages(res.data.totalPages);
     } catch (error) {

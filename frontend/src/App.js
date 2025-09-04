@@ -45,6 +45,8 @@ import SellerSignup from "./pages/Seller/SellerSignup";
 import SellerLogin from "./pages/Seller/SellerLogin";
 import SellerProfile from "./pages/Seller/SellerProfile";
 import EditProfile from "./pages/Seller/EditProfile";
+import AvailableOrders from "./pages/DeliveryBoy/AvailableOrders";
+import CommissionHistory from "./pages/DeliveryBoy/CommissionHistory";
 
 const App = () => {
   return (
@@ -106,11 +108,13 @@ const App = () => {
         <Route path="/delivery/signup" element={<DeliveryBoySignup />} />
         <Route path="/delivery/login" element={<DeliveryBoyLogin />} />
         <Route path="/delivery" element={<DeliveryBoyHome />} />
+        <Route path='/delivery/orders' element={<AvailableOrders />} />
         <Route
           path="/delivery/orders/:status"
           element={<DeliveryBoyOrders />}
         />
         <Route path="/delivery/order/:orderId" element={<DeliveryBoyOrder />} />
+        <Route path="/delivery/commissionHistory" element={<CommissionHistory />} />
       </Routes>
     </>
   );
