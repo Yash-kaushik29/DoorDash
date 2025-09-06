@@ -25,9 +25,6 @@ const AvailableOrders = ({ deliveryBoyId }) => {
       const res = await axios.get(
         `${process.env.REACT_APP_API_URL}/api/delivery/get-available-orders`
       );
-
-      console.log(res);
-
       if (res.data.success) {
         setOrders(res.data.orders);
       }
@@ -118,7 +115,7 @@ const AvailableOrders = ({ deliveryBoyId }) => {
 
                       {/* Delivery Charge */}
                       <p className="text-gray-600 dark:text-gray-300">
-                        Your commission 🚚 : ₹{order.deliveryCharge}
+                        Your commission 🚚 : <span className="text-green-500 font-semibold">₹{order.deliveryCharge}</span>
                       </p>
 
                       {/* Address (short form) */}

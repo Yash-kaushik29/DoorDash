@@ -17,6 +17,7 @@ const Checkout = () => {
   const [userAddresses, setUserAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [deliveryCharge, setDeliveryCharge] = useState(0);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (value) => (value * Math.PI) / 180;
@@ -40,7 +41,7 @@ const Checkout = () => {
     if (distance <= 4) return 30;
     if (distance <= 8) return 45;
     if (distance <= 20) return 70;
-    return distance*10; 
+    return distance * 10;
   };
 
   useEffect(() => {
@@ -73,28 +74,38 @@ const Checkout = () => {
       return;
     }
 
+    if (isPlacingOrder) return; // prevent multiple clicks
+    setIsPlacingOrder(true);
+
     const address = selectedAddress;
 
-    if (paymentMethod === "COD") {
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/order/create-order`,
-        {
-          userId: user._id,
-          cartItems,
-          address: selectedAddress,
-          paymentStatus: "Unpaid",
-          deliveryCharge,
-        },
-        { withCredentials: true }
-      );
-      if (data.success) {
-        toast.success("🎉 Order Placed Successfully!");
-        setTimeout(() => navigate(`/order/${data.order._id}`), 2000);
+    try {
+      if (paymentMethod === "COD") {
+        const { data } = await axios.post(
+          `${process.env.REACT_APP_API_URL}/api/order/create-order`,
+          {
+            userId: user._id,
+            cartItems,
+            address: selectedAddress,
+            paymentStatus: "Unpaid",
+            deliveryCharge,
+          },
+          { withCredentials: true }
+        );
+
+        if (data.success) {
+          toast.success("🎉 Order Placed Successfully!");
+          setTimeout(() => navigate(`/order/${data.order._id}`), 2000);
+        } else {
+          toast.error(data.message);
+        }
       } else {
-        toast.error(data.message);
+        await handlePayment(address);
       }
-    } else {
-      handlePayment(address);
+    } catch (error) {
+      setIsPlacingOrder(false);
+      console.error("Error placing order:", error);
+      toast.error("Something went wrong while placing the order.");
     }
   };
 
@@ -155,9 +166,13 @@ const Checkout = () => {
 
   const handleSelectAddress = (addr) => {
     setSelectedAddress(addr);
-    const distance = calculateDistance(28.83811395386716, 78.24223013771964, addr.lat, addr.long);
+    const distance = calculateDistance(
+      28.83811395386716,
+      78.24223013771964,
+      addr.lat,
+      addr.long
+    );
 
-    console.log(distance)
     setDeliveryCharge(getDeliveryCharge(distance));
   };
 
@@ -259,7 +274,11 @@ const Checkout = () => {
               : "bg-gray-300 cursor-not-allowed"
           }`}
         >
-          {paymentMethod === "Razorpay" ? "Proceed to Pay" : "Place Order"}
+          {isPlacingOrder
+            ? "Placing your order..."
+            : paymentMethod === "Razorpay"
+            ? "Proceed to Pay"
+            : "Place Order"}
         </button>
       </div>
     </div>

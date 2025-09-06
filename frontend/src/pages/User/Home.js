@@ -11,6 +11,7 @@ import { ToastContainer } from "react-toastify";
 import ShopCard from "../../components/ShopCard";
 import ProductCard from "../../components/ProductCard";
 import { Link } from "react-router-dom";
+import InstallPrompt from "../../components/InstallPrompt";
 
 const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
@@ -62,6 +63,9 @@ const Home = () => {
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-100">
       <ToastContainer position="top-right" autoClose={3000} />
       <Navbar />
+
+            <InstallPrompt />
+
 
       {/* Mobile Title */}
       <div className="flex flex-col items-center pt-4 lg:hidden">

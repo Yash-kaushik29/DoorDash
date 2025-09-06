@@ -1,8 +1,8 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
-import { Link } from 'react-router-dom';
-import { MdOutlineArrowOutward } from "react-icons/md";
+import { Link } from "react-router-dom";
+import { MdOutlineArrowOutward, MdAccessTimeFilled } from "react-icons/md";
 
 const RecentOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -16,10 +16,10 @@ const RecentOrders = () => {
     try {
       setLoading(true);
       const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/order/getUserOrders?page=${page}&limit=10`, 
+        `${process.env.REACT_APP_API_URL}/api/order/getUserOrders?page=${page}&limit=10`,
         { withCredentials: true }
       );
-  
+
       if (data.success) {
         setOrders(data.orders);
         setCurrentPage(data.currentPage);
@@ -48,7 +48,7 @@ const RecentOrders = () => {
 
   // Format Date
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
@@ -63,7 +63,7 @@ const RecentOrders = () => {
         return "text-red-500";
       case "Out for Delivery":
       case "Preparing":
-        return "text-yellow-500";  
+        return "text-yellow-500";
       default:
         return "text-gray-500";
     }
@@ -77,7 +77,12 @@ const RecentOrders = () => {
 
         {/* Loading & Error States */}
         {loading ? (
-          <div className="text-center">Loading...</div>
+          <div className="flex flex-col justify-center items-center py-6 space-y-5">
+            <MdAccessTimeFilled className="text-3xl text-green-500 animate-ping" />
+            <p className="text-gray-500 dark:text-gray-300 text-lg text-center">
+              Fetching your latest orders… ⏳
+            </p>
+          </div>
         ) : error ? (
           <div className="text-center text-red-500">{error}</div>
         ) : (
@@ -88,20 +93,26 @@ const RecentOrders = () => {
                 className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 p-6"
               >
                 <h2 className="text-xl font-semibold mb-2 flex items-center">
-                  Order ID: 
-                  <Link 
+                  Order ID:
+                  <Link
                     to={`/order/${order._id}`}
                     className="text-blue-500 hover:text-blue-600 transition ml-1 flex items-center hover:underline"
                   >
-                    #{order.id} 
+                    #{order.id}
                     <MdOutlineArrowOutward className="text-xl hover:translate-x-1 transition-transform" />
                   </Link>
                 </h2>
                 <p className="mb-2">
-                  Total Amount: <span className="text-green-600 font-bold">₹{order.amount}</span>
+                  Total Amount:{" "}
+                  <span className="text-green-600 font-bold">
+                    ₹{order.amount}
+                  </span>
                 </p>
                 <p className="mb-2">
-                  Delivery Status: <span className={getStatusColor(order.deliveryStatus)}>{order.deliveryStatus}</span>
+                  Delivery Status:{" "}
+                  <span className={getStatusColor(order.deliveryStatus)}>
+                    {order.deliveryStatus}
+                  </span>
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Order Date: {formatDate(order.createdAt)}

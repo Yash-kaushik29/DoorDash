@@ -178,9 +178,9 @@ const AddAddressModal = ({ userId, onClose, closeModal }) => {
             </h2>
             <form
               onSubmit={handleSave}
-              className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md space-y-6"
+              className="bg-white dark:bg-gray-900 p-4 sm:p-6 rounded-lg shadow-md space-y-6"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col">
                   <label className="text-sm font-medium text-green-700 mb-1">
                     Full Name <span className="text-red-500">*</span>
@@ -188,7 +188,7 @@ const AddAddressModal = ({ userId, onClose, closeModal }) => {
                   <input
                     type="text"
                     name="fullName"
-                    placeholder="John Doe"
+                    placeholder="User ABC"
                     value={addressData.fullName}
                     onChange={handleInputChange}
                     required
@@ -203,7 +203,7 @@ const AddAddressModal = ({ userId, onClose, closeModal }) => {
                   <input
                     type="text"
                     name="phone"
-                    placeholder="9876543210"
+                    placeholder="eg. 98******11"
                     value={addressData.phone}
                     onChange={handleInputChange}
                     required
@@ -211,7 +211,7 @@ const AddAddressModal = ({ userId, onClose, closeModal }) => {
                   />
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex flex-col sm:col-span-1">
                   <label className="text-sm font-medium text-green-700 mb-1">
                     Address Line <span className="text-red-500">*</span>
                   </label>
@@ -226,14 +226,14 @@ const AddAddressModal = ({ userId, onClose, closeModal }) => {
                   />
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex flex-col sm:col-span-1">
                   <label className="text-sm font-medium text-green-700 mb-1">
                     Area / Locality <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     name="area"
-                    placeholder="Sector 21, Andheri West"
+                    placeholder="Sector 21"
                     value={addressData.area}
                     onChange={handleInputChange}
                     required
@@ -241,21 +241,21 @@ const AddAddressModal = ({ userId, onClose, closeModal }) => {
                   />
                 </div>
 
-                <div className="flex flex-col md:col-span-2">
+                <div className="flex flex-col sm:col-span-2">
                   <label className="text-sm font-medium text-green-700 mb-1">
                     Landmark <span className="text-gray-400">(Optional)</span>
                   </label>
                   <input
                     type="text"
                     name="landmark"
-                    placeholder="Near Big Bazaar"
+                    placeholder="Near Main Market"
                     value={addressData.landmark}
                     onChange={handleInputChange}
                     className="p-2 border border-green-200 rounded focus:outline-none focus:ring-1 focus:ring-green-300 dark:bg-gray-800 dark:text-white"
                   />
                 </div>
 
-                <div className="flex items-center space-x-2 col-span-2 mt-2">
+                <div className="flex items-center space-x-2 sm:col-span-2 mt-2">
                   <input
                     type="checkbox"
                     name="isDefault"
@@ -271,7 +271,7 @@ const AddAddressModal = ({ userId, onClose, closeModal }) => {
 
               <button
                 type="submit"
-                className="mt-6 w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded transition"
+                className="mt-6 w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded transition"
               >
                 Save Address
               </button>

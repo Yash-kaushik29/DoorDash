@@ -34,31 +34,6 @@ const Navbar = () => {
     }
   };
 
-  // PWA Install prompt listener
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (event) => {
-      event.preventDefault();
-      setInstallPrompt(event);
-    };
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-
-    return () =>
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt
-      );
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    const choiceResult = await installPrompt.userChoice;
-    if (choiceResult.outcome === "accepted") {
-      console.log("PWA installed");
-    }
-    setInstallPrompt(null);
-  };
-
   return (
     <div className="relative">
       {/* Desktop Navbar */}
@@ -80,15 +55,6 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-6">
-            {/* Install button on desktop */}
-            {installPrompt && (
-              <button
-                onClick={handleInstallClick}
-                className="px-3 py-1 bg-green-500 text-white rounded-full hover:bg-green-600 transition flex items-center gap-1"
-              >
-                <MdDownload size={16} /> Install GullyFoods
-              </button>
-            )}
             <Link to="/recentOrders">
               <button className="p-2 hover:text-green-600 transition">
                 <FaHistory size={20} />
@@ -175,17 +141,6 @@ const Navbar = () => {
             <RiAccountCircleLine size={22} />
             <span className="text-xs">Login</span>
           </Link>
-        )}
-
-        {/* Install button in mobile nav */}
-        {installPrompt && (
-          <button
-            onClick={handleInstallClick}
-            className="p-2 flex flex-col items-center text-gray-600 dark:text-white hover:text-green-500 transition"
-          >
-            <MdDownload size={20} />
-            <span className="text-xs">Install</span>
-          </button>
         )}
       </nav>
     </div>

@@ -7,6 +7,11 @@ const DeliveryBoyLogin = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const token = localStorage.getItem('GullyFoodsDeliveryToken');
+
+  if(token) {
+    navigate('/delivery')
+  }
 
   const handleLogin = async () => {
     setError("");
@@ -19,7 +24,7 @@ const DeliveryBoyLogin = () => {
 
       if (res.data.success) {
         localStorage.setItem("GullyFoodsDeliveryToken", res.data.token);
-        navigate("/delivery/");
+        navigate("/delivery");
       }
     } catch (err) {
       setError("Login failed. Please check your credentials and try again.");

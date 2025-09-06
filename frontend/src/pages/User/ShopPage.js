@@ -5,6 +5,7 @@ import ProductCard from "../../components/ProductCard";
 import Navbar from "../../components/Navbar";
 import { UserContext } from "../../context/userContext";
 import { ToastContainer } from "react-toastify";
+import { MdStorefront } from "react-icons/md";
 
 const ShopPage = () => {
   const { shopId } = useParams();
@@ -56,7 +57,12 @@ const ShopPage = () => {
       <div className="max-w-6xl mx-auto p-4 mb-16 lg:mb-0">
         {/* Shop Image */}
         {loading ? (
-          <div className="animate-pulse bg-gray-300 h-48 rounded-md mb-4"></div>
+          <div className="flex flex-col items-center justify-center h-64 space-y-4">
+            <MdStorefront className="text-6xl text-green-500 animate-bounce" />
+            <p className="text-lg font-medium text-gray-600 dark:text-gray-300 animate-pulse">
+              Hold your cravings! We are getting it... 🛒
+            </p>
+          </div>
         ) : (
           <div
             className={`w-full h-48 bg-gray-200 rounded-md mb-4 overflow-hidden relative ${

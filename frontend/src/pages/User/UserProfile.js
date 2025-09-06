@@ -42,74 +42,85 @@ const UserProfile = () => {
     }
   };
 
-  if (!ready) return <>Loading...</>;
-
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex justify-center items-start p-4">
-        <div className="w-full max-w-xl bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-          {/* User's Name */}
-          <div className="text-center">
-            <h1 className="text-4xl font-bold">{username || "User"}</h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Welcome to your profile
-            </p>
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="mt-4 px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded transition"
-            >
-              Logout
-            </button>
-          </div>
-
-          {/* Navigation Buttons */}
+      {ready === false ? (
+        <div className="flex justify-center items-center space-x-2 h-[100vh]">
+          <span className="w-3 h-3 mb-4 bg-green-700 rounded-full animate-bounce [animation-delay:0s]"></span>
+          <span className="w-3 h-3 mb-4 bg-green-600 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+          <span className="w-3 h-3 mb-4 bg-green-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+        </div>
+      ) : (
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex justify-center items-start p-4 mb-16 lg:mb-0">
           {user && (
-            <div className="mt-8 space-y-4">
-              <Link
-                to="/notifications"
-                className="w-full bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition"
-              >
-                <span className="font-semibold text-lg">Notifications</span>
-                <MdNotifications className="text-2xl text-green-500" />
-              </Link>
+            <div className="w-full max-w-xl bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+              {/* User's Name */}
+              <div className="text-center">
+                <h1 className="text-4xl text-green-500 font-bold">{user.name || "User"}</h1>
+                <p className="font-semibold text-gray-800 dark:text-gray-200">
+                  {user.phone}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Welcome to your profile
+                </p>
+                {/* Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  className="mt-4 px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded transition"
+                >
+                  Logout
+                </button>
+              </div>
 
-              <Link
-                to="/recentOrders"
-                className="w-full bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition"
-              >
-                <span className="font-semibold text-lg">Orders</span>
-                <MdShoppingCart className="text-2xl text-green-500" />
-              </Link>
+              {/* Navigation Buttons */}
+              <div className="mt-8 space-y-4">
+                <Link
+                  to="/notifications"
+                  className="w-full bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+                >
+                  <span className="font-semibold text-lg">Notifications</span>
+                  <MdNotifications className="text-2xl text-green-500" />
+                </Link>
 
-              <Link
-                to={`/user/addresses/${user._id}`}
-                className="w-full bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition"
-              >
-                <span className="font-semibold text-lg">Addresses</span>
-                <MdLocationOn className="text-2xl text-green-500" />
-              </Link>
+                <Link
+                  to="/recentOrders"
+                  className="w-full bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+                >
+                  <span className="font-semibold text-lg">Orders</span>
+                  <MdShoppingCart className="text-2xl text-green-500" />
+                </Link>
 
-              <Link
-                to="/account-settings"
-                className="w-full bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition"
-              >
-                <span className="font-semibold text-lg">Account Settings</span>
-                <MdSettings className="text-2xl text-green-500" />
-              </Link>
+                <Link
+                  to={`/user/addresses/${user._id}`}
+                  className="w-full bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+                >
+                  <span className="font-semibold text-lg">Addresses</span>
+                  <MdLocationOn className="text-2xl text-green-500" />
+                </Link>
 
-              <Link
-                to="/help-support"
-                className="w-full bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition"
-              >
-                <span className="font-semibold text-lg">Help & Support</span>
-                <MdHelp className="text-2xl text-green-500" />
-              </Link>
+                <Link
+                  to="/account-settings"
+                  className="w-full bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+                >
+                  <span className="font-semibold text-lg">
+                    Account Settings
+                  </span>
+                  <MdSettings className="text-2xl text-green-500" />
+                </Link>
+
+                <Link
+                  to="/help-support"
+                  className="w-full bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+                >
+                  <span className="font-semibold text-lg">Help & Support</span>
+                  <MdHelp className="text-2xl text-green-500" />
+                </Link>
+              </div>
             </div>
           )}
         </div>
-      </div>
+      )}
     </>
   );
 };

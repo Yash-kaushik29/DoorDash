@@ -9,10 +9,12 @@ const Notifications = () => {
   const [filteredNotifications, setFilteredNotifications] = useState([]);
   const [filter, setFilter] = useState("All"); // 'All', 'Read', 'Unread'
   const { user } = useContext(UserContext);
-  const [selectedNotification, setSelectedNotification] = useState(null)
+  const [selectedNotification, setSelectedNotification] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchNotifications = async () => {
+      setIsLoading(true);
       try {
         if (!user || !user._id) return;
 
@@ -25,6 +27,8 @@ const Notifications = () => {
         setFilteredNotifications(data); // Initially show all
       } catch (error) {
         console.error("Error fetching notifications:", error);
+      } finally {
+        setIsLoading(false)
       }
     };
 
@@ -41,13 +45,17 @@ const Notifications = () => {
     }
   }, [filter, notifications]);
 
-  const showNotification = async(notif) => {
-    const {data} = await axios.post(`${process.env.REACT_APP_API_URL}/api/notification/readNotification`, {userId: user._id, notificationId: notif._id}, {withCredentials: true});
-    
-    if(data.success) {
-      setSelectedNotification(notif)
+  const showNotification = async (notif) => {
+    const { data } = await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/notification/readNotification`,
+      { userId: user._id, notificationId: notif._id },
+      { withCredentials: true }
+    );
+
+    if (data.success) {
+      setSelectedNotification(notif);
     }
-  }
+  };
 
   const closeModal = () => {
     setSelectedNotification(null);
@@ -60,99 +68,123 @@ const Notifications = () => {
       <Navbar />
 
       <div className="p-4 max-w-xl mx-auto">
-      <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-        Notifications
-      </h2>
+        <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+          Notifications
+        </h2>
 
-      {/* Filter Tabs */}
-      <div className="flex space-x-4 mb-4 border-b pb-2">
-        {["All", "Read", "Unread"].map((category) => (
-          <button
-            key={category}
-            className={`px-4 py-1 text-sm font-medium rounded transition ${
-              filter === category
-                ? "bg-green-600 text-white dark:bg-green-500"
-                : "bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700"
-            }`}
-            onClick={() => setFilter(category)}
-          >
-            {category}
-          </button>
-        ))}
-      </div>
-
-      {/* Notifications List */}
-      {filteredNotifications.length === 0 ? (
-        <p className="text-gray-500 dark:text-gray-400">No notifications</p>
-      ) : (
-        filteredNotifications.map((notif, index) => (
-          <div
-            key={index}
-            className={`p-3 border rounded mb-2 flex justify-between items-center transition-colors ${
-              notif.read
-                ? "bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600"
-                : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
-            }`}
-          >
-            <div>
-              <p className="text-gray-900 dark:text-gray-100">{notif.message}</p>
-              <small className="text-gray-500 dark:text-gray-400">
-                {new Date(notif.createdAt).toLocaleString()}
-              </small>
-            </div>
+        {/* Filter Tabs */}
+        <div className="flex space-x-4 mb-4 border-b pb-2">
+          {["All", "Read", "Unread"].map((category) => (
             <button
-              className="px-3 py-1 text-sm font-medium text-white bg-green-600 dark:bg-green-500 rounded hover:bg-green-700 dark:hover:bg-green-400 transition"
-              onClick={() => showNotification(notif)}
+              key={category}
+              className={`px-4 py-1 text-sm font-medium rounded transition ${
+                filter === category
+                  ? "bg-green-600 text-white dark:bg-green-500"
+                  : "bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700"
+              }`}
+              onClick={() => setFilter(category)}
             >
-              View
+              {category}
             </button>
-          </div>
-        ))
-      )}
-
-      {/* Modal Popup */}
-      {selectedNotification && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-          onClick={closeModal} // Close modal when clicking outside
-        >
-          <div
-            className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-lg w-96 relative"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
-          >
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white"
-              onClick={closeModal}
-            >
-              ✖
-            </button>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Notification Details
-            </h3>
-            <p className="mt-2 text-gray-700 dark:text-gray-300">
-              {selectedNotification.message}
-            </p>
-            <small className="text-gray-500 dark:text-gray-400 block mt-2">
-              {new Date(selectedNotification.createdAt).toLocaleString()}
-            </small>
-            <div className="flex justify-around">
-            <Link to={`${selectedNotification.url}`} className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-400 transition">
-              Track Order
-            </Link>
-            <button
-              className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-400 transition"
-              onClick={closeModal}
-            >
-              Close
-            </button>
-            </div>
-          </div>
+          ))}
         </div>
-      )}
-    </div>
+
+        {/* Notifications List */}
+        {isLoading ? (
+          <div className="space-y-4 p-4">
+            {[...Array(5)].map((_, idx) => (
+              <div
+                key={idx}
+                className="flex items-center space-x-4 animate-pulse"
+              >
+                {/* Text placeholder */}
+                <div className="flex-1 space-y-2 py-1">
+                  <div className="h-12 bg-gray-300 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            {filteredNotifications.length === 0 ? (
+              <p className="text-gray-500 dark:text-gray-400">
+                No notifications
+              </p>
+            ) : (
+              filteredNotifications.map((notif, index) => (
+                <div
+                  key={index}
+                  className={`p-3 border rounded mb-2 flex justify-between items-center transition-colors ${
+                    notif.read
+                      ? "bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600"
+                      : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700"
+                  }`}
+                >
+                  <div>
+                    <p className="text-gray-900 dark:text-gray-100">
+                      {notif.message}
+                    </p>
+                    <small className="text-gray-500 dark:text-gray-400">
+                      {new Date(notif.createdAt).toLocaleString()}
+                    </small>
+                  </div>
+                  <button
+                    className="px-3 py-1 text-sm font-medium text-white bg-green-600 dark:bg-green-500 rounded hover:bg-green-700 dark:hover:bg-green-400 transition"
+                    onClick={() => showNotification(notif)}
+                  >
+                    View
+                  </button>
+                </div>
+              ))
+            )}
+          </>
+        )}
+
+        {/* Modal Popup */}
+        {selectedNotification && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+            onClick={closeModal} // Close modal when clicking outside
+          >
+            <div
+              className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-lg w-96 relative"
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+            >
+              <button
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white"
+                onClick={closeModal}
+              >
+                ✖
+              </button>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Notification Details
+              </h3>
+              <p className="mt-2 text-gray-700 dark:text-gray-300">
+                {selectedNotification.message}
+              </p>
+              <small className="text-gray-500 dark:text-gray-400 block mt-2">
+                {new Date(selectedNotification.createdAt).toLocaleString()}
+              </small>
+              <div className="flex justify-around">
+                <Link
+                  to={`${selectedNotification.url}`}
+                  className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-400 transition"
+                >
+                  Track Order
+                </Link>
+                <button
+                  className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-400 transition"
+                  onClick={closeModal}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
 export default Notifications;
-

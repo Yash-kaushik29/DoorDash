@@ -6,6 +6,7 @@ import axios from "axios";
 import AddressCard from "../../components/AddressCard";
 import { IoIosArrowDropdown } from "react-icons/io";
 import AddAddressModal from "../../components/AddressModal";
+import { FaHome } from "react-icons/fa";
 
 const Addresses = () => {
   const { userId } = useParams();
@@ -19,9 +20,11 @@ const Addresses = () => {
   const [userAddresses, setUserAddresses] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const fetchAddresses = async () => {
     try {
+      setLoading(true);
       const response = await axios.get(
         `${process.env.REACT_APP_API_URL}/api/user-profile/getAddresses`,
         {
@@ -36,6 +39,8 @@ const Addresses = () => {
       }
     } catch (error) {
       console.error("Error fetching addresses:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,8 +54,7 @@ const Addresses = () => {
 
   const closeModal = () => {
     setShowModal(false);
-  }
-
+  };
 
   const deleteAddress = async (addressId) => {
     try {
@@ -133,17 +137,24 @@ const Addresses = () => {
           )}
 
           {/* User's Saved Addresses */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-            {userAddresses.map((address) => (
-              <AddressCard
-                key={address._id}
-                address={address}
-                deleteAddress={deleteAddress}
-                setAsDefault={setAsDefault}
-                updateAddress={updateAddress}
-              />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex mt-16 flex-col justify-center items-center ">
+              <FaHome className="text-green-500" />
+              <p>Fetching saved Addresses...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+              {userAddresses.map((address) => (
+                <AddressCard
+                  key={address._id}
+                  address={address}
+                  deleteAddress={deleteAddress}
+                  setAsDefault={setAsDefault}
+                  updateAddress={updateAddress}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </div>

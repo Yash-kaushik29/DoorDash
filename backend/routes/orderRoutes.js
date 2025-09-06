@@ -51,6 +51,7 @@ router.post("/create-order", async (req, res) => {
     await newOrder.save();
 
     await User.findByIdAndUpdate(userId, {
+      cart: [],
       $push: {
         notifications: {
           message: `Your order with order ID: #${newOrder.id} is processed.`,
