@@ -9,15 +9,19 @@ const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, ready } = useContext(UserContext);
-  const { cartItems, totalPrice } = location.state || {
+  const { cartItems, totalPrice, sellers } = location.state || {
     cartItems: [],
     totalPrice: 0,
+    sellers: 1,
   };
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [userAddresses, setUserAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [deliveryCharge, setDeliveryCharge] = useState(0);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [taxes, setTaxes] = useState((totalPrice * 5) / 100);
+
+  const convenienceFees = (sellers.length - 1) * 15;
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (value) => (value * Math.PI) / 180;
@@ -86,6 +90,8 @@ const Checkout = () => {
           {
             userId: user._id,
             cartItems,
+            taxes,
+            convenienceFees,
             address: selectedAddress,
             paymentStatus: "Unpaid",
             deliveryCharge,
@@ -140,6 +146,8 @@ const Checkout = () => {
               {
                 userId: user._id,
                 cartItems,
+                taxes,
+                convenienceFees,
                 address,
                 paymentStatus: "Paid",
                 deliveryCharge,
@@ -230,11 +238,25 @@ const Checkout = () => {
             Delivery Fee:{" "}
             <span className="text-green-500 ml-2">₹{deliveryCharge}</span>
           </p>
+          <p className="font-semibold">
+            Tax:{" "}
+            <span className="text-green-500 ml-2">
+              ₹{(totalPrice * 5) / 100}
+            </span>
+          </p>
+          {convenienceFees > 0 && (
+            <p className="font-semibold">
+              Multiple Store convenience Fee:{" "}
+              <span className="text-green-500 ml-2">
+                ₹{convenienceFees}
+              </span>
+            </p>
+          )}
           <div className="h-[1px] bg-black dark:bg-white my-2"></div>
           <p className="font-semibold">
             Total:{" "}
             <span className="text-green-500 ml-2">
-              ₹{totalPrice + deliveryCharge}
+              ₹{totalPrice + taxes + convenienceFees + deliveryCharge}
             </span>
           </p>
         </div>

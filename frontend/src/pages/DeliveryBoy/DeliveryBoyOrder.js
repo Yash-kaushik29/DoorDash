@@ -121,7 +121,7 @@ const DeliveryBoyOrder = () => {
               <p className="text-gray-600 dark:text-gray-300">
                 <span className="font-semibold">Amount: </span>
                 <span className="font-semibold text-green-600">
-                  ₹{order.amount}
+                  ₹{order?.amount + order?.taxes + order?.convenienceFees + order?.deliveryCharge}
                 </span>
               </p>
             </div>

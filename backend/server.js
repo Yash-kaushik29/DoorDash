@@ -15,11 +15,9 @@ const orderRoutes = require('./routes/orderRoutes');
 const notificationsRoutes = require('./routes/notificationsRoutes');
 const adminRoutes = require('./routes/adminRoutes')
 const deliveryRoutes = require('./routes/deliveryRoutes');
-const AWS = require("aws-sdk");
 const multer = require("multer");
-const fs = require("fs");
-const util = require("util");
 const axios = require("axios");
+const path = require("path");
 
 const app = express();
 dotenv.config();
@@ -47,31 +45,38 @@ mongoose
     console.log(err.red);
   });
 
-  const upload = multer({ dest: "uploads/" });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
 
-  const s3 = new AWS.S3({
-    accessKeyId: process.env.S3_ACCESS_KEY,
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-    region: "ap-southeast-2",
-  });
-  
-  const uploadToS3 = async (filePath, fileName, mimeType) => {
-    const fileContent = await util.promisify(fs.readFile)(filePath);
-  
-    const params = {
-      Bucket: "yash-booking-app",
-      Key: `uploads/${Date.now()}-${fileName}`,
-      Body: fileContent,
-      ContentType: mimeType,
-      ACL: "public-read",
-    };
-  
-    const uploadResult = await s3.upload(params).promise();
-  
-    await util.promisify(fs.unlink)(filePath);
-  
-    return uploadResult.Location;
-  };  
+const upload = multer({ storage });
+
+// ✅ Serve uploads folder as static
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Upload API
+app.post("/upload", upload.array("photos"), async (req, res) => {
+  try {
+    const uploadedFiles = req.files.map((file) => {
+      // Return public URL for each uploaded file
+      return `${req.protocol}://${req.get("host")}/uploads/${file.filename}`;
+    });
+
+    res.status(200).json({ success: true, files: uploadedFiles });
+  } catch (error) {
+    console.error("Error uploading files:", error);
+    res.status(500).json({
+      success: false,
+      message: "File upload failed.",
+      error,
+    });
+  }
+});  
 
 app.use('/api/auth', authRoutes);
 app.use('/api/shop', shopRoutes);
@@ -104,26 +109,6 @@ app.get("/api/location/reverse-geocode", async (req, res) => {
   } catch (err) {
     console.error("Nominatim error:", err.message);
     res.status(500).json({ success: false, message: "Reverse geocoding failed" });
-  }
-});
-
-app.post("/upload", upload.array("photos"), async (req, res) => {
-  try {
-    const uploadedFiles = [];
-    const files = req.files;
-
-    for (let i = 0; i < files.length; i++) {
-      const { path, originalname, mimetype } = files[i];
-      const url = await uploadToS3(path, originalname, mimetype);
-      uploadedFiles.push(url);
-    }
-
-    res.status(200).json({ success: true, files: uploadedFiles });
-  } catch (error) {
-    console.error("Error uploading files:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "File upload failed.", error });
   }
 });
 

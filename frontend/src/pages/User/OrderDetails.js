@@ -103,8 +103,34 @@ const OrderDetails = () => {
           </div>
 
           {/* Total Amount */}
-          <div className="mt-6 text-xl font-bold text-right text-green-600 dark:text-green-400">
-            Total: ₹{order?.amount}
+          <div className="my-6 text-right flex flex-col gap-1">
+            <p className="font-semibold">
+              Cart Total:{" "}
+              <span className="text-green-500 ml-2">₹{order?.amount}</span>
+            </p>
+            <p className="font-semibold">
+              Delivery Fee:{" "}
+              <span className="text-green-500 ml-2">₹{order?.deliveryCharge}</span>
+            </p>
+            <p className="font-semibold">
+              Tax:{" "}
+              <span className="text-green-500 ml-2">
+                ₹{order?.taxes}
+              </span>
+            </p>
+            {order.convenienceFees > 0 && (<p className="font-semibold">
+              Multiple Store convenience Fee:{" "}
+              <span className="text-green-500 ml-2">
+                ₹{order?.convenienceFees}
+              </span>
+            </p>)}
+            <div className="h-[1px] bg-black dark:bg-white my-2"></div>
+            <p className="font-semibold">
+              Total:{" "}
+              <span className="text-green-500 ml-2">
+                ₹{order?.amount + order?.taxes + order?.convenienceFees + order?.deliveryCharge}
+              </span>
+            </p>
           </div>
         </div>
       </div>

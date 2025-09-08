@@ -115,7 +115,7 @@ const AvailableOrders = ({ deliveryBoyId }) => {
 
                       {/* Delivery Charge */}
                       <p className="text-gray-600 dark:text-gray-300">
-                        Your commission 🚚 : <span className="text-green-500 font-semibold">₹{order.deliveryCharge}</span>
+                        Your commission 🚚 : <span className="text-green-500 font-semibold">₹{order.deliveryCharge + order.convenienceFees}</span>
                       </p>
 
                       {/* Address (short form) */}

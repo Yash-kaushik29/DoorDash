@@ -64,8 +64,7 @@ const Home = () => {
       <ToastContainer position="top-right" autoClose={3000} />
       <Navbar />
 
-            <InstallPrompt />
-
+      <InstallPrompt />
 
       {/* Mobile Title */}
       <div className="flex flex-col items-center pt-4 lg:hidden">

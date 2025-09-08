@@ -220,7 +220,7 @@ router.get("/order/:orderId", async (req, res) => {
     const { orderId } = req.params;
     const order = await Order.findById(orderId)
       .select(
-        "items user deliveryStatus createdAt shippingAddress id amount paymentStatus"
+        "items user deliveryStatus createdAt shippingAddress id amount taxes convenienceFees deliveryCharge paymentStatus"
       )
       .populate("items.product", "name shopName")
       .populate("user", "name email")
@@ -316,7 +316,7 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
       await DeliveryBoy.findByIdAndUpdate(order.deliveryBoy._id, {
         $push: {
           commissionHistory: {
-            commission: order.deliveryCharge,
+            commission: order.deliveryCharge + order.convenienceFees,
             time: new Date(),
           },
         },

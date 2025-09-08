@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get('/get-popular-shops', async(req, res) => {
     try {
-        const shops = await Shop.find().limit(6);
+        const shops = await Shop.find().limit(12);
         res.json({success: true, shops});
     } catch(error) {
         console.log(error)

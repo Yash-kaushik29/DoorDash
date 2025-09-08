@@ -9,16 +9,29 @@ import { useNavigate } from "react-router-dom";
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sellers, setSellers] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCartItems = async () => {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/cart/getCart`,
-        { withCredentials: true }
-      );
-      setCartItems(data.cart);
-      setLoading(false);
+      try {
+        const { data } = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/cart/getCart`,
+          { withCredentials: true }
+        );
+
+        setCartItems(data.cart);
+
+        const uniqueSellers = [
+          ...new Set(data.cart.map((item) => item.product.seller)),
+        ];
+
+        setSellers(uniqueSellers);
+      } catch (err) {
+        console.error("Failed to fetch cart:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchCartItems();
@@ -85,7 +98,7 @@ const CartPage = () => {
   );
 
   const handleCheckout = () => {
-    navigate("/checkout", { state: { cartItems, totalPrice } });
+    navigate("/checkout", { state: { cartItems, totalPrice, sellers } });
   };
 
   return (
@@ -133,6 +146,7 @@ const CartPage = () => {
                     <h3 className="font-semibold text-gray-800 dark:text-white">
                       {item.product.name}
                     </h3>
+                    <p className="text-green-500">{item.product.shopName}</p>
                     <p className="text-gray-500 dark:text-gray-400">
                       ₹{item.product?.price} x {item?.quantity}
                     </p>
@@ -190,6 +204,15 @@ const CartPage = () => {
                 Some items are from closed shops. Please remove them before
                 proceeding.
               </p>
+            )}
+
+            {sellers.length > 1 && (
+              <div className="mt-4 p-3 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded">
+                ⚠️ Your order contains products from <b>{sellers.length}</b>{" "}
+                different shops. Extra{" "}
+                <span className="font-semibold">convenience fee</span> may
+                apply.
+              </div>
             )}
 
             {/* Total Price & Checkout */}

@@ -14,18 +14,18 @@ const PhotosUploader = ({ images, setImages }) => {
       return [...prev, imageURL];
     });
 
-    console.log(images)
+    console.log(images);
     setImageURL("");
   };
 
   const handleUpload = async (e) => {
     const files = e.target.files;
     const filedata = new FormData();
-  
+
     for (let i = 0; i < files.length; i++) {
-      filedata.append("photos", files[i]); 
+      filedata.append("photos", files[i]);
     }
-  
+
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/upload`,
@@ -34,30 +34,29 @@ const PhotosUploader = ({ images, setImages }) => {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-  
-      const { files: uploadedFiles } = response.data; 
-      setImages((prev) => [...prev, ...uploadedFiles]); 
-      console.log(images)
+
+      const { files: uploadedFiles } = response.data;
+      setImages((prev) => [...prev, ...uploadedFiles]); // ✅ These will be URLs like http://localhost:5000/uploads/xyz.jpg
     } catch (error) {
       console.error("File upload failed:", error);
     }
   };
 
   const deleteImage = (imageToBeDeleted) => {
-    const newImages = images.filter(image => {
+    const newImages = images.filter((image) => {
       return image !== imageToBeDeleted;
-    })
+    });
 
-    setImages(newImages)
-  }
+    setImages(newImages);
+  };
 
   const setCoverPhoto = (coverPhoto) => {
-    const newImages = images.filter(image => {
+    const newImages = images.filter((image) => {
       return image !== coverPhoto;
-    })
+    });
 
     setImages([coverPhoto, ...newImages]);
-  }
+  };
 
   return (
     <>
@@ -85,11 +84,17 @@ const PhotosUploader = ({ images, setImages }) => {
           {images.length > 0 &&
             images.map((image) => (
               <div key={image} className="mt-4 rounded-xl flex relative">
-                <div className="cursor-pointer absolute right-2 bottom-1 text-2xl text-red-400" onClick={() => deleteImage(image)}><MdOutlineDelete /></div>
-                <div className="cursor-pointer absolute left-2 bottom-2 text-xl text-yellow-400" onClick={() => setCoverPhoto(image)}>
-                  {image === images[0] ? 
-                  <IoStar />:
-                  <IoStarOutline /> }
+                <div
+                  className="cursor-pointer absolute right-2 bottom-1 text-2xl text-red-400"
+                  onClick={() => deleteImage(image)}
+                >
+                  <MdOutlineDelete />
+                </div>
+                <div
+                  className="cursor-pointer absolute left-2 bottom-2 text-xl text-yellow-400"
+                  onClick={() => setCoverPhoto(image)}
+                >
+                  {image === images[0] ? <IoStar /> : <IoStarOutline />}
                 </div>
                 <Image
                   src={image}

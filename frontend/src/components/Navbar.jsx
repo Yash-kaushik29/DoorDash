@@ -14,7 +14,7 @@ const Navbar = () => {
 
   // Theme loading
   useEffect(() => {
-    const storedTheme = localStorage.getItem("doordashTheme");
+    const storedTheme = localStorage.getItem("GullyFoodsTheme");
     if (storedTheme) {
       setIsDarkMode(storedTheme === "dark");
       document.documentElement.classList.toggle("dark", storedTheme === "dark");
@@ -27,10 +27,10 @@ const Navbar = () => {
 
     if (newIsDarkMode) {
       document.documentElement.classList.add("dark");
-      localStorage.setItem("doordashTheme", "dark");
+      localStorage.setItem("GullyFoodsTheme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
-      localStorage.setItem("doordashTheme", "light");
+      localStorage.setItem("GullyFoodsTheme", "light");
     }
   };
 

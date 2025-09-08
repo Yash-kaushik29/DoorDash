@@ -32,6 +32,8 @@ const OrderSchema = new mongoose.Schema(
       landMark: { type: String },
     },
     amount: { type: Number, required: true },
+    taxes: { type: Number, required: true },
+    convenienceFees: { type: Number, required: true },
     deliveryStatus: { type: String, default: "Processing" },
     deliveryCharge: {type: Number, required: true},
     paymentStatus: { type: String, default: "Unpaid" },

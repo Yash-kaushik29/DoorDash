@@ -9,8 +9,6 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
   const addProductToCart = async () => {
     if (loading) return;
 
-    console.log(user);
-
     if (!user) {
       toast.warning("Please login first");
       return;
@@ -201,7 +199,7 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
       <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
         {product.name || "Product Name"}
       </h3>
-      <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
+      <p className="mt-1 text-sm text-yellow-500 dark:text-yellow-400">
         {product.shopName || "Shop Name"}
       </p>
       <p className="mt-1 text-sm text-green-500 font-semibold">
