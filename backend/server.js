@@ -3,21 +3,22 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const colors = require("colors");
-const cookieParser = require('cookie-parser');
-const authRoutes = require('./routes/authRoutes');
-const shopRoutes = require('./routes/shopRoutes');
-const userProfileRoutes = require('./routes/userProfileRoutes');
-const homeRoutes = require('./routes/homeRoutes');
-const commonRoutes = require('./routes/commonRoutes');
-const cartRoutes = require('./routes/cartRoutes');
-const paymentRoutes = require('./routes/paymentRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-const notificationsRoutes = require('./routes/notificationsRoutes');
-const adminRoutes = require('./routes/adminRoutes')
-const deliveryRoutes = require('./routes/deliveryRoutes');
+const cookieParser = require("cookie-parser");
+const authRoutes = require("./routes/authRoutes");
+const shopRoutes = require("./routes/shopRoutes");
+const userProfileRoutes = require("./routes/userProfileRoutes");
+const homeRoutes = require("./routes/homeRoutes");
+const commonRoutes = require("./routes/commonRoutes");
+const cartRoutes = require("./routes/cartRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
+const orderRoutes = require("./routes/orderRoutes");
+const notificationsRoutes = require("./routes/notificationsRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+const deliveryRoutes = require("./routes/deliveryRoutes");
 const multer = require("multer");
 const axios = require("axios");
-const path = require("path");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("./cloudinary.js");
 
 const app = express();
 dotenv.config();
@@ -45,27 +46,19 @@ mongoose
     console.log(err.red);
   });
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "gullyfoods_uploads", // optional folder name in Cloudinary
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
   },
 });
 
 const upload = multer({ storage });
 
-// ✅ Serve uploads folder as static
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// Upload API
 app.post("/upload", upload.array("photos"), async (req, res) => {
   try {
-    const uploadedFiles = req.files.map((file) => {
-      // Return public URL for each uploaded file
-      return `${req.protocol}://${req.get("host")}/uploads/${file.filename}`;
-    });
+    const uploadedFiles = req.files.map((file) => file.path);
 
     res.status(200).json({ success: true, files: uploadedFiles });
   } catch (error) {
@@ -76,21 +69,22 @@ app.post("/upload", upload.array("photos"), async (req, res) => {
       error,
     });
   }
-});  
+});
 
-app.use('/api/auth', authRoutes);
-app.use('/api/shop', shopRoutes);
-app.use('/api/user-profile', userProfileRoutes);
-app.use('/api/home', homeRoutes);
-app.use('/api/common', commonRoutes);
-app.use('/api/cart', cartRoutes);
-app.use('/api/payment', paymentRoutes);
-app.use('/api/order', orderRoutes);
-app.use('/api/notification', notificationsRoutes);
 
-app.use('/api/admin', adminRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/shop", shopRoutes);
+app.use("/api/user-profile", userProfileRoutes);
+app.use("/api/home", homeRoutes);
+app.use("/api/common", commonRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/payment", paymentRoutes);
+app.use("/api/order", orderRoutes);
+app.use("/api/notification", notificationsRoutes);
 
-app.use('/api/delivery', deliveryRoutes);
+app.use("/api/admin", adminRoutes);
+
+app.use("/api/delivery", deliveryRoutes);
 
 app.get("/api/location/reverse-geocode", async (req, res) => {
   const { lat, lon } = req.query;
@@ -108,7 +102,9 @@ app.get("/api/location/reverse-geocode", async (req, res) => {
     res.json({ success: true, address: data.display_name });
   } catch (err) {
     console.error("Nominatim error:", err.message);
-    res.status(500).json({ success: false, message: "Reverse geocoding failed" });
+    res
+      .status(500)
+      .json({ success: false, message: "Reverse geocoding failed" });
   }
 });
 

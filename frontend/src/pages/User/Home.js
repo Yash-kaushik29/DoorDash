@@ -69,8 +69,11 @@ const Home = () => {
       {/* Mobile Title */}
       <div className="flex flex-col items-center pt-4 lg:hidden">
         <div className="flex items-center gap-2 text-3xl">
-          <span className="font-extrabold text-green-500">GullyFoods</span>
-          <GiNoodles className="font-extrabold text-green-500 -mt-1" />
+          <span className="font-bold text-black dark:text-white">
+            Gully<span className="text-green-500">Foods</span>
+          </span>
+
+          <GiNoodles className="font-bold text-green-500 -mt-1" />
         </div>
         <span className="italic text-gray-600 font-semibold dark:text-white text-lg text-center">
           Your lane, your taste, your GullyFoods ✨
@@ -145,7 +148,7 @@ const Home = () => {
 
       {/* Footer */}
       <footer className="bg-gray-800 text-white py-6 text-center mt-10">
-        <p>&copy; 2025 DoorDash. All rights reserved.</p>
+        <p>&copy; 2025 GullyFoods. All rights reserved.</p>
       </footer>
     </div>
   );

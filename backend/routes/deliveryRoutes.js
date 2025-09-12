@@ -281,6 +281,7 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
 
     if (!order) return res.status(404).json({ message: "Order not found" });
 
+    // 1. Update order status
     order.deliveryStatus = "Delivered";
     order.paymentStatus = "Paid";
     order.items = order.items.map((item) => ({
@@ -288,11 +289,13 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
       status: item.status !== "Cancelled" ? "Delivered" : item.status,
     }));
 
+    // 2. Track seller earnings
     const sellerSalesMap = {};
     for (const item of order.items) {
       if (item.status !== "Cancelled" && item.product.seller) {
         const sellerId = item.product.seller.toString();
-        const amount = item.quantity * parseFloat(item.product.price);
+        const amount = item.quantity * parseFloat(item.product.basePrice);
+
         if (!sellerSalesMap[sellerId]) {
           sellerSalesMap[sellerId] = 0;
         }
@@ -300,18 +303,28 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
       }
     }
 
+    // 3. Update sellers’ sales history
     for (const sellerId in sellerSalesMap) {
+      const seller = await Seller.findById(sellerId);
+
+      if (!seller) continue;
+
+      const totalAmount = sellerSalesMap[sellerId];
+      const commissionRate = seller.commissionRate || 0; // fallback to 0 if not set
+      const sellerEarnings = totalAmount * (1 - commissionRate);
+
       await Seller.findByIdAndUpdate(sellerId, {
         $push: {
           salesHistory: {
             orderId,
-            amount: sellerSalesMap[sellerId],
+            amount: sellerEarnings,
             date: new Date(),
           },
         },
       });
     }
 
+    // 4. Update delivery boy’s commission
     if (order.deliveryBoy && order.deliveryCharge) {
       await DeliveryBoy.findByIdAndUpdate(order.deliveryBoy._id, {
         $push: {
@@ -328,7 +341,7 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
     res.json({
       success: true,
       message:
-        "Order confirmed as delivered, sales updated, and commission added",
+        "Order confirmed as delivered, seller earnings updated, and delivery boy commission added",
     });
   } catch (error) {
     console.error("Error confirming order delivery:", error);

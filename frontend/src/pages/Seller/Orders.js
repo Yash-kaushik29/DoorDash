@@ -101,7 +101,7 @@ const Orders = () => {
                     </span>
                   </h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Items: {order.items.length} | Total: ₹{order.amount}
+                    Items: {order.items.length} 
                   </p>
                   <p className="text-sm text-gray-500">
                     {new Date(order.createdAt).toLocaleString("en-IN", {

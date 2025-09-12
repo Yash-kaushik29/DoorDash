@@ -184,6 +184,20 @@ const Checkout = () => {
     setDeliveryCharge(getDeliveryCharge(distance));
   };
 
+  if(isPlacingOrder) {
+    return (<div className="flex flex-col items-center justify-center h-full py-10">
+      <video
+        src="/logoAnimation.mp4" // put your video file in public/animations/
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="w-32 h-32 object-contain"
+      />
+      <p className="mt-4 text-green-600 font-medium">Placing your order...</p>
+    </div>)
+  }
+
   return (
     <div className="mx-2 pb-16">
       <ToastContainer position="top-right" autoClose={3000} />

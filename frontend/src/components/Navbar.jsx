@@ -43,9 +43,11 @@ const Navbar = () => {
           <Link to="/">
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2">
-                <span className="flex gap-1 items-center font-extrabold text-green-500 text-xl">
-                  GullyFoods <GiNoodles />
+                <span className="font-bold text-black dark:text-white">
+                  Gully<span className="text-green-500">Foods</span>
                 </span>
+
+                <GiNoodles className="font-bold text-green-500 -mt-1" />
               </div>
               <span className="italic text-gray-600 font-semibold dark:text-white">
                 Your lane, your taste, your GullyFoods ✨

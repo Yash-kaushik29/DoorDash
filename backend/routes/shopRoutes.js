@@ -41,7 +41,9 @@ router.post("/add-shop", async (req, res) => {
       const existingSeller = await Seller.findById(seller.sellerID);
 
       if (!existingSeller) {
-        return res.status(404).json({ success: false, message: "Seller not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "Seller not found" });
       }
 
       if (existingSeller.shop) {
@@ -55,10 +57,18 @@ router.post("/add-shop", async (req, res) => {
       existingSeller.shop = newShop._id;
       await existingSeller.save();
 
-      res.status(201).json({ success: true, message: "Shop added successfully", shop: newShop });
+      res
+        .status(201)
+        .json({
+          success: true,
+          message: "Shop added successfully",
+          shop: newShop,
+        });
     } catch (error) {
       console.error("Error adding shop:", error);
-      res.status(500).json({ success: false, message: "Internal server error" });
+      res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
     }
   });
 });
@@ -67,7 +77,9 @@ router.post("/add-product", async (req, res) => {
   const { sellerToken } = req.cookies;
 
   if (!sellerToken) {
-    return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized: No token provided" });
   }
 
   try {
@@ -75,17 +87,23 @@ router.post("/add-product", async (req, res) => {
     const existingSeller = await Seller.findById(decoded.sellerID);
 
     if (!existingSeller) {
-      return res.status(404).json({ success: false, message: "Seller not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     const { product, images } = req.body;
     if (!product.name || !product.price || !product.dietType) {
-      return res.status(400).json({ success: false, message: "Missing required product fields" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required product fields" });
     }
 
     const shop = await Shop.findById(existingSeller.shop);
     if (!shop) {
-      return res.status(404).json({ success: false, message: "Shop not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Shop not found" });
     }
 
     const newProduct = new Product({
@@ -112,6 +130,84 @@ router.post("/add-product", async (req, res) => {
     });
   } catch (error) {
     console.error("Error adding product:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// Only for bulk addition by admin
+router.post("/add-products", async (req, res) => {
+  const authHeader = req.headers["authorization"];
+  let sellerToken = req.cookies?.sellerToken || authHeader;
+
+  if (sellerToken && sellerToken.startsWith("Bearer ")) {
+    sellerToken = sellerToken.slice(7).trim(); // remove "Bearer "
+  }
+
+  if (!sellerToken) {
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized: No token provided" });
+  }
+
+  try {
+    const decoded = jwt.verify(sellerToken, process.env.JWT_SECRET_KEY);
+    const existingSeller = await Seller.findById(decoded.sellerID);
+
+    if (!existingSeller) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
+    }
+
+    const { products } = req.body;
+
+    if (!Array.isArray(products) || products.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No products provided" });
+    }
+
+    const shop = await Shop.findById(existingSeller.shop);
+    if (!shop) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Shop not found" });
+    }
+
+    // Attach shop & seller info
+    const preparedProducts = products.map((p) => {
+      if (p.basePrice > p.price) {
+        throw new Error(
+          `Invalid pricing: Product "${p.name}" has basePrice (${p.basePrice}) greater than price (${p.price})`
+        );
+      }
+
+      return {
+        ...p,
+        shop: shop._id,
+        shopName: shop.name,
+        shopType: shop.category,
+        seller: existingSeller._id,
+      };
+    });
+
+    const newProducts = await Product.insertMany(preparedProducts);
+
+    // Update seller & shop in one go
+    const productIds = newProducts.map((p) => p._id);
+    existingSeller.products.push(...productIds);
+    await existingSeller.save();
+
+    shop.products.push(...productIds);
+    await shop.save();
+
+    res.status(201).json({
+      success: true,
+      message: `${newProducts.length} products added successfully`,
+      shop,
+    });
+  } catch (error) {
+    console.error("Error adding products:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
@@ -168,7 +264,7 @@ router.put("/edit-product", async (req, res) => {
 router.get("/get-products", async (req, res) => {
   try {
     const { sellerToken } = req.cookies;
-    
+
     if (!sellerToken) {
       return res
         .status(401)
@@ -184,7 +280,9 @@ router.get("/get-products", async (req, res) => {
     // Find Seller
     const existingSeller = await Seller.findById(decoded.sellerID).lean();
     if (!existingSeller) {
-      return res.status(404).json({ success: false, message: "Seller not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     // Fetch Products
@@ -201,14 +299,18 @@ router.put("/update-stock", async (req, res) => {
   const { productId } = req.body;
 
   if (!productId) {
-    return res.status(400).json({ success: false, message: "Product ID is required" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Product ID is required" });
   }
 
   try {
     // Check Product Existence
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ success: false, message: "Product not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
     }
 
     // Toggle Stock
@@ -399,6 +501,5 @@ router.get("/get-restaurants", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 module.exports = router;

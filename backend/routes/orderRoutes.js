@@ -153,7 +153,7 @@ router.get("/getOrder/:orderId", async (req, res) => {
         }
 
         const order = await Order.findById(orderId)
-          .populate("items.product", "name price images")
+          .populate("items.product", "name basePrice images")
           .lean(); // ✅ Using lean() for performance
 
         if (!order) {
@@ -169,7 +169,7 @@ router.get("/getOrder/:orderId", async (req, res) => {
           .map((item) => ({
             _id: item.product._id,
             productName: item.product.name,
-            price: item.product.price,
+            price: item.product.basePrice,
             image: item.product.images[0],
             quantity: item.quantity,
             status: item.status,
@@ -270,7 +270,6 @@ router.put("/confirm-order/:orderId", async (req, res) => {
     }
   );
 });
-
 
 router.get("/getAllOrders", async (req, res) => {
   const { sellerToken } = req.cookies;

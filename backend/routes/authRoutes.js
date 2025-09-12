@@ -276,6 +276,8 @@ router.post("/seller-login", async (req, res) => {
           { expiresIn: "15d" }
         );
 
+        console.log(token);
+
         res
           .cookie("sellerToken", token, {
             httpOnly: true,
