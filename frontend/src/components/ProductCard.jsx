@@ -1,6 +1,22 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { FaRegCircleDot } from "react-icons/fa6";
+
+const DietIcon = ({ type }) => {
+  switch (type) {
+    case "Vegetarian":
+      return <FaRegCircleDot color="green" size={16} />;
+    case "Veg":
+      return <FaRegCircleDot color="green" size={16} />;  
+    case "Egg":
+      return <FaRegCircleDot color="yellow" size={16} />;
+    case "Non-Vegetarian":
+      return <FaRegCircleDot color="red" size={16} />;
+    default:
+      return null;
+  }
+};
 
 const ProductCard = ({ product, bestSeller, user, setUser }) => {
   const [loading, setLoading] = useState(false);
@@ -196,9 +212,10 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
         ) : null}
       </div>
 
-      <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-        {product.name || "Product Name"}
+      <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-4">
+        {product.name || "Product Name"} <DietIcon type={product.dietType} />
       </h3>
+
       <p className="mt-1 text-sm text-yellow-500 dark:text-yellow-400">
         {product.shopName || "Shop Name"}
       </p>

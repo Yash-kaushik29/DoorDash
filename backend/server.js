@@ -19,6 +19,7 @@ const multer = require("multer");
 const axios = require("axios");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("./cloudinary.js");
+const cronRoutes = require('./routes/cronRoutes.js');
 
 const app = express();
 dotenv.config();
@@ -49,7 +50,7 @@ mongoose
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: "gullyfoods_uploads", // optional folder name in Cloudinary
+    folder: "gullyfoods_uploads", 
     allowed_formats: ["jpg", "jpeg", "png", "webp"],
   },
 });

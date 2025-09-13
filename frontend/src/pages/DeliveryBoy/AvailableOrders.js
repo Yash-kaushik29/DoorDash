@@ -91,7 +91,7 @@ const AvailableOrders = ({ deliveryBoyId }) => {
                     ...new Set(
                       (order.items || []).map(
                         (item) =>
-                          item.seller?.shopName ||
+                          item.product?.shopName ||
                           item.seller?.username ||
                           "Unknown Shop"
                       )

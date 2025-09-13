@@ -172,7 +172,7 @@ router.get("/get-available-orders", async (req, res) => {
       deliveryBoyAssigned: false,
     })
       .populate("user", "username phone")
-      .populate("items.product", "name")
+      .populate("items.product", "name shopName")
       .populate("items.seller", "username shop");
 
     res.json({
