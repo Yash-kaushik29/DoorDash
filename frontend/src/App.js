@@ -47,6 +47,9 @@ import SellerProfile from "./pages/Seller/SellerProfile";
 import EditProfile from "./pages/Seller/EditProfile";
 import AvailableOrders from "./pages/DeliveryBoy/AvailableOrders";
 import CommissionHistory from "./pages/DeliveryBoy/CommissionHistory";
+import OutstandingAmountDetails from "./pages/DeliveryBoy/OutstandingAmountDetails";
+import OutstandingAmountList from "./pages/Admin/OutstandingAmountList";
+import DeliveryBoyDetails from "./pages/Admin/DeliveryBoyDetails";
 
 const App = () => {
   return (
@@ -102,6 +105,8 @@ const App = () => {
         <Route path="/admin/getSellers" element={<SellerList />} />
         <Route path="/admin/adminProducts" element={<AdminProducts />} />
         <Route path="/admin/userDetails" element={<UserDetails />} />
+        <Route path="/admin/outstandingAmounts" element={<OutstandingAmountList />} />
+        <Route path="/admin/deliveryBoyDetails/:deliveryBoyId" element={<DeliveryBoyDetails />} />
       </Routes>
 
       <Routes>
@@ -115,6 +120,7 @@ const App = () => {
         />
         <Route path="/delivery/order/:orderId" element={<DeliveryBoyOrder />} />
         <Route path="/delivery/commissionHistory" element={<CommissionHistory />} />
+        <Route path="/delivery/outstandingAmountDetails" element={<OutstandingAmountDetails />} />
       </Routes>
     </>
   );

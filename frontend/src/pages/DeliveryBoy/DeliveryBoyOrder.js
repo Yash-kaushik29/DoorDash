@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { FaMoneyBillWave, FaPhoneAlt, FaMapMarkerAlt, FaUser } from "react-icons/fa";
+import { IoFastFoodSharp } from "react-icons/io5";
+import { MdDeliveryDining } from "react-icons/md";
 import DeliveryBoyHeader from "../../components/DeliveryBoyHeader";
 
 const DeliveryBoyOrder = () => {
@@ -75,78 +78,92 @@ const DeliveryBoyOrder = () => {
         </h1>
 
         {/* Order Details Section */}
-        <div className="bg-white dark:bg-gray-700 shadow-md rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-            Order Information
+
+        <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2">
+            <IoFastFoodSharp className="text-green-500" /> Order Info
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-gray-700 dark:text-gray-200">
-                <span className="font-semibold">Order ID:</span>{" "}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left Section */}
+            <div className="space-y-3">
+              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
+                <MdDeliveryDining className="text-blue-500" />
+                <span className="font-semibold">Order ID:</span>
                 <span className="text-blue-600 dark:text-blue-400">
                   #{order.id}
                 </span>
               </p>
 
-              <p className="text-gray-700 dark:text-gray-200 mt-2">
-                <span className="font-semibold">Payment Status:</span>{" "}
+              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
+                <FaMoneyBillWave className="text-green-500" />
+                <span className="font-semibold">Amount:</span>
+                <span className="font-bold text-green-600 dark:text-green-400">
+                  ₹
+                  {order?.totalAmount}
+                </span>
+              </p>
+
+              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
+                <span className="font-semibold">Payment:</span>
                 <span
-                  className={`font-bold ${
-                    order?.paymentStatus === "Unpaid"
-                      ? "text-red-500"
-                      : "text-green-600 dark:text-green-400"
+                  className={`px-2 py-1 rounded-full text-xs font-bold ${
+                    order?.paymentStatus === "Paid"
+                      ? "bg-green-100 text-green-700 dark:bg-green-700 dark:text-white"
+                      : "bg-red-100 text-red-700 dark:bg-red-700 dark:text-white"
                   }`}
                 >
                   {order?.paymentStatus}
                 </span>
               </p>
 
-              <p className="text-gray-700 dark:text-gray-200 mt-2">
-                <span className="font-semibold">Delivery Status:</span>{" "}
+              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
+                <span className="font-semibold">Status:</span>
                 <span
-                  className={`font-bold ${
+                  className={`px-2 py-1 rounded-full text-xs font-bold ${
                     order?.deliveryStatus === "Delivered"
-                      ? "text-green-600 dark:text-green-400"
+                      ? "bg-green-100 text-green-700 dark:bg-green-700 dark:text-white"
                       : order?.deliveryStatus === "Out For Delivery"
-                      ? "text-yellow-600 dark:text-yellow-400"
+                      ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-600 dark:text-white"
                       : order?.deliveryStatus === "Processing"
-                      ? "text-blue-600 dark:text-blue-400"
+                      ? "bg-blue-100 text-blue-700 dark:bg-blue-600 dark:text-white"
                       : order?.deliveryStatus === "Cancelled"
-                      ? "text-red-600 dark:text-red-400"
-                      : "text-gray-600 dark:text-gray-400"
+                      ? "bg-red-100 text-red-700 dark:bg-red-700 dark:text-white"
+                      : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
                   }`}
                 >
                   {order?.deliveryStatus}
                 </span>
               </p>
-
-              <p className="text-gray-700 dark:text-gray-200 mt-2">
-                <span className="font-semibold">Amount:</span>{" "}
-                <span className="font-semibold text-green-600">
-                  ₹
-                  {order?.amount +
-                    order?.taxes +
-                    order?.convenienceFees +
-                    order?.deliveryCharge}
-                </span>
-              </p>
             </div>
 
-            <div>
-              <p className="text-gray-700 dark:text-gray-200">
-                <span className="font-semibold">Customer Name:</span>{" "}
+            {/* Right Section */}
+            <div className="space-y-3">
+              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
+                <FaUser className="text-purple-500" />
+                <span className="font-semibold">Customer:</span>{" "}
                 {order?.shippingAddress?.fullName}
               </p>
-              <p className="text-gray-700 dark:text-gray-200 mt-2">
+
+              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
+                <FaPhoneAlt className="text-indigo-500" />
                 <span className="font-semibold">Phone:</span>{" "}
-                {order?.shippingAddress?.phone}
+                <a
+                  href={`tel:${order?.shippingAddress?.phone}`}
+                  className="text-blue-500 hover:underline"
+                >
+                  {order?.shippingAddress?.phone}
+                </a>
               </p>
-              <p className="text-gray-700 dark:text-gray-200 mt-2">
+
+              <p className="flex items-start gap-2 text-gray-700 dark:text-gray-200">
+                <FaMapMarkerAlt className="text-red-500 mt-1" />
                 <span className="font-semibold">Address:</span>{" "}
-                {order?.shippingAddress?.addressLine},{" "}
-                {order?.shippingAddress?.area},{" "}
-                {order?.shippingAddress?.landMark}
+                <span>
+                  {order?.shippingAddress?.addressLine},{" "}
+                  {order?.shippingAddress?.area},{" "}
+                  {order?.shippingAddress?.landMark}
+                </span>
               </p>
 
               {order?.shippingAddress?.lat && order?.shippingAddress?.long && (
@@ -154,9 +171,9 @@ const DeliveryBoyOrder = () => {
                   href={`https://www.google.com/maps?q=${order.shippingAddress.lat},${order.shippingAddress.long}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block mt-4 px-4 py-2 bg-green-600 text-white rounded-md shadow hover:bg-green-700 transition"
+                  className="inline-flex items-center justify-center mt-3 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition w-full sm:w-auto"
                 >
-                  📍 View on Google Maps
+                  <FaMapMarkerAlt className="mr-2" /> Open in Google Maps
                 </a>
               )}
             </div>

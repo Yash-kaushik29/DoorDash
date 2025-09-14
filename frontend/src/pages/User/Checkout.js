@@ -93,6 +93,7 @@ const Checkout = () => {
             taxes,
             convenienceFees,
             address: selectedAddress,
+            paymentMethod: "COD",
             paymentStatus: "Unpaid",
             deliveryCharge,
           },
@@ -149,6 +150,7 @@ const Checkout = () => {
                 taxes,
                 convenienceFees,
                 address,
+                paymentMethod: "Online",
                 paymentStatus: "Paid",
                 deliveryCharge,
               },
@@ -184,18 +186,22 @@ const Checkout = () => {
     setDeliveryCharge(getDeliveryCharge(distance));
   };
 
-  if(isPlacingOrder) {
-    return (<div className="flex flex-col items-center justify-center h-full py-10">
+  if (isPlacingOrder) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-stone-100">
       <video
         src="/logoAnimation.mp4" // put your video file in public/animations/
         autoPlay
         loop
         muted
         playsInline
-        className="w-32 h-32 object-contain"
+        className="w-64 h-64 object-contain" // increase size
       />
-      <p className="mt-4 text-green-600 font-medium">Placing your order...</p>
-    </div>)
+      <p className="mt-6 text-green-600 font-semibold text-lg">
+        Placing your order...
+      </p>
+    </div>
+    );
   }
 
   return (
@@ -261,9 +267,7 @@ const Checkout = () => {
           {convenienceFees > 0 && (
             <p className="font-semibold">
               Multiple Store convenience Fee:{" "}
-              <span className="text-green-500 ml-2">
-                ₹{convenienceFees}
-              </span>
+              <span className="text-green-500 ml-2">₹{convenienceFees}</span>
             </p>
           )}
           <div className="h-[1px] bg-black dark:bg-white my-2"></div>

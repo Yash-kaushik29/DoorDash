@@ -42,12 +42,12 @@ const Navbar = () => {
           {/* Brand Logo */}
           <Link to="/">
             <div className="flex flex-col items-center">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-xl">
                 <span className="font-bold text-black dark:text-white">
                   Gully<span className="text-green-500">Foods</span>
                 </span>
 
-                <GiNoodles className="font-bold text-green-500 -mt-1" />
+                <GiNoodles className="font-bold text-green-500 " />
               </div>
               <span className="italic text-gray-600 font-semibold dark:text-white">
                 Your lane, your taste, your GullyFoods ✨
@@ -63,9 +63,14 @@ const Navbar = () => {
               </button>
             </Link>
             <Link to="/cart">
-              <button className="p-2 hover:text-green-500 transition">
+              <div className="relative">
                 <IoIosCart size={22} />
-              </button>
+                {user && user.cart?.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                    {user.cart.length}
+                  </span>
+                )}
+              </div>
             </Link>
 
             <button onClick={toggleTheme} className="p-2 transition">
@@ -115,7 +120,14 @@ const Navbar = () => {
           to="/cart"
           className="p-2 flex flex-col items-center text-gray-600 dark:text-white hover:text-green-500 transition"
         >
-          <IoIosCart size={22} />
+          <div className="relative">
+            <IoIosCart size={22} />
+            {user && user.cart?.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                {user.cart.length}
+              </span>
+            )}
+          </div>
           <span className="text-xs">Cart</span>
         </Link>
 

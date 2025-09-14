@@ -149,6 +149,25 @@ const AdminDashboard = () => {
               <p>Loading...</p>
             )}
           </div>
+
+          {/*Outstanding amount card */}
+          <Link to='/admin/outstandingAmounts'>
+          <div className="bg-gradient-to-br from-gray-400 to-gray-600 text-white p-6 rounded-lg shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-semibold">Outstanding Amount</h2>
+              <DollarSign className="w-10 h-10 opacity-80" />
+            </div>
+            {overview ? (
+              <div className="mt-4 space-y-2">
+                <p>
+                  Amount:{" "}
+                  <span className="font-bold">₹{overview.outstandingAmount}</span>
+                </p>
+              </div>
+            ) : (
+              <p>Loading...</p>
+            )}
+          </div></Link>
         </div>
 
         {/* Details Section */}

@@ -7,11 +7,19 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 
 router.post("/create-order", async (req, res) => {
-  const { userId, cartItems, taxes, convenienceFees, address, paymentStatus, deliveryCharge } =
-    req.body;
+  const {
+    userId,
+    cartItems,
+    paymentMethod,
+    taxes,
+    convenienceFees,
+    address,
+    paymentStatus,
+    deliveryCharge,
+  } = req.body;
 
   try {
-    let totalAmount = 0;
+    let subTotal = 0;
     let sellersNotified = [];
 
     // Create order items
@@ -27,7 +35,7 @@ router.post("/create-order", async (req, res) => {
           sellersNotified.push(sellerId);
         }
 
-        totalAmount += product.price * item.quantity;
+        subTotal += product.price * item.quantity;
 
         return {
           product: item.product,
@@ -37,12 +45,15 @@ router.post("/create-order", async (req, res) => {
       })
     );
 
+    const totalAmount = subTotal + deliveryCharge + taxes + convenienceFees;
 
     const newOrder = new Order({
       user: userId,
       items: orderItems,
       shippingAddress: address,
-      amount: totalAmount,
+      paymentMethod,
+      totalAmount,
+      amount: subTotal,
       taxes,
       convenienceFees,
       deliveryStatus: "Processing",
@@ -60,12 +71,7 @@ router.post("/create-order", async (req, res) => {
           message: `Your order with order ID: #${newOrder.id} is processed.`,
           url: `/order/${newOrder._id}`,
         },
-      },
-    });
-
-    await User.findByIdAndUpdate(userId, {
-      $push: {
-        orders: newOrder,
+        orders: newOrder._id,
       },
     });
 
@@ -119,6 +125,52 @@ router.get("/getOrderDetails/:id", async (req, res) => {
   } catch (error) {
     console.error("Error fetching order details:", error);
     res.status(500).json({ success: false, message: "Failed to fetch order!" });
+  }
+});
+
+router.post("/submit-review", async (req, res) => {
+  try {
+    const { orderId, ratings, reviewText } = req.body;
+    console.log(ratings);
+
+    if (!orderId || !ratings) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Order ID and ratings are required.",
+        });
+    }
+
+    // Find the order
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found." });
+    }
+
+    // Check if already reviewed
+    if (order.hasReviewed) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Order already reviewed." });
+    }
+
+    order.appRatings = ratings.appRatings;
+    order.deliveryRatings = ratings.deliveryRatings;
+    order.overallRatings = ratings.overallRatings;
+    order.review = reviewText;
+    order.hasReviewed = true;
+
+    await order.save();
+
+    res
+      .status(200)
+      .json({ success: true, message: "Review submitted successfully!" });
+  } catch (error) {
+    console.error("Error submitting review:", error);
+    res.status(500).json({ message: "Server error." });
   }
 });
 

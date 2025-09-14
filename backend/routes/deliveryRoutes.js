@@ -87,17 +87,11 @@ router.get("/orders/:deliveryBoyId", async (req, res) => {
     // Default response if no orders
     if (!orders.length) {
       return res.json({
-        assignedOrders: 0,
-        deliveredOrders: 0,
         pendingOrders: 0,
         commission: 0, // nothing earned
       });
     }
 
-    const assignedOrders = orders.length;
-    const deliveredOrders = orders.filter(
-      (order) => order.deliveryStatus === "Delivered"
-    ).length;
     const pendingOrders = orders.filter(
       (order) => !["Delivered", "Cancelled"].includes(order.deliveryStatus)
     ).length;
@@ -119,13 +113,35 @@ router.get("/orders/:deliveryBoyId", async (req, res) => {
     );
 
     res.json({
-      assignedOrders,
-      deliveredOrders,
+      outstandingAmount: deliveryBoy.outstandingAmount,
       pendingOrders,
       commission: todayCommission,
     });
   } catch (error) {
     console.error("Error fetching delivery boy orders:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/outstandingAmounts/:deliveryBoyId", async (req, res) => {
+  try {
+    const { deliveryBoyId } = req.params;
+
+    const deliveryBoy = await DeliveryBoy.findById(deliveryBoyId).populate({
+      path: "outstandingPayments.orderId",
+      select: "id", 
+    });
+
+    if (!deliveryBoy) {
+      return res.status(404).json({ message: "Delivery boy not found" });
+    }
+
+    res.json({
+      success: true,
+      outstandingPayments: deliveryBoy.outstandingPayments,
+    });
+  } catch (error) {
+    console.error("Error fetching outstanding amounts:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
@@ -220,7 +236,7 @@ router.get("/order/:orderId", async (req, res) => {
     const { orderId } = req.params;
     const order = await Order.findById(orderId)
       .select(
-        "items user deliveryStatus createdAt shippingAddress id amount taxes convenienceFees deliveryCharge paymentStatus"
+        "items user deliveryStatus createdAt shippingAddress id totalAmount paymentStatus"
       )
       .populate("items.product", "name shopName")
       .populate("user", "name email")
@@ -326,14 +342,26 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
 
     // 4. Update delivery boy’s commission
     if (order.deliveryBoy && order.deliveryCharge) {
-      await DeliveryBoy.findByIdAndUpdate(order.deliveryBoy._id, {
-        $push: {
-          commissionHistory: {
-            commission: order.deliveryCharge + order.convenienceFees,
-            time: new Date(),
-          },
-        },
+      const deliveryBoy = await DeliveryBoy.findById(order.deliveryBoy._id);
+
+      if (!deliveryBoy) return res.status(404).json({ message: "Delivery boy not found" });
+
+      
+      deliveryBoy.commissionHistory.push({
+        commission: (order.deliveryCharge || 0) + (order.convenienceFees || 0),
       });
+
+      if (order.paymentMethod === "COD") {
+        const totalCOD = order.amount + order.deliveryCharge + order.convenienceFees + order.taxes; 
+        deliveryBoy.outstandingPayments.push({
+          orderId,
+          amount: totalCOD,
+          collectedAt: new Date(),
+        });
+        deliveryBoy.outstandingAmount += totalCOD;
+      }
+
+      await deliveryBoy.save();
     }
 
     await order.save();

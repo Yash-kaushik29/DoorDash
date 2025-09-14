@@ -4,19 +4,19 @@ import { FaSun, FaMoon } from "react-icons/fa";
 import { MdDeliveryDining } from "react-icons/md";
 import { RiAccountCircleLine } from "react-icons/ri";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
+import { GiNoodles } from "react-icons/gi";
 
 const SellerHeader = ({ sellerId }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const storedTheme = localStorage.getItem('doordashTheme');
+    const storedTheme = localStorage.getItem("doordashTheme");
     if (storedTheme) {
-      setIsDarkMode(storedTheme === 'dark');
-      document.documentElement.classList.toggle('dark', storedTheme === 'dark');
+      setIsDarkMode(storedTheme === "dark");
+      document.documentElement.classList.toggle("dark", storedTheme === "dark");
     }
   }, []);
-  
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -26,11 +26,11 @@ const SellerHeader = ({ sellerId }) => {
     const newIsDarkMode = !isDarkMode;
     setIsDarkMode(newIsDarkMode);
     if (newIsDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('doordashTheme', 'dark');
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("doordashTheme", "dark");
     } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('doordashTheme', 'light');
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("doordashTheme", "light");
     }
   };
 
@@ -39,14 +39,15 @@ const SellerHeader = ({ sellerId }) => {
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
         <div className="flex flex-col items-center">
-          <div className="flex items-center gap-2">
-            <span className="font-extrabold text-green-500 text-xl">
-              DoorDash
+          <div className="flex items-center gap-2 text-xl">
+            <span className="font-bold text-black dark:text-white">
+              Gully<span className="text-green-500">Foods</span>
             </span>
-            <MdDeliveryDining className="font-extrabold text-green-500 text-xl" />
+
+            <GiNoodles className="font-bold text-green-500 " />
           </div>
           <span className="italic text-gray-600 font-semibold dark:text-white">
-            Delivery at your Doorstep
+            Your lane, your taste, your GullyFoods ✨
           </span>
         </div>
 
@@ -54,24 +55,16 @@ const SellerHeader = ({ sellerId }) => {
         <div className="hidden md:flex space-x-14 text-gray-700 dark:text-white">
           <ul className="flex space-x-8 ">
             <Link to="/seller">
-              <li className="cursor-pointer font-semibold">
-                DashBoard
-              </li>
+              <li className="cursor-pointer font-semibold">DashBoard</li>
             </Link>
             <Link to="/seller/my-products">
-              <li className="cursor-pointer font-semibold ">
-                Products
-              </li>
+              <li className="cursor-pointer font-semibold ">Products</li>
             </Link>
             <Link to="/seller/my-orders">
-              <li className="cursor-pointer font-semibold ">
-                Orders
-              </li>
+              <li className="cursor-pointer font-semibold ">Orders</li>
             </Link>
             <Link to="/seller/notifications">
-              <li className="cursor-pointer font-semibold ">
-                Notifications
-              </li>
+              <li className="cursor-pointer font-semibold ">Notifications</li>
             </Link>
           </ul>
         </div>
@@ -101,7 +94,7 @@ const SellerHeader = ({ sellerId }) => {
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex gap-3 items-center">
-        {sellerId !== null ? (
+          {sellerId !== null ? (
             <Link to="/seller/profile">
               <RiAccountCircleLine className="cursor-pointer text-gray-700 dark:text-white text-3xl" />
             </Link>
@@ -124,32 +117,28 @@ const SellerHeader = ({ sellerId }) => {
         <div className="md:hidden bg-white dark:bg-gray-900 mt-2 rounded-lg">
           <ul className="flex flex-col items-center space-y-4 py-4">
             <Link to="/seller" onClick={toggleMobileMenu}>
-              <li className="cursor-pointer font-semibold ">
-                DashBoard
-              </li>
+              <li className="cursor-pointer font-semibold ">DashBoard</li>
             </Link>
             <Link to="/seller/my-products" onClick={toggleMobileMenu}>
-              <li className="cursor-pointer font-semibold ">
-                Products
-              </li>
+              <li className="cursor-pointer font-semibold ">Products</li>
             </Link>
             <Link to="/seller/my-orders" onClick={toggleMobileMenu}>
-              <li className="cursor-pointer font-semibold ">
-                Orders
-              </li>
+              <li className="cursor-pointer font-semibold ">Orders</li>
             </Link>
             <Link to="/seller/notifications" onClick={toggleMobileMenu}>
-              <li className="cursor-pointer font-semibold ">
-                Notifications
-              </li>
+              <li className="cursor-pointer font-semibold ">Notifications</li>
             </Link>
-            <button onClick={toggleTheme} className="p-2 transition flex gap-2 items-center font-semibold">
-            {isDarkMode ? (
-              <FaSun className="hover:text-yellow-400 " size={20} />
-            ) : (
-              <FaMoon className="hover:text-gray-500" size={20} />
-            )} Toggle Theme
-          </button>
+            <button
+              onClick={toggleTheme}
+              className="p-2 transition flex gap-2 items-center font-semibold"
+            >
+              {isDarkMode ? (
+                <FaSun className="hover:text-yellow-400 " size={20} />
+              ) : (
+                <FaMoon className="hover:text-gray-500" size={20} />
+              )}{" "}
+              Toggle Theme
+            </button>
           </ul>
         </div>
       )}

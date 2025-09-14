@@ -41,7 +41,7 @@ export default function Signup() {
       if (response.data.success) {
         toast.success("Signup Successful! 🎉");
         setTimeout(() => {
-          navigate("/login");
+          navigate("/");
         }, 2000);
       } else {
         toast.error(response.data.message + " ❌");

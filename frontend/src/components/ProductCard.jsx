@@ -8,7 +8,7 @@ const DietIcon = ({ type }) => {
     case "Vegetarian":
       return <FaRegCircleDot color="green" size={16} />;
     case "Veg":
-      return <FaRegCircleDot color="green" size={16} />;  
+      return <FaRegCircleDot color="green" size={16} />;
     case "Egg":
       return <FaRegCircleDot color="yellow" size={16} />;
     case "Non-Vegetarian":
@@ -189,7 +189,14 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
                   >
                     −
                   </button>
-                  <span className="text-sm font-semibold">{item.quantity}</span>
+                  {loading ? (
+                    <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                  ) : (
+                    <span className="text-sm font-semibold">
+                      {item.quantity}
+                    </span>
+                  )}
+
                   <button
                     className="text-white font-bold"
                     onClick={() => handleIncrement(product._id)}

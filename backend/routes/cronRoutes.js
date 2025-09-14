@@ -1,6 +1,9 @@
 const express = require("express");
 const cron = require("node-cron");
 const DeliveryBoy = require("../models/DeliveryBoy");
+const Order = require("../models/Order");
+const Seller = require("../models/Seller");
+const User = require("../models/User");
 
 cron.schedule("0 1 * * *", async () => {
   try {
@@ -20,13 +23,11 @@ cron.schedule("0 1 * * *", async () => {
   }
 });
 
-cron.schedule("0 1 * * *", async () => {
+cron.schedule("0 2 * * *", async () => {
   try {
-    // 3 months ago
     const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 3);
+    cutoffDate.setMonth(cutoffDate.getMonth() - 3);
 
-    // Fetch old orders
     const oldOrders = await Order.find({ createdAt: { $lt: cutoffDate } });
 
     if (!oldOrders.length) {
@@ -59,7 +60,7 @@ cron.schedule("0 1 * * *", async () => {
   }
 });
 
-cron.schedule("0 1 * * *", async () => {
+cron.schedule("0 3 * * *", async () => {
   try {
     const now = new Date();
 
@@ -87,3 +88,20 @@ cron.schedule("0 1 * * *", async () => {
     console.error("❌ Error running seller cleanup:", error);
   }
 });
+
+cron.schedule("0 4 * * *", async() => {
+    try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 7); // 7 days back
+
+    // Remove notifications older than 7 days
+    const result = await User.updateMany(
+      {},
+      { $pull: { notifications: { createdAt: { $lt: cutoffDate } } } }
+    );
+
+    console.log(`✅ Removed old notifications from ${result.modifiedCount} users.`);
+  } catch (error) {
+    console.error("❌ Error removing old notifications:", error);
+  }
+})

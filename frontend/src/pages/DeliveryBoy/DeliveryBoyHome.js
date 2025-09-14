@@ -8,9 +8,7 @@ import notificationSound from "../../sound/notificationSound.mp3";
 import { ToastContainer, toast } from "react-toastify";
 
 const DeliveryBoyHome = () => {
-  const [orderStats, setOrderStats] = useState({
-    assignedOrders: 0,
-    deliveredOrders: 0,
+  const [deliveryBoyStats, setDeliveryBoyStats] = useState({
     pendingOrders: 0,
     commission: 0,
   });
@@ -70,7 +68,7 @@ const DeliveryBoyHome = () => {
               `You have ${response.data.pendingOrders} new deliveries.`
             );
           }
-          setOrderStats(response.data);
+          setDeliveryBoyStats(response.data);
         } catch (error) {
           console.error("Error fetching order stats:", error);
         }
@@ -98,42 +96,15 @@ const DeliveryBoyHome = () => {
         </Link>
       </div>
       <div className="min-h-screen bg-gray-100 p-4 dark:bg-gray-800">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-          <Link to="/delivery/orders/all">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg rounded-2xl p-4 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-bold">Assigned Orders</h2>
-                  <p className="text-3xl font-semibold">
-                    {orderStats.assignedOrders}
-                  </p>
-                </div>
-                <Truck className="w-12 h-12 text-white opacity-80" />
-              </div>
-            </div>
-          </Link>
-
-          <Link to="/delivery/orders/delivered">
-            <div className="bg-gradient-to-br from-green-500 to-green-700 shadow-lg rounded-2xl p-4 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-bold">Delivered Orders</h2>
-                  <p className="text-3xl font-semibold">
-                    {orderStats.deliveredOrders}
-                  </p>
-                </div>
-                <CheckCircle className="w-12 h-12 text-white opacity-80" />
-              </div>
-            </div>
-          </Link>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Pending Deliveries */}
           <Link to="/delivery/orders/pending">
             <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg rounded-2xl p-4 text-white">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-bold">Pending Deliveries</h2>
                   <p className="text-3xl font-semibold">
-                    {orderStats.pendingOrders}
+                    {deliveryBoyStats.pendingOrders}
                   </p>
                 </div>
                 <Clock className="w-12 h-12 text-white opacity-80" />
@@ -141,12 +112,13 @@ const DeliveryBoyHome = () => {
             </div>
           </Link>
 
+          {/* Commission Earned */}
           <div className="bg-gradient-to-br from-purple-600 to-purple-800 shadow-lg rounded-2xl p-4 text-white">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold">Commission Earned</h2>
                 <p className="text-3xl font-semibold">
-                  ₹{orderStats.commission}
+                  ₹{deliveryBoyStats.commission}
                 </p>
               </div>
               <DollarSign className="w-12 h-12 text-white opacity-80" />
@@ -154,12 +126,35 @@ const DeliveryBoyHome = () => {
 
             {/* Small link */}
             <div className="mt-2 text-right">
-              <a
-                href="/delivery/commissionHistory"
+              <Link
+                to="/delivery/commissionHistory"
                 className="text-sm text-purple-200 underline hover:text-white transition"
               >
                 View History →
-              </a>
+              </Link>
+            </div>
+          </div>
+
+          {/* Outstanding Amount */}
+          <div className="bg-gradient-to-br from-red-500 to-red-700 shadow-lg rounded-2xl p-4 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold">Outstanding Amount</h2>
+                <p className="text-3xl font-semibold">
+                  ₹{deliveryBoyStats?.outstandingAmount || 0}
+                </p>
+              </div>
+              <DollarSign className="w-12 h-12 text-white opacity-80" />
+            </div>
+
+            {/* Small link */}
+            <div className="mt-2 text-right">
+              <Link
+                to="/delivery/outstandingAmountDetails"
+                className="text-sm text-red-200 underline hover:text-white transition"
+              >
+                View Details →
+              </Link>
             </div>
           </div>
         </div>
