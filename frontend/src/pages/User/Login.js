@@ -1,5 +1,4 @@
-import { useContext, useState } from "react";
-import { motion } from "framer-motion";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,32 +6,73 @@ import { UserContext } from "../../context/userContext";
 
 export default function Login() {
   const { user, setUser } = useContext(UserContext);
-  const [formData, setFormData] = useState({
-    phone: "",
-    otp: "",
-  });
+  const [formData, setFormData] = useState({ phone: "", otp: "" });
   const [otpSent, setOtpSent] = useState(false);
+  const [canResend, setCanResend] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const OTP_COOLDOWN = 120; // 2 minutes
   const navigate = useNavigate();
 
-  if (user) {
-    navigate("/");
+  useEffect(() => {
+  // Initialize timer from localStorage
+  const storedExpire = localStorage.getItem("otpExpireTime");
+  if (storedExpire) {
+    const remaining = Math.floor((storedExpire - Date.now()) / 1000);
+    if (remaining > 0) {
+      setOtpSent(true);
+      setTimeLeft(remaining);
+      setCanResend(false);
+    } else {
+      localStorage.removeItem("otpExpireTime");
+    }
   }
+}, []);
+
+useEffect(() => {
+  if (timeLeft <= 0) {
+    setCanResend(true);
+    return;
+  }
+
+  const timer = setInterval(() => {
+    setTimeLeft(prev => {
+      if (prev <= 1) {
+        clearInterval(timer);
+        localStorage.removeItem("otpExpireTime");
+        setCanResend(true);
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, [timeLeft]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const sendOtp = async () => {
     if (!formData.phone) return toast.warn("Enter your phone number first");
+
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/send-login-otp`, {
-        phone: formData.phone,
-      });
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/send-login-otp`,
+        { phone: formData.phone }
+      );
 
       if (res.data.success) {
         toast.success("OTP sent successfully");
         setOtpSent(true);
+        setCanResend(false);
+        setTimeLeft(OTP_COOLDOWN);
+
+        // Store OTP expiration timestamp
+        const otpExpireTime = Date.now() + OTP_COOLDOWN * 1000;
+        localStorage.setItem("otpExpireTime", otpExpireTime);
       } else {
         toast.error(res.data.message);
       }
@@ -43,11 +83,14 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.phone || !formData.otp) return toast.warn("Fill all fields");
+
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/user-login`, {
-        phone: formData.phone,
-        otp: formData.otp,
-      }, { withCredentials: true });
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/user-login`,
+        { phone: formData.phone, otp: formData.otp },
+        { withCredentials: true }
+      );
 
       if (res.data.success) {
         toast.success("Login Successful! 🎉");
@@ -64,79 +107,88 @@ export default function Login() {
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="flex flex-col min-h-screen p-4 bg-green-200">
-        <h1 className="text-center text-4xl font-semibold text-green-600 mb-5">
-          Login to App
+      <div className="flex flex-col min-h-screen p-4 bg-gradient-to-b from-green-200 via-green-100 to-green-50">
+        <h1 className="text-center text-4xl font-extrabold text-green-600 mb-6">
+          Gully<span className="text-emerald-700">Foods</span>
         </h1>
+
         <div className="flex justify-center items-center">
-          <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="w-full max-w-md bg-white p-6 shadow-xl rounded-2xl"
-          >
-            <h2 className="text-2xl text-center text-green-600 font-bold mb-4">
+          <div className="w-full max-w-md bg-white p-6 shadow-2xl rounded-3xl border-t-4 border-green-500">
+            <h2 className="text-2xl text-center text-green-700 font-bold mb-6">
               Login with OTP
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-green-600 mb-1">Phone</label>
+                <label className="block text-green-700 mb-1 font-medium">Phone</label>
                 <input
                   type="text"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
                   required
-                  className="w-full border border-green-300 p-2 rounded focus:outline-none dark:text-gray-800"
+                  className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+                  placeholder="Enter your mobile number"
                 />
               </div>
 
               {otpSent && (
                 <div>
-                  <label className="block text-green-600 mb-1">OTP</label>
+                  <label className="block text-green-700 mb-1 font-medium">OTP</label>
                   <input
                     type="text"
                     name="otp"
                     value={formData.otp}
                     onChange={handleChange}
                     required
-                    className="w-full border border-green-300 p-2 rounded focus:outline-none dark:text-gray-800"
+                    className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+                    placeholder="Enter OTP"
                   />
                 </div>
               )}
 
               {!otpSent ? (
-                <motion.button
+                <button
                   type="button"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                   onClick={sendOtp}
-                  className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-800"
+                  className="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition"
                 >
                   Send OTP
-                </motion.button>
+                </button>
               ) : (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  type="submit"
-                  className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-800"
-                >
-                  Login
-                </motion.button>
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="submit"
+                    className="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition"
+                  >
+                    Login
+                  </button>
+
+                  <div className="text-center text-sm text-gray-600">
+                    {timeLeft > 0 ? (
+                      <span>Resend OTP in {timeLeft}s ⏱️</span>
+                    ) : (
+                      <button
+                        onClick={sendOtp}
+                        className="text-green-700 font-semibold underline"
+                      >
+                        Resend OTP
+                      </button>
+                    )}
+                  </div>
+                </div>
               )}
             </form>
 
             <div className="text-center mt-4 text-gray-800">
               Don’t have an account?
               <Link to="/signup">
-                <span className="text-green-600 font-semibold hover:underline ml-1">
+                <span className="text-green-700 font-semibold hover:underline ml-1">
                   Sign Up
                 </span>
               </Link>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </>

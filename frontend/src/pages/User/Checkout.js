@@ -23,6 +23,8 @@ const Checkout = () => {
 
   const convenienceFees = (sellers.length - 1) * 15;
 
+  if (cartItems.length === 0) navigate("/cart");
+
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (value) => (value * Math.PI) / 180;
     const R = 6371;
@@ -205,123 +207,110 @@ const Checkout = () => {
   }
 
   return (
-    <div className="mx-2 pb-16">
-      <ToastContainer position="top-right" autoClose={3000} />
-      <Navbar />
-      <div className="max-w-lg mx-auto mt-8 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-semibold mb-4">Choose Delivery Address</h2>
+    <div className="mx-2 pb-20 bg-stone-50 dark:bg-gray-900 min-h-screen">
+  <ToastContainer position="top-right" autoClose={3000} />
+  <Navbar />
 
-        {userAddresses.length === 0 ? (
-          <div className="text-center text-sm text-gray-500">
-            <p>No saved addresses found.</p>
-            <button
-              onClick={() => navigate(`/user/addresses/${user._id}`)}
-              className="mt-2 text-green-500 underline"
-            >
-              ➕ Add a new address
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4 mb-6">
-            {userAddresses.map((addr, index) => (
-              <div
-                key={index}
-                onClick={() => handleSelectAddress(addr)}
-                className={`border rounded-lg p-3 cursor-pointer transition-all duration-200
-      ${
-        selectedAddress?._id === addr._id
-          ? "border-green-500 bg-green-100 dark:bg-green-900"
-          : "border-gray-300 dark:border-gray-600 hover:border-green-400"
-      }
-    `}
-              >
-                <p className="font-semibold text-gray-900 dark:text-white">
-                  {addr.fullName}
-                </p>
-                <p className="text-sm text-gray-700 dark:text-gray-300">
-                  {addr.phone}
-                </p>
-                <p className="text-sm text-gray-800 dark:text-gray-400">
-                  {addr.addressLine}, {addr.area}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+  <div className="max-w-lg mx-auto mt-8 p-6 rounded-2xl shadow-xl bg-white dark:bg-gray-800">
+    <h2 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-white">
+      Choose Delivery Address 🏠
+    </h2>
 
-        <div className="my-6 text-right">
-          <p className="font-semibold">
-            Cart Total:{" "}
-            <span className="text-green-500 ml-2">₹{totalPrice}</span>
-          </p>
-          <p className="font-semibold">
-            Delivery Fee:{" "}
-            <span className="text-green-500 ml-2">₹{deliveryCharge}</span>
-          </p>
-          <p className="font-semibold">
-            Tax:{" "}
-            <span className="text-green-500 ml-2">
-              ₹{(totalPrice * 5) / 100}
-            </span>
-          </p>
-          {convenienceFees > 0 && (
-            <p className="font-semibold">
-              Multiple Store convenience Fee:{" "}
-              <span className="text-green-500 ml-2">₹{convenienceFees}</span>
-            </p>
-          )}
-          <div className="h-[1px] bg-black dark:bg-white my-2"></div>
-          <p className="font-semibold">
-            Total:{" "}
-            <span className="text-green-500 ml-2">
-              ₹{totalPrice + taxes + convenienceFees + deliveryCharge}
-            </span>
-          </p>
-        </div>
-
-        <div className="space-y-3 mt-4">
-          <label>Select Payment Method:</label>
-          <div className="flex space-x-4">
-            <button
-              onClick={() => setPaymentMethod("COD")}
-              className={`p-3 w-1/2 rounded-lg ${
-                paymentMethod === "COD"
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-200 dark:bg-gray-500"
-              }`}
-            >
-              Cash on Delivery
-            </button>
-            <button
-              onClick={() => setPaymentMethod("Razorpay")}
-              className={`p-3 w-1/2 rounded-lg ${
-                paymentMethod === "Razorpay"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 dark:bg-gray-500"
-              }`}
-            >
-              Pay with Razorpay
-            </button>
-          </div>
-        </div>
-
+    {userAddresses.length === 0 ? (
+      <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+        <p>No saved addresses found.</p>
         <button
-          onClick={handleCheckout}
-          disabled={!selectedAddress}
-          className={`w-full py-2 mt-4 rounded-lg ${
-            selectedAddress
-              ? "bg-green-500 hover:bg-green-600 text-white"
-              : "bg-gray-300 cursor-not-allowed"
-          }`}
+          onClick={() => navigate(`/user/addresses/${user._id}`)}
+          className="mt-2 text-green-500 underline hover:text-green-600"
         >
-          {isPlacingOrder
-            ? "Placing your order..."
-            : paymentMethod === "Razorpay"
-            ? "Proceed to Pay"
-            : "Place Order"}
+          ➕ Add a new address
+        </button>
+      </div>
+    ) : (
+      <div className="space-y-3 mb-6">
+        {userAddresses.map((addr, index) => (
+          <div
+            key={index}
+            onClick={() => handleSelectAddress(addr)}
+            className={`p-4 rounded-xl cursor-pointer transition-all duration-200 border-2
+              ${
+                selectedAddress?._id === addr._id
+                  ? "border-green-500 bg-green-50 dark:bg-green-900"
+                  : "border-gray-300 dark:border-gray-600 hover:border-green-400"
+              }`}
+          >
+            <p className="font-semibold text-gray-900 dark:text-white">{addr.fullName}</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">{addr.phone}</p>
+            <p className="text-sm text-gray-800 dark:text-gray-400">{addr.addressLine}, {addr.area}</p>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {/* Order Summary */}
+    <div className="mb-6 space-y-2">
+      <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">Order Summary 🛒</h3>
+      <div className="flex justify-between">
+        <span>Cart Total:</span>
+        <span className="text-green-500 font-semibold">₹{totalPrice}</span>
+      </div>
+      <div className="flex justify-between">
+        <span>Delivery Fee 🚚:</span>
+        <span className="text-green-500 font-semibold">₹{deliveryCharge}</span>
+      </div>
+      <div className="flex justify-between">
+        <span>GST (5%) 💰:</span>
+        <span className="text-green-500 font-semibold">₹{taxes}</span>
+      </div>
+      {convenienceFees > 0 && (
+        <div className="flex justify-between">
+          <span>Multi-store Fee ⚡:</span>
+          <span className="text-green-500 font-semibold">₹{convenienceFees}</span>
+        </div>
+      )}
+      <div className="h-[1px] bg-gray-300 dark:bg-gray-600 my-2"></div>
+      <div className="flex justify-between text-xl font-bold">
+        <span>Total:</span>
+        <span className="text-green-600">₹{totalPrice + taxes + convenienceFees + deliveryCharge}</span>
+      </div>
+    </div>
+
+    {/* Payment Method */}
+    <div className="space-y-3 mb-6">
+      <label className="font-semibold text-gray-800 dark:text-gray-100">Select Payment Method 💳:</label>
+      <div className="flex space-x-4">
+        <button
+          onClick={() => setPaymentMethod("COD")}
+          className={`p-3 w-1/2 rounded-xl font-semibold transition transform hover:scale-105
+            ${paymentMethod === "COD" ? "bg-green-500 text-white" : "bg-gray-200 dark:bg-gray-500"}
+          `}
+        >
+          Cash on Delivery
+        </button>
+        <button
+          onClick={() => setPaymentMethod("Razorpay")}
+          className={`p-3 w-1/2 rounded-xl font-semibold transition transform hover:scale-105
+            ${paymentMethod === "Razorpay" ? "bg-blue-500 text-white" : "bg-gray-200 dark:bg-gray-500"}
+          `}
+        >
+          Pay with Razorpay
         </button>
       </div>
     </div>
+
+    {/* Checkout Button */}
+    <button
+      onClick={handleCheckout}
+      disabled={!selectedAddress}
+      className={`w-full py-3 mt-2 rounded-xl font-bold text-lg transition 
+        ${selectedAddress ? "bg-green-500 hover:bg-green-600 text-white" : "bg-gray-300 cursor-not-allowed text-gray-600"}
+      `}
+    >
+      {paymentMethod === "Razorpay" ? "Proceed to Pay 💳" : "Place Order 🎉"}
+    </button>
+  </div>
+</div>
+
   );
 };
 

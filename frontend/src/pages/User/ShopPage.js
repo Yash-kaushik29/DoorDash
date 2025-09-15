@@ -14,10 +14,10 @@ const ShopPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(""); // Single category selection
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   const handleButtonClick = (category) => {
-    setSelectedCategory((prev) => (prev === category ? "" : category)); // Toggle selection
+    setSelectedCategory((prev) => (prev === category ? "" : category));
   };
 
   useEffect(() => {
@@ -28,7 +28,7 @@ const ShopPage = () => {
         );
         setShop(data.shop);
         setProducts(data.products);
-        setFilteredProducts(data.products); // Initially show all products
+        setFilteredProducts(data.products);
       } catch (error) {
         console.error("Error fetching shop details:", error);
       } finally {
@@ -124,7 +124,12 @@ const ShopPage = () => {
                       />
                     ))
                   ) : (
-                    <p className="text-gray-500">No products available.</p>
+                    <div className="flex flex-col items-center justify-center col-span-full py-8">
+                      <MdStorefront className="text-4xl text-gray-400 mb-2" />
+                      <p className="text-gray-500">
+                        No products found in this category.
+                      </p>
+                    </div>
                   )}
                 </div>
               </>

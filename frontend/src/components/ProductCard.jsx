@@ -21,7 +21,6 @@ const DietIcon = ({ type }) => {
 const ProductCard = ({ product, bestSeller, user, setUser }) => {
   const [loading, setLoading] = useState(false);
 
-  // Add to Cart
   const addProductToCart = async () => {
     if (loading) return;
 
@@ -29,6 +28,13 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
       toast.warning("Please login first");
       return;
     }
+
+    const prevCart = [...(user.cart || [])];
+    setUser((prevUser) => ({
+      ...prevUser,
+      cart: [...prevCart, { productId: product._id, quantity: 1 }],
+    }));
+
     setLoading(true);
 
     try {
@@ -39,26 +45,33 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
       );
 
       if (data.success) {
-        setUser((prevUser) => ({
-          ...prevUser,
-          cart: [...prevUser?.cart, { productId: product._id, quantity: 1 }],
-        }));
         toast.success("Product added to cart!");
       } else {
-        toast.error(data.message);
+        throw new Error(data.message);
       }
     } catch (error) {
-      console.error("Error adding product to cart:", error.message);
-      toast.error("Something went wrong. Try again.");
+      setUser((prevUser) => ({
+        ...prevUser,
+        cart: prevCart,
+      }));
+      toast.error(error.message || "Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Increment Quantity
   const handleIncrement = async (productId) => {
     if (loading) return;
-    setLoading(true);
+
+    // 1. Optimistically update
+    setUser((prev) => ({
+      ...prev,
+      cart: prev.cart.map((item) =>
+        item.productId === productId
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      ),
+    }));
 
     try {
       const { data } = await axios.post(
@@ -67,28 +80,41 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
         { withCredentials: true }
       );
 
-      if (data.success) {
-        setUser((prevUser) => ({
-          ...prevUser,
-          cart: prevUser.cart.map((item) =>
-            item.productId === productId
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          ),
-        }));
-      }
+      if (!data.success) throw new Error(data.message);
     } catch (error) {
-      console.error("Error incrementing cart:", error.message);
-      toast.error("Something went wrong. Try again.");
-    } finally {
-      setLoading(false);
+      toast.error("Could not update quantity");
+
+      // 2. Rollback if failed
+      setUser((prev) => ({
+        ...prev,
+        cart: prev.cart.map((item) =>
+          item.productId === productId
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        ),
+      }));
     }
   };
 
-  // Decrement Quantity
   const handleDecrement = async (productId) => {
     if (loading) return;
-    setLoading(true);
+
+    const item = user.cart.find((i) => i.productId === productId);
+    if (!item) return;
+
+    if (item.quantity === 1) {
+      setUser((prev) => ({
+        ...prev,
+        cart: prev.cart.filter((i) => i.productId !== productId),
+      }));
+    } else {
+      setUser((prev) => ({
+        ...prev,
+        cart: prev.cart.map((i) =>
+          i.productId === productId ? { ...i, quantity: i.quantity - 1 } : i
+        ),
+      }));
+    }
 
     try {
       const { data } = await axios.post(
@@ -97,29 +123,30 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
         { withCredentials: true }
       );
 
-      if (data.success) {
-        setUser((prevUser) => ({
-          ...prevUser,
-          cart: prevUser.cart
-            .map((item) =>
-              item.productId === productId
-                ? { ...item, quantity: item.quantity - 1 }
-                : item
-            )
-            .filter((item) => item.quantity > 0),
-        }));
-      }
+      if (!data.success) throw new Error(data.message);
     } catch (error) {
-      console.error("Error decrementing cart:", error.message);
-      toast.error("Something went wrong. Try again.");
-    } finally {
-      setLoading(false);
+      toast.error("Could not update quantity");
+
+      setUser((prev) => ({
+        ...prev,
+        cart: prev.cart.map((i) =>
+          i.productId === productId
+            ? { ...i, quantity: (i.quantity || 0) + 1 }
+            : i
+        ),
+      }));
     }
   };
 
-  // Remove from Cart
   const removeFromCart = async (productId) => {
     if (loading) return;
+
+    const prevCart = [...(user.cart || [])];
+    setUser((prevUser) => ({
+      ...prevUser,
+      cart: prevUser.cart.filter((item) => item.productId !== productId),
+    }));
+
     setLoading(true);
 
     try {
@@ -130,15 +157,16 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
       );
 
       if (data.success) {
-        setUser((prevUser) => ({
-          ...prevUser,
-          cart: prevUser.cart.filter((item) => item.productId !== productId),
-        }));
         toast.success("Product removed from cart!");
+      } else {
+        throw new Error(data.message);
       }
     } catch (error) {
-      console.error("Error removing from cart:", error.message);
-      toast.error("Something went wrong. Try again.");
+      setUser((prevUser) => ({
+        ...prevUser,
+        cart: prevCart,
+      }));
+      toast.error(error.message || "Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }

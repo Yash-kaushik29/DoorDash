@@ -59,18 +59,14 @@ router.get("/search/:query", async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
 
-    // Split query into words for better matching
-    const queryWords = query.split(" ").map((word) => new RegExp(word, "i"));
-
-    const products = await Product.find({
-      $or: [
-        { name: { $in: queryWords } }, // Match words in name
-        { categories: { $in: queryWords } } // Match words in categories
-      ]
-    })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .populate("shop");
+    const products = await Product.find(
+      { $text: { $search: query } },
+      { score: { $meta: "textScore" } } // get relevance score
+    )
+      .sort({ score: { $meta: "textScore" } }) // sort by relevance
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate("shop");
 
     res.status(200).json(products);
   } catch (error) {
@@ -78,8 +74,5 @@ router.get("/search/:query", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-
-
 
 module.exports = router;

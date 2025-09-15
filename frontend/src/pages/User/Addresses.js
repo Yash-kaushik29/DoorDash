@@ -113,34 +113,48 @@ const Addresses = () => {
       <Navbar />
 
       <main className="container mx-auto px-4 py-8 mb-16 lg:mb-0">
-        <div className="bg-white dark:bg-gray-900 shadow-lg rounded-lg overflow-hidden p-6 max-w-4xl mx-auto">
-          <p className="text-gray-600 dark:text-gray-300 mt-2">
-            Manage your account details and preferences.
-          </p>
+        <div className="bg-white dark:bg-gray-900 shadow-lg rounded-2xl overflow-hidden p-6 max-w-4xl mx-auto border border-gray-200 dark:border-gray-700 transition-all">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-green-600">
+                My Addresses
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Saved delivery locations for faster checkout.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition"
+            >
+              <span className="text-lg">➕</span> Add New
+            </button>
+          </div>
 
-          <button
-            className="bg-green-600 text-white px-4 py-2 rounded font-semibold mx-auto my-4"
-            onClick={() => setShowModal(true)}
-          >
-            ➕ Add New Address
-          </button>
-
+          {/* Add Address Modal */}
           {showModal && (
             <AddAddressModal
               userId={userId}
               closeModal={closeModal}
               onClose={() => {
                 setShowModal(false);
-                fetchAddresses(); // Refresh list after save
+                fetchAddresses();
               }}
             />
           )}
 
-          {/* User's Saved Addresses */}
+          {/* Loading / Empty / Grid */}
           {loading ? (
-            <div className="flex mt-16 flex-col justify-center items-center ">
-              <FaHome className="text-green-500" />
-              <p>Fetching saved Addresses...</p>
+            <div className="flex flex-col justify-center items-center py-16 text-gray-600 dark:text-gray-400">
+              <FaHome className="text-5xl text-green-500 mb-4 animate-bounce" />
+              <p>Fetching saved addresses...</p>
+            </div>
+          ) : userAddresses.length === 0 ? (
+            <div className="flex flex-col justify-center items-center py-16 text-gray-600 dark:text-gray-400">
+              <FaHome className="text-5xl text-green-400 mb-4" />
+              <p className="font-medium">No saved addresses yet</p>
+              <p className="text-sm">Add one to make checkout easier 🚀</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">

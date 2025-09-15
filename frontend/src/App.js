@@ -38,7 +38,6 @@ import DeliveryBoyHome from "./pages/DeliveryBoy/DeliveryBoyHome";
 import DeliveryBoyOrders from "./pages/DeliveryBoy/DeliveryBoyOrders";
 import DeliveryBoyOrder from "./pages/DeliveryBoy/DeliveryBoyOrder";
 import Addresses from "./pages/User/Addresses";
-import AccountSettings from "./pages/User/AccountSettings";
 import HelpSupport from "./pages/User/HelpSupport ";
 import Restaurants from "./pages/User/Restaurants";
 import SellerSignup from "./pages/Seller/SellerSignup";
@@ -71,7 +70,6 @@ const App = () => {
           <Route path="/recentOrders" element={<RecentOrders />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/user/addresses/:userId" element={<Addresses />} />
-          <Route path="/account-settings" element={<AccountSettings />} />
           <Route path="/help-support" element={<HelpSupport />} />
         </Routes>
       </UserContextProvider>

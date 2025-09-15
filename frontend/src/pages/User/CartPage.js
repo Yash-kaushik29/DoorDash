@@ -35,10 +35,18 @@ const CartPage = () => {
     };
 
     fetchCartItems();
-  }, [loading]);
+  }, []);
 
   const handleIncrement = async (productId) => {
-    setLoading(true);
+    const prevCart = [...cartItems];
+
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.product._id === productId
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    );
 
     try {
       const { data } = await axios.post(
@@ -46,16 +54,29 @@ const CartPage = () => {
         { productId },
         { withCredentials: true }
       );
+
+      if (!data.success) {
+        setCartItems(prevCart);
+        throw new Error("Increment failed");
+      }
     } catch (error) {
-      toast.error(error.message);
-      console.error("Error updating cart:", error.message);
-    } finally {
-      setLoading(false);
+      setCartItems(prevCart);
+      toast.error("Failed to update quantity. Please try again.");
     }
   };
 
   const handleDecrement = async (productId) => {
-    setLoading(true);
+    const prevCart = [...cartItems];
+
+    setCartItems((prev) =>
+      prev
+        .map((item) =>
+          item.product._id === productId
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
 
     try {
       const { data } = await axios.post(
@@ -63,16 +84,23 @@ const CartPage = () => {
         { productId },
         { withCredentials: true }
       );
+
+      if (!data.success) {
+        setCartItems(prevCart);
+        throw new Error("Decrement failed");
+      }
     } catch (error) {
-      toast.error(error.message);
-      console.error("Error updating cart:", error.message);
-    } finally {
-      setLoading(false);
+      setCartItems(prevCart); // rollback
+      toast.error("Failed to update quantity. Please try again.");
     }
   };
 
   const removeFromCart = async (productId) => {
-    setLoading(true);
+    const prevItems = [...cartItems];
+    setCartItems((prevItems) =>
+      prevItems.filter((item) => item.product._id !== productId)
+    );
+
     try {
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/cart/removeFromCart`,
@@ -80,15 +108,12 @@ const CartPage = () => {
         { withCredentials: true }
       );
 
-      if (data.success) {
-        setCartItems((prevItems) =>
-          prevItems.filter((item) => item._id !== productId)
-        );
+      if (!data.success) {
+        setCartItems(prevItems);
       }
     } catch (error) {
       console.error("Error removing from cart:", error.message);
-    } finally {
-      setLoading(false);
+      setCartItems(prevItems);
     }
   };
 
@@ -120,12 +145,12 @@ const CartPage = () => {
             Sad cart alert! Time to grab some treats 🍕🍔
           </p>
         ) : (
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-3xl mx-auto">
+          <div className="bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-xl max-w-3xl mx-auto border border-green-100 dark:border-gray-700">
             <div className="space-y-6">
               {cartItems.map((item) => (
                 <div
                   key={item.product._id}
-                  className="flex items-center justify-between border-b pb-4"
+                  className="flex items-center justify-between border-b border-green-100 dark:border-gray-700 pb-4"
                 >
                   {/* Product Image */}
                   <img
@@ -134,65 +159,55 @@ const CartPage = () => {
                       "https://via.placeholder.com/100"
                     }
                     alt={item.product.name}
-                    className={`w-16 h-16 object-cover rounded-lg border dark:border-gray-700 ${
+                    className={`w-16 h-16 object-cover rounded-xl shadow-md ${
                       !item.product.inStock || !item.product?.shop?.isOpen
-                        ? "opacity-50"
+                        ? "opacity-50 grayscale"
                         : ""
                     }`}
                   />
 
                   {/* Product Details */}
                   <div className="flex-1 ml-4">
-                    <h3 className="font-semibold text-gray-800 dark:text-white">
+                    <h3 className="font-bold text-gray-900 dark:text-white text-lg">
                       {item.product.name}
                     </h3>
-                    <p className="text-green-500">{item.product.shopName}</p>
-                    <p className="text-gray-500 dark:text-gray-400">
+                    <p className="text-green-600 font-medium text-sm">
+                      {item.product.shopName}
+                    </p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">
                       ₹{item.product?.price} x {item?.quantity}
                     </p>
 
-                    {/* Stock Status */}
+                    {/* Stock / Shop Status */}
                     {!item.product.inStock && (
-                      <p className="text-red-500 text-sm font-semibold">
-                        Out of Stock
+                      <p className="text-red-500 text-xs font-semibold mt-1">
+                        Out of Stock 🚫
                       </p>
                     )}
-
-                    {/* Shop Status */}
-                    <p
-                      className={`text-sm font-semibold ${
-                        item.product.shop?.isOpen ? "" : "text-red-500"
-                      }`}
-                    >
-                      {!item.product.shop?.isOpen && "Shop Closed"}
-                    </p>
+                    {!item.product.shop?.isOpen && (
+                      <p className="text-red-500 text-xs font-semibold mt-1">
+                        Shop Closed 💤
+                      </p>
+                    )}
                   </div>
 
                   {/* Quantity Controls */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 bg-green-100 dark:bg-gray-700 px-3 py-1 rounded-full shadow-inner">
                     <IoRemoveCircle
-                      className="rounded-full cursor-pointer"
+                      className="text-red-500 hover:text-red-600 text-2xl cursor-pointer transition"
                       onClick={() =>
                         item.quantity > 1
                           ? handleDecrement(item.product._id)
                           : removeFromCart(item.product._id)
                       }
                     />
-                    <span className="text-lg font-semibold text-green-500">
+                    <span className="text-lg font-bold text-green-700 dark:text-green-300 w-6 text-center">
                       {item.quantity}
                     </span>
                     <IoAddCircle
-                      className="rounded-full cursor-pointer"
+                      className="text-green-500 hover:text-green-600 text-2xl cursor-pointer transition"
                       onClick={() => handleIncrement(item.product._id)}
                     />
-
-                    {/* Remove Item */}
-                    <button
-                      className="text-red-500 hover:text-red-600 transition"
-                      onClick={() => removeFromCart(item.product._id)}
-                    >
-                      <MdDelete size={24} />
-                    </button>
                   </div>
                 </div>
               ))}
@@ -201,34 +216,34 @@ const CartPage = () => {
             {/* Warning if any shop is closed */}
             {cartItems.some((item) => !item?.product?.shop?.isOpen) && (
               <p className="text-red-500 text-sm font-semibold text-center mt-4">
-                Some items are from closed shops. Please remove them before
-                proceeding.
+                ⚠️ Some items are from closed shops. Remove them before
+                checkout.
               </p>
             )}
 
+            {/* Multi-seller warning */}
             {sellers.length > 1 && (
-              <div className="mt-4 p-3 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded">
-                ⚠️ Your order contains products from <b>{sellers.length}</b>{" "}
-                different shops. Extra{" "}
+              <div className="mt-4 p-3 bg-gradient-to-r from-yellow-100 to-yellow-50 border-l-4 border-yellow-500 text-yellow-800 rounded-lg text-sm font-medium shadow-sm">
+                ⚡ Your order has items from <b>{sellers.length}</b> shops. A{" "}
                 <span className="font-semibold">convenience fee</span> may
                 apply.
               </div>
             )}
 
             {/* Total Price & Checkout */}
-            <div className="mt-6">
-              <div className="flex justify-between text-lg font-semibold">
+            <div className="mt-6 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-inner">
+              <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white">
                 <span>Total:</span>
                 <span>₹{totalPrice.toFixed(2)}</span>
               </div>
               <button
-                className={`w-full py-3 mt-6 rounded-lg font-semibold transition ${
+                className={`w-full py-3 mt-6 rounded-xl font-semibold transition shadow-lg ${
                   cartItems.some(
                     (item) =>
                       !item.product.inStock || !item?.product?.shop?.isOpen
                   )
-                    ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                    : "bg-green-500 text-white hover:bg-green-600"
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:scale-105 hover:shadow-xl"
                 }`}
                 onClick={handleCheckout}
                 disabled={cartItems.some(
@@ -241,7 +256,7 @@ const CartPage = () => {
                     !item.product.inStock || !item?.product?.shop?.isOpen
                 )
                   ? "Remove Unavailable Items"
-                  : "Proceed to Checkout"}
+                  : "Proceed to Checkout 🚀"}
               </button>
             </div>
           </div>
