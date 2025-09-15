@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { MdDelete } from "react-icons/md";
 import { IoAddCircle, IoRemoveCircle } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../context/userContext";
 
 const CartPage = () => {
+  const { user, setUser } = useContext(UserContext);
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sellers, setSellers] = useState([]);
@@ -20,12 +22,20 @@ const CartPage = () => {
           { withCredentials: true }
         );
 
+        // Local cartItems with full product details
         setCartItems(data.cart);
+
+        // Context cart with only productId + quantity
+        const normalizedCart = data.cart.map((item) => ({
+          productId: item.product?._id?.toString(),
+          quantity: item.quantity,
+        }));
+
+        setUser((prev) => ({ ...prev, cart: normalizedCart }));
 
         const uniqueSellers = [
           ...new Set(data.cart.map((item) => item.product.seller)),
         ];
-
         setSellers(uniqueSellers);
       } catch (err) {
         console.error("Failed to fetch cart:", err);
@@ -38,7 +48,8 @@ const CartPage = () => {
   }, []);
 
   const handleIncrement = async (productId) => {
-    const prevCart = [...cartItems];
+    const prevItems = [...cartItems];
+    const prevCart = [...(user.cart || [])];
 
     setCartItems((prev) =>
       prev.map((item) =>
@@ -48,6 +59,15 @@ const CartPage = () => {
       )
     );
 
+    setUser((prev) => ({
+      ...prev,
+      cart: prev.cart.map((item) =>
+        item.productId === productId
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      ),
+    }));
+
     try {
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/cart/incrementQty`,
@@ -56,17 +76,21 @@ const CartPage = () => {
       );
 
       if (!data.success) {
-        setCartItems(prevCart);
+        // Rollback
+        setCartItems(prevItems);
+        setUser((prevUser) => ({ ...prevUser, cart: prevCart }));
         throw new Error("Increment failed");
       }
     } catch (error) {
-      setCartItems(prevCart);
+      setCartItems(prevItems);
+      setUser((prevUser) => ({ ...prevUser, cart: prevCart }));
       toast.error("Failed to update quantity. Please try again.");
     }
   };
 
   const handleDecrement = async (productId) => {
-    const prevCart = [...cartItems];
+    const prevItems = [...cartItems];
+    const prevCart = [...(user.cart || [])];
 
     setCartItems((prev) =>
       prev
@@ -78,6 +102,17 @@ const CartPage = () => {
         .filter((item) => item.quantity > 0)
     );
 
+    setUser((prev) => ({
+      ...prev,
+      cart: prev.cart
+        .map((item) =>
+          item.productId === productId
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        )
+        .filter((item) => item.quantity > 0),
+    }));
+
     try {
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/cart/decrementQty`,
@@ -86,20 +121,30 @@ const CartPage = () => {
       );
 
       if (!data.success) {
-        setCartItems(prevCart);
+        // Rollback
+        setCartItems(prevItems);
+        setUser((prevUser) => ({ ...prevUser, cart: prevCart }));
         throw new Error("Decrement failed");
       }
     } catch (error) {
-      setCartItems(prevCart); // rollback
+      setCartItems(prevItems);
+      setUser((prevUser) => ({ ...prevUser, cart: prevCart }));
       toast.error("Failed to update quantity. Please try again.");
     }
   };
 
   const removeFromCart = async (productId) => {
     const prevItems = [...cartItems];
-    setCartItems((prevItems) =>
-      prevItems.filter((item) => item.product._id !== productId)
+    const prevCart = [...(user.cart || [])];
+
+    setCartItems((prev) =>
+      prev.filter((item) => item.product._id !== productId)
     );
+
+    setUser((prevUser) => ({
+      ...prevUser,
+      cart: prevUser.cart.filter((item) => item.productId !== productId),
+    }));
 
     try {
       const { data } = await axios.post(
@@ -109,11 +154,16 @@ const CartPage = () => {
       );
 
       if (!data.success) {
+        // Rollback
         setCartItems(prevItems);
+        setUser((prevUser) => ({ ...prevUser, cart: prevCart }));
+        throw new Error("Remove failed");
       }
     } catch (error) {
       console.error("Error removing from cart:", error.message);
       setCartItems(prevItems);
+      setUser((prevUser) => ({ ...prevUser, cart: prevCart }));
+      toast.error("Failed to remove product. Please try again.");
     }
   };
 

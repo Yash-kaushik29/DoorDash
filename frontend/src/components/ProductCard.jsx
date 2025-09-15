@@ -102,19 +102,12 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
     const item = user.cart.find((i) => i.productId === productId);
     if (!item) return;
 
-    if (item.quantity === 1) {
-      setUser((prev) => ({
-        ...prev,
-        cart: prev.cart.filter((i) => i.productId !== productId),
-      }));
-    } else {
       setUser((prev) => ({
         ...prev,
         cart: prev.cart.map((i) =>
           i.productId === productId ? { ...i, quantity: i.quantity - 1 } : i
         ),
       }));
-    }
 
     try {
       const { data } = await axios.post(
@@ -159,6 +152,10 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
       if (data.success) {
         toast.success("Product removed from cart!");
       } else {
+        setUser((prevUser) => ({
+        ...prevUser,
+        cart: prevCart,
+      }));
         throw new Error(data.message);
       }
     } catch (error) {
@@ -199,52 +196,59 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
         )}
 
         {product.inStock ? (
-          user?.cart?.some((item) => item.productId === product._id) ? (
-            user.cart.map((item) =>
-              item.productId === product._id ? (
-                <div
-                  key={item.productId}
-                  className="absolute bottom-0 w-full bg-green-500 flex items-center justify-evenly px-3 rounded-b-md text-white"
-                >
-                  <button
-                    className="text-white font-bold"
-                    onClick={() =>
-                      item.quantity === 1
-                        ? removeFromCart(product._id)
-                        : handleDecrement(product._id)
-                    }
-                    disabled={loading}
-                  >
-                    −
-                  </button>
-                  {loading ? (
-                    <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-                  ) : (
-                    <span className="text-sm font-semibold">
-                      {item.quantity}
-                    </span>
-                  )}
+  (() => {
+    const cartItem = user?.cart?.find(
+      (item) =>
+        item?.productId?.toString() === product?._id?.toString()
+    );
 
-                  <button
-                    className="text-white font-bold"
-                    onClick={() => handleIncrement(product._id)}
-                    disabled={loading}
-                  >
-                    +
-                  </button>
-                </div>
-              ) : null
-            )
+    if (cartItem) {
+      return (
+        <div className="absolute bottom-0 w-full bg-green-500 flex items-center justify-evenly px-3 rounded-b-md text-white">
+          <button
+            className="text-white font-bold"
+            onClick={() =>
+              cartItem.quantity === 1
+                ? removeFromCart(product._id)
+                : handleDecrement(product._id)
+            }
+            disabled={loading}
+          >
+            −
+          </button>
+
+          {loading ? (
+            <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
           ) : (
-            <button
-              className="absolute bottom-0 mt-2 w-full bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-b-md hover:bg-green-600 transition cursor-pointer"
-              onClick={() => addProductToCart(product._id)}
-              disabled={loading}
-            >
-              {loading ? "Adding..." : "Add"}
-            </button>
-          )
-        ) : null}
+            <span className="text-sm font-semibold">
+              {cartItem.quantity}
+            </span>
+          )}
+
+          <button
+            className="text-white font-bold"
+            onClick={() => handleIncrement(product._id)}
+            disabled={loading}
+          >
+            +
+          </button>
+        </div>
+      );
+    }
+
+    // Not in cart → show "Add" button
+    return (
+      <button
+        className="absolute bottom-0 mt-2 w-full bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-b-md hover:bg-green-600 transition cursor-pointer"
+        onClick={() => addProductToCart(product._id)}
+        disabled={loading}
+      >
+        {loading ? "Adding..." : "Add"}
+      </button>
+    );
+  })()
+) : null}
+
       </div>
 
       <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-4">
