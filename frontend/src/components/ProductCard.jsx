@@ -17,7 +17,7 @@ const DietIcon = ({ type }) => {
   }
 };
 
-const ProductCard = ({ product, bestSeller, user, setUser, variant = "food" }) => {
+const ProductCard = ({ product, bestSeller, user, setUser, variant = "foodCart" }) => {
   const [loading, setLoading] = useState(false);
 
   const prevCart = [...(user?.foodCart || [])];

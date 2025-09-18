@@ -320,7 +320,8 @@ router.get("/getUser", (req, res) => {
           user: {
             _id: currUser._id,
             name: currUser.username,
-            cart: currUser.cart,
+            foodCart: currUser.foodCart,
+            groceryCart: currUser.groceryCart,
             phone: currUser.phone,
           },
         });

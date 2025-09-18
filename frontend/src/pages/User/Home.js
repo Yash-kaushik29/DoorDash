@@ -17,6 +17,8 @@ const Home = () => {
   const [shops, setShops] = useState([]);
   const [products, setProducts] = useState([]);
 
+  console.log(user)
+
   const fetchPopularShops = async () => {
     try {
       const { data } = await axios.get(
