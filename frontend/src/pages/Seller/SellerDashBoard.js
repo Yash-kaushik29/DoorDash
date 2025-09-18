@@ -2,24 +2,23 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SellerHeader from "../../components/SellerHeader";
 import axios from "axios";
-import SellerDashboardSkeleton from "../../skeletons/SellerDashboardSkeleton ";
+import SellerDashboardSkeleton from '../../skeletons/SellerDashboardSkeleton ';
 import notificationSound from "../../sound/notificationSound.mp3";
 import { ToastContainer, toast } from "react-toastify";
 
-const audio = new Audio(notificationSound)
+const audio = new Audio(notificationSound);
 
 const SellerDashboard = () => {
   const [seller, setSeller] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [newOrders, setNewOrders] = useState(0);
   const navigate = useNavigate();
   const token = localStorage.getItem("doordash-seller");
 
   useEffect(() => {
     const unlockAudio = () => {
       audio.play().then(() => {
-        audio.pause(); 
+        audio.pause();
         audio.currentTime = 0;
         document.removeEventListener("click", unlockAudio);
       }).catch(() => {});
@@ -37,11 +36,8 @@ const SellerDashboard = () => {
           `${process.env.REACT_APP_API_URL}/api/notification/unread-order-notifications`,
           { withCredentials: true }
         );
-
         if (data.success && data.count > 0) {
-          console.log(data.count)
           audio.play();
-          setNewOrders(data.count)
           toast.info(`📦 ${data.count} new orders`);
         }
       } catch (err) {
@@ -50,8 +46,7 @@ const SellerDashboard = () => {
     };
 
     const interval = setInterval(pollNotifications, 5 * 60 * 1000);
-
-    return () => clearInterval(interval); 
+    return () => clearInterval(interval);
   }, [token]);
 
   const fetchSeller = async () => {
@@ -62,13 +57,10 @@ const SellerDashboard = () => {
         { withCredentials: true }
       );
 
-      if (data.success) {
-        setSeller(data.sellerDetails);
-      } else {
-        setError(data.message);
-      }
+      if (data.success) setSeller(data.sellerDetails);
+      else setError(data.message);
     } catch (err) {
-      console.error("Error fetching seller details:", err);
+      console.error(err);
       setError("Failed to load seller details. Please try again later.");
     } finally {
       setLoading(false);
@@ -76,11 +68,8 @@ const SellerDashboard = () => {
   };
 
   useEffect(() => {
-    if (!token) {
-      navigate("/seller-login");
-    } else {
-      fetchSeller();
-    }
+    if (!token) navigate("/seller-login");
+    else fetchSeller();
   }, [token, navigate]);
 
   const takeToLogin = () => {
@@ -92,27 +81,23 @@ const SellerDashboard = () => {
 
   if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center">
           <h2 className="text-2xl text-red-600 mb-4">Error</h2>
           <p className="text-gray-600">{error}</p>
-          <div className="flex gap-2 mt-4 items-center justify-center">
-            <div>
-              <button
-                onClick={fetchSeller}
-                className=" bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-              >
-                Retry
-              </button>
-            </div>
-            <div>
-              <button
-                onClick={takeToLogin}
-                className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
-              >
-                Back to login
-              </button>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-2 mt-4 justify-center">
+            <button
+              onClick={fetchSeller}
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+            >
+              Retry
+            </button>
+            <button
+              onClick={takeToLogin}
+              className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+            >
+              Back to login
+            </button>
           </div>
         </div>
       </div>
@@ -125,7 +110,7 @@ const SellerDashboard = () => {
 
       {/* Welcome Section */}
       <div className="max-w-5xl mx-auto p-6 text-center">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white">
           Welcome, {seller?.username || "Seller"}!
         </h1>
         <p className="text-gray-600 dark:text-gray-300 mt-2">
@@ -134,67 +119,68 @@ const SellerDashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-        <Link
-          to="/seller/add-product"
-          className="bg-green-500 text-white p-4 rounded-lg text-center shadow-md hover:bg-green-600"
-        >
+      <div className="max-w-5xl mx-auto p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <Link className="action-card bg-green-500 hover:bg-green-600" to="/seller/add-product">
           ➕ Add Product
         </Link>
-        <Link
-          to="/seller/my-products"
-          className="bg-blue-500 text-white p-4 rounded-lg text-center shadow-md hover:bg-blue-600"
-        >
+        <Link className="action-card bg-blue-500 hover:bg-blue-600" to="/seller/my-products">
           🛒 View Products
         </Link>
-        <Link
-          to="/seller/my-orders"
-          className="bg-yellow-500 text-white p-4 rounded-lg text-center shadow-md hover:bg-yellow-600"
-        >
+        <Link className="action-card bg-yellow-500 hover:bg-yellow-600" to="/seller/my-orders">
           📦 Manage Orders
         </Link>
         {seller?.shop ? (
-          <Link
-            to={`/seller/edit-shop/${seller.shop}`}
-            className="bg-purple-500 text-white p-4 rounded-lg text-center shadow-md hover:bg-purple-600"
-          >
+          <Link className="action-card bg-purple-500 hover:bg-purple-600" to={`/seller/edit-shop/${seller.shop}`}>
             🏪 Edit Shop Details
           </Link>
         ) : (
-          <Link
-            to="/seller/add-shop"
-            className="bg-teal-500 text-white p-4 rounded-lg text-center shadow-md hover:bg-teal-600"
-          >
+          <Link className="action-card bg-teal-500 hover:bg-teal-600" to="/seller/add-shop">
             🏪 Add Shop
           </Link>
         )}
       </div>
 
       {/* Stats Section */}
-      <div className="max-w-4xl mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold text-gray-700 dark:text-white">
-            Total Sales
-          </h2>
-          <p className="text-2xl font-bold text-green-500">₹{seller.todaySalesTotal}</p>
+      <div className="max-w-5xl mx-auto p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="stat-card bg-white dark:bg-gray-800 text-green-500">
+          <h2 className="text-lg font-semibold text-gray-700 dark:text-white">Total Sales</h2>
+          <p className="text-2xl font-bold">₹{seller.todaySalesTotal}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold text-gray-700 dark:text-white">
-            Pending Orders
-          </h2>
-          <p className="text-2xl font-bold text-yellow-500">
-            {seller?.pendingOrdersCount}
-          </p>
+        <div className="stat-card bg-white dark:bg-gray-800 text-yellow-500">
+          <h2 className="text-lg font-semibold text-gray-700 dark:text-white">Pending Orders</h2>
+          <p className="text-2xl font-bold">{seller?.pendingOrdersCount}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold text-gray-700 dark:text-white">
-            Total Products
-          </h2>
-          <p className="text-2xl font-bold text-blue-500">
-            {seller?.productsCount}
-          </p>
+        <div className="stat-card bg-white dark:bg-gray-800 text-blue-500">
+          <h2 className="text-lg font-semibold text-gray-700 dark:text-white">Total Products</h2>
+          <p className="text-2xl font-bold">{seller?.productsCount}</p>
         </div>
       </div>
+
+      <style jsx>{`
+        .action-card {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1rem;
+          font-size: 1rem;
+          font-weight: 600;
+          border-radius: 0.5rem;
+          color: white;
+          text-align: center;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          transition: all 0.2s ease;
+        }
+        .action-card:hover {
+          transform: translateY(-2px);
+        }
+        .stat-card {
+          padding: 1rem;
+          border-radius: 0.5rem;
+          text-align: center;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          transition: all 0.2s ease;
+        }
+      `}</style>
     </div>
   );
 };

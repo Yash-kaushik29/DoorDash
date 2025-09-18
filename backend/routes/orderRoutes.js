@@ -327,50 +327,48 @@ router.get("/getAllOrders", async (req, res) => {
   const { sellerToken } = req.cookies;
 
   if (!sellerToken) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized access" });
+    return res.status(401).json({ success: false, message: "Unauthorized access" });
   }
 
-  jwt.verify(
-    sellerToken,
-    process.env.JWT_SECRET_KEY,
-    {},
-    async (err, seller) => {
-      if (err) {
-        return res
-          .status(403)
-          .json({ success: false, message: "Invalid token" });
-      }
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
 
-      try {
-        const existingSeller = await Seller.findById(seller.sellerID)
-          .populate({
-            path: "orders",
-            populate: {
-              path: "items.product",
-              select: "id name price",
-            },
-            select: "id items amount deliveryStatus createdAt",
-            options: { sort: { createdAt: -1 } },
-          })
-          .lean(); // ✅ Better performance
-
-        if (!existingSeller) {
-          return res
-            .status(404)
-            .json({ success: false, message: "Seller not found" });
-        }
-
-        res.status(200).json({ success: true, orders: existingSeller.orders });
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-        res
-          .status(500)
-          .json({ success: false, message: "Internal server error" });
-      }
+  jwt.verify(sellerToken, process.env.JWT_SECRET_KEY, {}, async (err, seller) => {
+    if (err) {
+      return res.status(403).json({ success: false, message: "Invalid token" });
     }
-  );
+
+    try {
+      // Fetch orders where the seller has at least one item
+      const orders = await Order.find({ "items.seller": seller.sellerID })
+        .populate("items.product", "id name price")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean();
+
+      // Filter items inside each order to include only those belonging to this seller
+      const filteredOrders = orders.map((order) => ({
+        ...order,
+        items: order.items.filter((item) => item.seller.toString() === seller.sellerID),
+      }));
+
+      // Count total orders for pagination
+      const totalOrders = await Order.countDocuments({ "items.seller": seller.sellerID });
+
+      res.status(200).json({
+        success: true,
+        orders: filteredOrders,
+        totalOrders,
+        currentPage: page,
+        totalPages: Math.ceil(totalOrders / limit),
+      });
+    } catch (error) {
+      console.error("Error fetching seller orders:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
 });
 
 router.get("/getUserOrders", async (req, res) => {

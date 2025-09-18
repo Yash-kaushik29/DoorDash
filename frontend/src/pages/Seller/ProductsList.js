@@ -12,7 +12,7 @@ const ProductsList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const onToggleStock = async (productId) => {
+  const toggleStock = async (productId) => {
     try {
       const { data } = await axios.put(
         `${process.env.REACT_APP_API_URL}/api/shop/update-stock`,
@@ -21,20 +21,18 @@ const ProductsList = () => {
       );
 
       if (data.success) {
-        setProducts((prevProducts) =>
-          prevProducts.map((product) =>
-            product._id === productId
-              ? { ...product, inStock: !product.inStock }
-              : product
+        setProducts((prev) =>
+          prev.map((p) =>
+            p._id === productId ? { ...p, inStock: !p.inStock } : p
           )
         );
         toast.success(data.message);
       } else {
-        toast.error(data.message || "Failed to update stock status.");
+        toast.error(data.message || "Failed to update stock.");
       }
-    } catch (error) {
-      console.error("Error updating stock status:", error);
-      toast.error("An error occurred while updating the stock status.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error updating stock status.");
     }
   };
 
@@ -54,61 +52,58 @@ const ProductsList = () => {
           setProducts([]);
           setError(data.message || "Failed to fetch products.");
         }
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        setError("An error occurred while fetching products.");
+      } catch (err) {
+        console.error(err);
+        setError("Error fetching products.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-  };
-
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = products.filter((p) =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
       <SellerHeader />
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">My Products</h1>
+      <div className="max-w-7xl mx-auto p-4">
+        <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">My Products</h1>
 
         {/* Search Bar */}
         <input
           type="text"
           placeholder="Search products..."
           value={searchQuery}
-          onChange={handleSearchChange}
-          className="w-full p-2 mb-4 rounded-xl border border-green-300 focus:outline-none dark:text-gray-900 focus:outline-green-500"
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full md:w-1/2 p-3 mb-6 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 dark:text-gray-900"
         />
 
         {/* Loading Skeleton */}
         {loading && <ProductListCardSkeleton />}
 
-        {/* Error Message */}
-        {error && (
-          <div className="text-red-500 mb-4 font-semibold">{error}</div>
-        )}
+        {/* Error */}
+        {error && <div className="text-red-500 mb-4">{error}</div>}
 
-        {/* Products List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Product Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {!loading && filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
               <ProductListCard
                 key={product._id}
                 product={product}
-                onToggleStock={onToggleStock}
+                onToggleStock={toggleStock}
               />
             ))
           ) : (
-            !loading && <div>No Products found.</div>
+            !loading && (
+              <div className="text-center text-gray-500 col-span-full">
+                No products found.
+              </div>
+            )
           )}
         </div>
       </div>

@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
+import { UserContext } from "../../context/userContext";
 
 export default function Signup() {
+  const {user, setUser} = useContext(UserContext);
   const [formData, setFormData] = useState({
     username: "",
     phone: "",
@@ -40,6 +42,7 @@ export default function Signup() {
 
       if (response.data.success) {
         toast.success("Signup Successful! 🎉");
+        setUser(response.data.user)
         setTimeout(() => {
           navigate("/");
         }, 2000);

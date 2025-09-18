@@ -9,21 +9,21 @@ router.post("/addToCart", authenticateUser, async (req, res) => {
   const currUser = req.user;
 
   try {
-    const existingCartItem = currUser.cart.find(
+    const existingCartItem = currUser.foodCart.find(
       (item) => item.productId === productId
     );
 
     if (existingCartItem) {
       existingCartItem.quantity++;
     } else {
-      currUser.cart.push({ productId, quantity: 1 });
+      currUser.foodCart.push({ productId, quantity: 1 });
     }
 
     await currUser.save();
     return res.status(200).send({
       success: true,
       message: "Product added to cart!",
-      cart: currUser.cart,
+      cart: currUser.foodCart,
     });
   } catch (error) {
     console.error("Error adding product to cart:", error.message);
@@ -39,14 +39,14 @@ router.post("/incrementQty", authenticateUser, async (req, res) => {
   const currUser = req.user;
 
   try {
-    const existingCartItem = currUser.cart.find(
+    const existingCartItem = currUser.foodCart.find(
       (item) => item.productId === productId
     );
 
     if (existingCartItem) {
       existingCartItem.quantity++;
       await currUser.save();
-      return res.status(200).send({ success: true, cart: currUser.cart });
+      return res.status(200).send({ success: true, cart: currUser.foodCart });
     } else {
       return res.status(404).send({
         success: false,
@@ -67,19 +67,19 @@ router.post("/decrementQty", authenticateUser, async (req, res) => {
   const currUser = req.user;
 
   try {
-    const existingCartItem = currUser.cart.find(
+    const existingCartItem = currUser.foodCart.find(
       (item) => item.productId === productId
     );
 
     if (existingCartItem) {
       existingCartItem.quantity--;
       if (existingCartItem.quantity < 1) {
-        currUser.cart = currUser.cart.filter(
+        currUser.foodCart = currUser.foodCart.filter(
           (item) => item.productId !== productId
         );
       }
       await currUser.save();
-      return res.status(200).send({ success: true, cart: currUser.cart });
+      return res.status(200).send({ success: true, cart: currUser.foodCart });
     } else {
       return res.status(404).send({
         success: false,
@@ -100,16 +100,16 @@ router.post("/removeFromCart", authenticateUser, async (req, res) => {
   const currUser = req.user;
 
   try {
-    const existingCartItem = currUser.cart.find(
+    const existingCartItem = currUser.foodCart.find(
       (item) => item.productId === productId
     );
 
     if (existingCartItem) {
-      currUser.cart = currUser.cart.filter(
+      currUser.foodCart = currUser.foodCart.filter(
         (item) => item.productId !== productId
       );
       await currUser.save();
-      return res.status(200).send({ success: true, cart: currUser.cart });
+      return res.status(200).send({ success: true, cart: currUser.foodCart });
     } else {
       return res.status(404).send({
         success: false,
@@ -131,13 +131,13 @@ router.get("/getCart", authenticateUser, async (req, res) => {
 
   try {
     // Get all product IDs from the user's cart
-    const productIds = currUser.cart.map((item) => item.productId);
+    const productIds = currUser.foodCart.map((item) => item.productId);
 
     // Fetch all products in one go using $in operator
     const products = await Product.find({ _id: { $in: productIds } }).populate("shop", "isOpen");
 
     // Map products to cart items with corresponding quantities
-    const cart = currUser.cart.map((cartItem) => {
+    const cart = currUser.foodCart.map((cartItem) => {
       const product = products.find(
         (p) => p._id.toString() === cartItem.productId
       );

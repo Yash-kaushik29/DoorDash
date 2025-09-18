@@ -1,63 +1,63 @@
-import React, { useState, useEffect, useContext } from "react";
+import React from "react";
 import Navbar from "../../components/Navbar";
-import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import ProductCard from "../../components/ProductCard";
-import InfiniteScroll from "react-infinite-scroll-component";
-import { UserContext } from "../../context/userContext";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+
+const groceryCategories = [
+  { name: "Vegetables", img: "/groceryImages/veggies.png" },
+  { name: "Fruits", img: "/groceryImages/fruits.png" },
+  { name: "Dairy & Eggs", img: "/groceryImages/dairy.png" },
+  { name: "Rice, Atta & Dal", img: "/groceryImages/rice.png" },
+  { name: "Oils & Ghee", img: "/groceryImages/oils.png" },
+  { name: "Snacks & Namkeens", img: "/groceryImages/snacks.png" },
+  { name: "Bakery & Biscuits", img: "/groceryImages/bakery.png" },
+  { name: "Instant Food", img: "/groceryImages/instant.png" },
+  { name: "Drinks", img: "/groceryImages/drinks.png" },
+  { name: "Spices & Masala", img: "/groceryImages/spices.png" },
+  { name: "Dry Fruits & Nuts", img: "/groceryImages/dryfruits.png" },
+  { name: "Household Items", img: "/groceryImages/household.png" },
+  { name: "Daily Essentials", img: "/groceryImages/essentials.png" },
+  { name: "Ice Creams", img: "/groceryImages/icecream.png" },
+  { name: "Baby Care", img: "/groceryImages/baby.png" },
+];
 
 const Groceries = () => {
-  const [products, setProducts] = useState([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const {user, setUser} = useContext(UserContext);
-
-  const fetchGroceries = async () => {
-    try {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/common/groceries?page=${page}&limit=10`, {withCredentials: true}
-      );
-      if (data.products.length === 0) {
-        setHasMore(false);
-      } else {
-        setProducts((prev) => [...prev, ...data.products]);
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching groceries:", error);
-      toast.error("Error fetching grocery products.");
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchGroceries();
-  }, [page]);
-
   return (
-    <div>
-      <ToastContainer position="top-right" autoClose={3000} />
+    <>
       <Navbar />
-
-      <section className="pb-6 container mx-auto px-4">
-        {loading && <p className="text-center text-gray-500">Loading groceries...</p>}
-
-        <InfiniteScroll
-          dataLength={products.length}
-          next={() => setPage((prev) => prev + 1)}
-          hasMore={hasMore}
-          loader={<p className="text-center text-gray-500">Loading more products...</p>}
-          endMessage={<p className="text-center text-gray-400">No more products available.</p>}
-        >
-          <div className="mt-6 p-4 grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-8 gap-6 mb-12 lg:mb-0">
-            {products.map((product, index) => (
-              <ProductCard key={index} product={product} bestSeller={false} user={user} setUser={setUser} />
+      <div className="min-h-screen bg-stone-50 dark:bg-gray-900 p-4 pb-16 lg:pb-0">
+        <section className="mb-8">
+          <h2 className="text-xl md:text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
+            Shop by Category
+          </h2>
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 gap-3">
+            {groceryCategories.map((category, index) => (
+              <Link to={`/products/groceries/${category.name}`}>
+                <motion.div
+                  key={category.name}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: index * 0.04 }}
+                  viewport={{ once: true }}
+                  className="flex flex-col items-center bg-gray-50 dark:bg-gray-900 rounded-3xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 p-2"
+                >
+                  <div className="w-24 h-24 sm:w-24 sm:h-24 md:w-28 md:h-28 overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <img
+                      src={category.img}
+                      alt={category.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <span className="mt-1 text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200 text-center">
+                    {category.name}
+                  </span>
+                </motion.div>
+              </Link>
             ))}
           </div>
-        </InfiniteScroll>
-      </section>
-    </div>
+        </section>
+      </div>
+    </>
   );
 };
 

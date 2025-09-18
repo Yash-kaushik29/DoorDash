@@ -3,14 +3,12 @@ import { Link } from "react-router-dom";
 import { IoIosCart } from "react-icons/io";
 import { RiAccountCircleLine } from "react-icons/ri";
 import { FaSun, FaMoon, FaHistory, FaHome } from "react-icons/fa";
-import { MdDownload } from "react-icons/md";
 import { UserContext } from "../context/userContext";
 import { GiNoodles } from "react-icons/gi";
 
 const Navbar = () => {
   const { user } = useContext(UserContext);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [installPrompt, setInstallPrompt] = useState(null);
 
   // Theme loading
   useEffect(() => {
@@ -65,9 +63,9 @@ const Navbar = () => {
             <Link to="/cart">
               <div className="relative">
                 <IoIosCart size={22} />
-                {user && user.cart?.length > 0 && (
+                {user && user.foodCart?.length > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                    {user.cart.length}
+                    {user.foodCart.length}
                   </span>
                 )}
               </div>
@@ -122,9 +120,9 @@ const Navbar = () => {
         >
           <div className="relative">
             <IoIosCart size={22} />
-            {user && user.cart?.length > 0 && (
+            {user && user.foodCart?.length > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                {user.cart.length}
+                {user.foodCart.length}
               </span>
             )}
           </div>

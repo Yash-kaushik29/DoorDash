@@ -22,16 +22,14 @@ const CartPage = () => {
           { withCredentials: true }
         );
 
-        // Local cartItems with full product details
         setCartItems(data.cart);
 
-        // Context cart with only productId + quantity
         const normalizedCart = data.cart.map((item) => ({
           productId: item.product?._id?.toString(),
           quantity: item.quantity,
         }));
 
-        setUser((prev) => ({ ...prev, cart: normalizedCart }));
+        setUser((prev) => ({ ...prev, foodCart: normalizedCart }));
 
         const uniqueSellers = [
           ...new Set(data.cart.map((item) => item.product.seller)),
@@ -49,7 +47,7 @@ const CartPage = () => {
 
   const handleIncrement = async (productId) => {
     const prevItems = [...cartItems];
-    const prevCart = [...(user.cart || [])];
+    const prevCart = [...(user.foodCart || [])];
 
     setCartItems((prev) =>
       prev.map((item) =>
@@ -61,7 +59,7 @@ const CartPage = () => {
 
     setUser((prev) => ({
       ...prev,
-      cart: prev.cart.map((item) =>
+      foodCart: prev.foodCart.map((item) =>
         item.productId === productId
           ? { ...item, quantity: item.quantity + 1 }
           : item
@@ -78,19 +76,19 @@ const CartPage = () => {
       if (!data.success) {
         // Rollback
         setCartItems(prevItems);
-        setUser((prevUser) => ({ ...prevUser, cart: prevCart }));
+        setUser((prevUser) => ({ ...prevUser, foodCart: prevCart }));
         throw new Error("Increment failed");
       }
     } catch (error) {
       setCartItems(prevItems);
-      setUser((prevUser) => ({ ...prevUser, cart: prevCart }));
+      setUser((prevUser) => ({ ...prevUser, foodCart: prevCart }));
       toast.error("Failed to update quantity. Please try again.");
     }
   };
 
   const handleDecrement = async (productId) => {
     const prevItems = [...cartItems];
-    const prevCart = [...(user.cart || [])];
+    const prevCart = [...(user.foodCart || [])];
 
     setCartItems((prev) =>
       prev
@@ -104,7 +102,7 @@ const CartPage = () => {
 
     setUser((prev) => ({
       ...prev,
-      cart: prev.cart
+      foodCart: prev.foodCart
         .map((item) =>
           item.productId === productId
             ? { ...item, quantity: item.quantity - 1 }
@@ -123,19 +121,19 @@ const CartPage = () => {
       if (!data.success) {
         // Rollback
         setCartItems(prevItems);
-        setUser((prevUser) => ({ ...prevUser, cart: prevCart }));
+        setUser((prevUser) => ({ ...prevUser, foodCart: prevCart }));
         throw new Error("Decrement failed");
       }
     } catch (error) {
       setCartItems(prevItems);
-      setUser((prevUser) => ({ ...prevUser, cart: prevCart }));
+      setUser((prevUser) => ({ ...prevUser, foodCart: prevCart }));
       toast.error("Failed to update quantity. Please try again.");
     }
   };
 
   const removeFromCart = async (productId) => {
     const prevItems = [...cartItems];
-    const prevCart = [...(user.cart || [])];
+    const prevCart = [...(user.foodCart || [])];
 
     setCartItems((prev) =>
       prev.filter((item) => item.product._id !== productId)
@@ -143,7 +141,7 @@ const CartPage = () => {
 
     setUser((prevUser) => ({
       ...prevUser,
-      cart: prevUser.cart.filter((item) => item.productId !== productId),
+      foodCart: prevUser.foodCart.filter((item) => item.productId !== productId),
     }));
 
     try {
@@ -156,13 +154,13 @@ const CartPage = () => {
       if (!data.success) {
         // Rollback
         setCartItems(prevItems);
-        setUser((prevUser) => ({ ...prevUser, cart: prevCart }));
+        setUser((prevUser) => ({ ...prevUser, foodCart: prevCart }));
         throw new Error("Remove failed");
       }
     } catch (error) {
       console.error("Error removing from cart:", error.message);
       setCartItems(prevItems);
-      setUser((prevUser) => ({ ...prevUser, cart: prevCart }));
+      setUser((prevUser) => ({ ...prevUser, foodCart: prevCart }));
       toast.error("Failed to remove product. Please try again.");
     }
   };

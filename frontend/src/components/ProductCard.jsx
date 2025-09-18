@@ -6,7 +6,6 @@ import { FaRegCircleDot } from "react-icons/fa6";
 const DietIcon = ({ type }) => {
   switch (type) {
     case "Vegetarian":
-      return <FaRegCircleDot color="green" size={16} />;
     case "Veg":
       return <FaRegCircleDot color="green" size={16} />;
     case "Egg":
@@ -18,43 +17,35 @@ const DietIcon = ({ type }) => {
   }
 };
 
-const ProductCard = ({ product, bestSeller, user, setUser }) => {
+const ProductCard = ({ product, bestSeller, user, setUser, variant = "food" }) => {
   const [loading, setLoading] = useState(false);
+
+  const prevCart = [...(user?.foodCart || [])];
 
   const addProductToCart = async () => {
     if (loading) return;
-
     if (!user) {
       toast.warning("Please login first");
       return;
     }
 
-    const prevCart = [...(user.cart || [])];
-    setUser((prevUser) => ({
-      ...prevUser,
-      cart: [...prevCart, { productId: product._id, quantity: 1 }],
+    setUser((prev) => ({
+      ...prev,
+      foodCart: [...prev.foodCart, { productId: product._id, quantity: 1 }],
     }));
 
     setLoading(true);
-
     try {
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/cart/addToCart`,
         { productId: product._id },
         { withCredentials: true }
       );
-
-      if (data.success) {
-        toast.success("Product added to cart!");
-      } else {
-        throw new Error(data.message);
-      }
-    } catch (error) {
-      setUser((prevUser) => ({
-        ...prevUser,
-        cart: prevCart,
-      }));
-      toast.error(error.message || "Something went wrong. Try again.");
+      if (!data.success) throw new Error(data.message);
+      toast.success("Product added to cart!");
+    } catch (err) {
+      setUser((prev) => ({ ...prev, foodCart: prevCart }));
+      toast.error(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -62,11 +53,9 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
 
   const handleIncrement = async (productId) => {
     if (loading) return;
-
-    // 1. Optimistically update
     setUser((prev) => ({
       ...prev,
-      cart: prev.cart.map((item) =>
+      foodCart: prev.foodCart.map((item) =>
         item.productId === productId
           ? { ...item, quantity: item.quantity + 1 }
           : item
@@ -79,15 +68,12 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
         { productId },
         { withCredentials: true }
       );
-
       if (!data.success) throw new Error(data.message);
-    } catch (error) {
+    } catch {
       toast.error("Could not update quantity");
-
-      // 2. Rollback if failed
       setUser((prev) => ({
         ...prev,
-        cart: prev.cart.map((item) =>
+        foodCart: prev.foodCart.map((item) =>
           item.productId === productId
             ? { ...item, quantity: item.quantity - 1 }
             : item
@@ -98,16 +84,19 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
 
   const handleDecrement = async (productId) => {
     if (loading) return;
-
-    const item = user.cart.find((i) => i.productId === productId);
+    const item = user?.foodCart?.find((i) => i.productId === productId);
     if (!item) return;
 
-      setUser((prev) => ({
-        ...prev,
-        cart: prev.cart.map((i) =>
-          i.productId === productId ? { ...i, quantity: i.quantity - 1 } : i
-        ),
-      }));
+    if (item.quantity === 1) {
+      return removeFromCart(productId);
+    }
+
+    setUser((prev) => ({
+      ...prev,
+      foodCart: prev.foodCart.map((i) =>
+        i.productId === productId ? { ...i, quantity: i.quantity - 1 } : i
+      ),
+    }));
 
     try {
       const { data } = await axios.post(
@@ -115,16 +104,14 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
         { productId },
         { withCredentials: true }
       );
-
       if (!data.success) throw new Error(data.message);
-    } catch (error) {
+    } catch {
       toast.error("Could not update quantity");
-
       setUser((prev) => ({
         ...prev,
-        cart: prev.cart.map((i) =>
+        foodCart: prev.foodCart.map((i) =>
           i.productId === productId
-            ? { ...i, quantity: (i.quantity || 0) + 1 }
+            ? { ...i, quantity: i.quantity + 1 }
             : i
         ),
       }));
@@ -134,40 +121,32 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
   const removeFromCart = async (productId) => {
     if (loading) return;
 
-    const prevCart = [...(user.cart || [])];
-    setUser((prevUser) => ({
-      ...prevUser,
-      cart: prevUser.cart.filter((item) => item.productId !== productId),
+    const prevCart = [...(user?.foodCart || [])];
+    setUser((prev) => ({
+      ...prev,
+      foodCart: prev.foodCart.filter((i) => i.productId !== productId),
     }));
 
     setLoading(true);
-
     try {
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/cart/removeFromCart`,
         { productId },
         { withCredentials: true }
       );
-
-      if (data.success) {
-        toast.success("Product removed from cart!");
-      } else {
-        setUser((prevUser) => ({
-        ...prevUser,
-        cart: prevCart,
-      }));
-        throw new Error(data.message);
-      }
-    } catch (error) {
-      setUser((prevUser) => ({
-        ...prevUser,
-        cart: prevCart,
-      }));
-      toast.error(error.message || "Something went wrong. Try again.");
+      if (!data.success) throw new Error(data.message);
+      toast.success("Product removed from cart!");
+    } catch (err) {
+      setUser((prev) => ({ ...prev, foodCart: prevCart }));
+      toast.error(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
+
+  const cartItem = user?.foodCart?.find(
+    (item) => item?.productId?.toString() === product?._id?.toString()
+  );
 
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transform transition duration-300 hover:scale-105 relative">
@@ -177,17 +156,18 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
         </span>
       )}
 
+      {/* IMAGE */}
       <div className="relative">
         <img
           className={`w-full h-32 object-cover rounded-md ${
-            !product.inStock ? "opacity-50" : ""
+            !product?.inStock ? "opacity-50" : ""
           }`}
           src={product.images?.[0] || "https://via.placeholder.com/150"}
           alt={product.name || "Product"}
           onError={(e) => (e.target.src = "https://via.placeholder.com/150")}
         />
 
-        {!product.inStock && (
+        {!product?.inStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 rounded-md">
             <span className="text-white font-semibold text-sm">
               Out of Stock
@@ -195,69 +175,58 @@ const ProductCard = ({ product, bestSeller, user, setUser }) => {
           </div>
         )}
 
-        {product.inStock ? (
-  (() => {
-    const cartItem = user?.cart?.find(
-      (item) =>
-        item?.productId?.toString() === product?._id?.toString()
-    );
-
-    if (cartItem) {
-      return (
-        <div className="absolute bottom-0 w-full bg-green-500 flex items-center justify-evenly px-3 rounded-b-md text-white">
-          <button
-            className="text-white font-bold"
-            onClick={() =>
-              cartItem.quantity === 1
-                ? removeFromCart(product._id)
-                : handleDecrement(product._id)
-            }
-            disabled={loading}
-          >
-            −
-          </button>
-
-          {loading ? (
-            <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-          ) : (
-            <span className="text-sm font-semibold">
-              {cartItem.quantity}
-            </span>
-          )}
-
-          <button
-            className="text-white font-bold"
-            onClick={() => handleIncrement(product._id)}
-            disabled={loading}
-          >
-            +
-          </button>
-        </div>
-      );
-    }
-
-    // Not in cart → show "Add" button
-    return (
-      <button
-        className="absolute bottom-0 mt-2 w-full bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-b-md hover:bg-green-600 transition cursor-pointer"
-        onClick={() => addProductToCart(product._id)}
-        disabled={loading}
-      >
-        {loading ? "Adding..." : "Add"}
-      </button>
-    );
-  })()
-) : null}
-
+        {/* CART CONTROLS */}
+        {product.inStock && (
+          <div className="absolute bottom-0 w-full">
+            {cartItem ? (
+              <div className="bg-green-500 flex items-center justify-evenly px-2 rounded-b-md text-white">
+                <button
+                  className="font-bold"
+                  onClick={() => handleDecrement(product._id)}
+                  disabled={loading}
+                >
+                  −
+                </button>
+                {loading ? (
+                  <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                ) : (
+                  <span className="text-sm font-semibold">
+                    {cartItem.quantity}
+                  </span>
+                )}
+                <button
+                  className="font-bold"
+                  onClick={() => handleIncrement(product._id)}
+                  disabled={loading}
+                >
+                  +
+                </button>
+              </div>
+            ) : (
+              <button
+                className="w-full bg-green-500 text-white text-xs font-semibold py-1 rounded-b-md hover:bg-green-600 transition cursor-pointer"
+                onClick={() => addProductToCart(product._id)}
+                disabled={loading}
+              >
+                {loading ? "Adding..." : "Add"}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-4">
-        {product.name || "Product Name"} <DietIcon type={product.dietType} />
+      {/* INFO */}
+      <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        {product.name || "Product Name"}
+        {variant === "food" && <DietIcon type={product.dietType} />}
       </h3>
 
-      <p className="mt-1 text-sm text-yellow-500 dark:text-yellow-400">
-        {product.shopName || "Shop Name"}
-      </p>
+      {variant === "food" && (
+        <p className="mt-1 text-xs text-yellow-500 dark:text-yellow-400">
+          {product.shopName || "Shop Name"}
+        </p>
+      )}
+
       <p className="mt-1 text-sm text-green-500 font-semibold">
         ₹{product.price || "N/A"}
       </p>

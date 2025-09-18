@@ -24,7 +24,13 @@ const UserSchema = new mongoose.Schema(
       default: "",
     },
     addresses: [addressSchema],
-    cart: [
+    foodCart: [
+      {
+        productId: { type: String },
+        quantity: { type: Number, default: 1 },
+      },
+    ],
+    groceryCart: [
       {
         productId: { type: String },
         quantity: { type: Number, default: 1 },

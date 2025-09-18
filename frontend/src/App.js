@@ -49,6 +49,7 @@ import CommissionHistory from "./pages/DeliveryBoy/CommissionHistory";
 import OutstandingAmountDetails from "./pages/DeliveryBoy/OutstandingAmountDetails";
 import OutstandingAmountList from "./pages/Admin/OutstandingAmountList";
 import DeliveryBoyDetails from "./pages/Admin/DeliveryBoyDetails";
+import GroceryProducts from "./pages/User/GroceryProducts";
 
 const App = () => {
   return (
@@ -60,6 +61,7 @@ const App = () => {
           <Route path="/signup" element={<Signup />} />
           <Route path="/user/profile" element={<UserProfile />} />
           <Route path="/products/groceries" element={<Groceries />} />
+          <Route path="/products/groceries/:category" element={<GroceryProducts />} />
           <Route path="/products/restaurants" element={<Restaurants />} />
           <Route path="/products/medicines" element={<Medicines />} />
           <Route path="/search/:query" element={<SearchQuery />} />
