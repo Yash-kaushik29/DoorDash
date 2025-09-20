@@ -3,32 +3,31 @@ import { useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import ProductCard from "../../components/ProductCard";
 import { UserContext } from "../../context/userContext";
+import { motion } from "framer-motion";
 
 // Mock dataset
 const mockProducts = [
   {
-    id: 1,
+    _id: 11324,
     name: "Oreo Biscuits",
     price: 30,
-    img: "https://via.placeholder.com/150/000000/FFFFFF?text=Oreo",
+    images: [
+      "https://tse4.mm.bing.net/th/id/OIP.I0lBkwMCwcIrQZC2J3u4fAHaHa?pid=Api&P=0&h=180",
+    ],
+    inStock: true,
     categories: ["bakery & biscuits", "biscuits"],
     subcategory: "Biscuits",
   },
   {
-    id: 2,
+    _id: 2112,
     name: "Parle-G",
     price: 20,
-    img: "https://via.placeholder.com/150/FFD700/000000?text=Parle-G",
+    inStock: true,
+    images: [
+      "https://tse3.mm.bing.net/th/id/OIP.9q4Knro84bqPsULimC7_3AHaHa?pid=Api&P=0&h=180",
+    ],
     categories: ["bakery & biscuits", "biscuits"],
     subcategory: "Biscuits",
-  }, 
-  {
-    id: 3,
-    name: "Britannia Cake",
-    price: 50,
-    img: "https://via.placeholder.com/150/FF69B4/FFFFFF?text=Cake",
-    categories: ["bakery & biscuits", "cakes"],
-    subcategory: "Cakes",
   },
   {
     id: 4,
@@ -51,7 +50,7 @@ const mockProducts = [
 const GroceryProducts = () => {
   const { category } = useParams();
   const [products, setProducts] = useState([]);
-  const {user, setUser} = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
 
   useEffect(() => {
     // Simulate API filter
@@ -89,7 +88,13 @@ const GroceryProducts = () => {
               {/* Horizontal Scroll */}
               <div className="flex space-x-4 overflow-x-auto pb-3 scrollbar-hide">
                 {items.map((product) => (
-                  <ProductCard product={product} user={user} setUser={setUser} variant="grocery" />
+                  <motion.div
+                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <ProductCard user={user} setUser={setUser} product={product} variant="grocery" />
+                  </motion.div>
                 ))}
               </div>
             </div>

@@ -14,7 +14,6 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-  // Initialize timer from localStorage
   const storedExpire = localStorage.getItem("otpExpireTime");
   if (storedExpire) {
     const remaining = Math.floor((storedExpire - Date.now()) / 1000);
@@ -58,27 +57,31 @@ useEffect(() => {
   const sendOtp = async () => {
     if (!formData.phone) return toast.warn("Enter your phone number first");
 
-    try {
-      const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/send-login-otp`,
-        { phone: formData.phone }
-      );
-
-      if (res.data.success) {
-        toast.success("OTP sent successfully");
-        setOtpSent(true);
+    setOtpSent(true);
         setCanResend(false);
         setTimeLeft(OTP_COOLDOWN);
 
-        // Store OTP expiration timestamp
-        const otpExpireTime = Date.now() + OTP_COOLDOWN * 1000;
-        localStorage.setItem("otpExpireTime", otpExpireTime);
-      } else {
-        toast.error(res.data.message);
-      }
-    } catch (err) {
-      toast.error("Failed to send OTP");
-    }
+    // try {
+    //   const res = await axios.post(
+    //     `${process.env.REACT_APP_API_URL}/api/auth/send-login-otp`,
+    //     { phone: formData.phone }
+    //   );
+
+    //   if (res.data.success) {
+    //     toast.success("OTP sent successfully");
+    //     setOtpSent(true);
+    //     setCanResend(false);
+    //     setTimeLeft(OTP_COOLDOWN);
+
+    //     // Store OTP expiration timestamp
+    //     const otpExpireTime = Date.now() + OTP_COOLDOWN * 1000;
+    //     localStorage.setItem("otpExpireTime", otpExpireTime);
+    //   } else {
+    //     toast.error(res.data.message);
+    //   }
+    // } catch (err) {
+    //   toast.error("Failed to send OTP");
+    // }
   };
 
   const handleSubmit = async (e) => {
@@ -106,91 +109,107 @@ useEffect(() => {
 
   return (
     <>
-      <ToastContainer position="top-right" autoClose={3000} />
-      <div className="flex flex-col min-h-screen p-4 bg-gradient-to-b from-green-200 via-green-100 to-green-50">
-        <h1 className="text-center text-4xl font-extrabold text-green-600 mb-6">
-          Gully<span className="text-emerald-700">Foods</span>
-        </h1>
+  <ToastContainer position="top-right" autoClose={3000} />
+  <div className="flex flex-col min-h-screen p-4 bg-white">
+    <div className="mx-auto">
+      <img
+        src="/AppLogo.jpg"
+        alt="GullyFoods Logo"
+        className="w-full h-32 object-contain"
+      />
+    </div>
 
-        <div className="flex justify-center items-center">
-          <div className="w-full max-w-md bg-white p-6 shadow-2xl rounded-3xl border-t-4 border-green-500">
-            <h2 className="text-2xl text-center text-green-700 font-bold mb-6">
-              Login with OTP
-            </h2>
+    <div className="flex justify-center items-center flex-1">
+      <div className="w-full max-w-md bg-white p-6 shadow-2xl rounded-3xl border-t-4 border-green-500">
+        <h2 className="text-2xl text-center text-green-700 font-bold mb-6">
+          Login with OTP
+        </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-green-700 mb-1 font-medium">Phone</label>
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
-                  placeholder="Enter your mobile number"
-                />
-              </div>
-
-              {otpSent && (
-                <div>
-                  <label className="block text-green-700 mb-1 font-medium">OTP</label>
-                  <input
-                    type="text"
-                    name="otp"
-                    value={formData.otp}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
-                    placeholder="Enter OTP"
-                  />
-                </div>
-              )}
-
-              {!otpSent ? (
-                <button
-                  type="button"
-                  onClick={sendOtp}
-                  className="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition"
-                >
-                  Send OTP
-                </button>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  <button
-                    type="submit"
-                    className="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition"
-                  >
-                    Login
-                  </button>
-
-                  <div className="text-center text-sm text-gray-600">
-                    {timeLeft > 0 ? (
-                      <span>Resend OTP in {timeLeft}s ⏱️</span>
-                    ) : (
-                      <button
-                        onClick={sendOtp}
-                        className="text-green-700 font-semibold underline"
-                      >
-                        Resend OTP
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </form>
-
-            <div className="text-center mt-4 text-gray-800">
-              Don’t have an account?
-              <Link to="/signup">
-                <span className="text-green-700 font-semibold hover:underline ml-1">
-                  Sign Up
-                </span>
-              </Link>
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-green-700 mb-1 font-medium">Phone</label>
+            <input
+              type="text"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+              className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+              placeholder="Enter your mobile number"
+            />
           </div>
+
+          {otpSent && (
+            <div>
+              <label className="block text-green-700 mb-1 font-medium">OTP</label>
+              <input
+                type="text"
+                name="otp"
+                value={formData.otp}
+                onChange={handleChange}
+                required
+                className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+                placeholder="Enter OTP"
+              />
+            </div>
+          )}
+
+          {!otpSent ? (
+            <button
+              type="button"
+              onClick={sendOtp}
+              className="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition"
+            >
+              Send OTP
+            </button>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <button
+                type="submit"
+                className="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition"
+              >
+                Login
+              </button>
+
+              <div className="text-center text-sm text-gray-600">
+                {timeLeft > 0 ? (
+                  <span>Resend OTP in {timeLeft}s ⏱️</span>
+                ) : (
+                  <button
+                    onClick={sendOtp}
+                    className="text-green-700 font-semibold underline"
+                  >
+                    Resend OTP
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </form>
+
+        <div className="text-center mt-4 text-gray-800">
+          Don’t have an account?
+          <Link to="/signup">
+            <span className="text-green-700 font-semibold hover:underline ml-1">
+              Sign Up
+            </span>
+          </Link>
+        </div>
+
+        {/* T&C and Privacy Policy Links */}
+        <div className="text-center mt-4 text-sm text-gray-500">
+          By logging in, you agree to our{" "}
+          <Link to="/terms" className="text-green-700 underline">
+            Terms & Conditions
+          </Link>{" "}
+          and{" "}
+          <Link to="/policy" className="text-green-700 underline">
+            Privacy Policy
+          </Link>.
         </div>
       </div>
-    </>
+    </div>
+  </div>
+</>
   );
 }

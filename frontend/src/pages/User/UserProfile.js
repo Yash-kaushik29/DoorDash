@@ -7,9 +7,11 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import {
+  MdDescription,
   MdHelp,
   MdLocationOn,
   MdNotifications,
+  MdPolicy,
   MdSettings,
   MdShoppingCart,
 } from "react-icons/md";
@@ -107,6 +109,22 @@ const UserProfile = () => {
                 >
                   <span className="font-semibold">Help & Support</span>
                   <MdHelp className="text-2xl text-green-500" />
+                </Link>
+
+                <Link
+                  to="/terms"
+                  className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl p-4 shadow-sm hover:scale-105 transition"
+                >
+                  <span className="font-semibold">Terms & Conditions</span>
+                  <MdDescription className="text-2xl text-green-500" />
+                </Link>
+
+                <Link
+                  to="/policy"
+                  className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl p-4 shadow-sm hover:scale-105 transition"
+                >
+                  <span className="font-semibold">Privacy Policy</span>
+                  <MdPolicy className="text-2xl text-green-500" />
                 </Link>
               </div>
             </div>

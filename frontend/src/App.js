@@ -50,6 +50,8 @@ import OutstandingAmountDetails from "./pages/DeliveryBoy/OutstandingAmountDetai
 import OutstandingAmountList from "./pages/Admin/OutstandingAmountList";
 import DeliveryBoyDetails from "./pages/Admin/DeliveryBoyDetails";
 import GroceryProducts from "./pages/User/GroceryProducts";
+import Terms from "./Terms";
+import Policy from "./Policy";
 
 const App = () => {
   return (
@@ -73,6 +75,8 @@ const App = () => {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/user/addresses/:userId" element={<Addresses />} />
           <Route path="/help-support" element={<HelpSupport />} />
+          <Route path='/terms' element={<Terms />} />
+          <Route path='/policy' element={<Policy />} />
         </Routes>
       </UserContextProvider>
 

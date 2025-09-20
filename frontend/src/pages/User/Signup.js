@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 
 export default function Signup() {
-  const {user, setUser} = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
   const [formData, setFormData] = useState({
     username: "",
     phone: "",
@@ -42,7 +42,7 @@ export default function Signup() {
 
       if (response.data.success) {
         toast.success("Signup Successful! 🎉");
-        setUser(response.data.user)
+        setUser(response.data.user);
         setTimeout(() => {
           navigate("/");
         }, 2000);
@@ -90,64 +90,104 @@ export default function Signup() {
     <>
       <ToastContainer position="top-right" autoClose={3000} />
       {step === "form" ? (
-        <div
-          className="flex justify-center items-center min-h-screen p-4 bg-cover bg-center bg-no-repeat bg-green-200"
-          style={{
-            backgroundImage: "url('/bg.jpg')",
-            backgroundSize: "contain",
-          }}
-        >
-          <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="w-full max-w-md bg-white p-6 shadow-xl rounded-2xl backdrop-blur-lg bg-opacity-90"
-          >
-            <h2 className="text-2xl text-center text-green-600 font-bold mb-4">
-              Signup
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-green-600 mb-1">Name</label>
-                <input
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-green-300 p-2 rounded focus:ring-green-600 focus:border-green-600 focus:outline-none dark:text-gray-800"
-                />
-              </div>
-              <div>
-                <label className="block text-green-600 mb-1">Phone</label>
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-green-300 p-2 rounded focus:ring-green-600 focus:border-green-600 focus:outline-none dark:text-gray-800"
-                />
-              </div>
+        <div className="flex flex-col min-h-screen bg-white">
+          {/* Logo at top */}
+          <div className="mx-auto my-6">
+            <img
+              src="/AppLogo.jpg"
+              alt="GullyFoods Logo"
+              className="w-full h-32 object-contain"
+            />
+          </div>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                type="submit"
-                className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-800"
-              >
+          {/* Signup Card */}
+          <div className="flex justify-center items-center flex-1 p-4">
+            <motion.div
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="w-full max-w-md bg-white p-6 shadow-2xl rounded-3xl border-t-4 border-green-500"
+            >
+              <h2 className="text-2xl text-center text-green-700 font-bold mb-6">
                 Sign Up
-              </motion.button>
-            </form>
+              </h2>
 
-            <div className="text-center mt-4 dark:text-gray-800">
-              Already have an account!{" "}
-              <Link to="/login">
-                <span className="text-green-600 font-semibold hover:underline cursor-pointer ml-1">
-                  Login
-                </span>
-              </Link>
-            </div>
-          </motion.div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-green-700 mb-1 font-medium">
+                    Name
+                  </label>
+                  <input
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+                    placeholder="Enter your name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-green-700 mb-1 font-medium">
+                    Phone
+                  </label>
+                  <input
+                    type="text"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+                    placeholder="Enter your mobile number"
+                  />
+                </div>
+
+                {/* T&C & Privacy */}
+                <div className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    required
+                    className="accent-green-600"
+                  />
+                  <span className="text-gray-600 dark:text-gray-700">
+                    I agree to the{" "}
+                    <Link
+                      to="/terms"
+                      className="text-green-600 hover:underline"
+                    >
+                      Terms & Conditions
+                    </Link>{" "}
+                    and{" "}
+                    <Link
+                      to="/policy"
+                      className="text-green-600 hover:underline"
+                    >
+                      Privacy Policy
+                    </Link>
+                  </span>
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="submit"
+                  className="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition"
+                >
+                  Sign Up
+                </motion.button>
+              </form>
+
+              <div className="text-center mt-4 text-gray-800">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="text-green-700 font-semibold hover:underline"
+                >
+                  Log In
+                </Link>
+              </div>
+            </motion.div>
+          </div>
         </div>
       ) : (
         <div className="z-10 max-w-md mx-auto my-[10vh] text-center bg-white px-4 sm:px-8 py-10 rounded-xl shadow">
