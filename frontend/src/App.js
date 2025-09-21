@@ -52,6 +52,7 @@ import DeliveryBoyDetails from "./pages/Admin/DeliveryBoyDetails";
 import GroceryProducts from "./pages/User/GroceryProducts";
 import Terms from "./Terms";
 import Policy from "./Policy";
+import InstallGuide from "./pages/User/InstallGuide";
 
 const App = () => {
   return (
@@ -77,6 +78,7 @@ const App = () => {
           <Route path="/help-support" element={<HelpSupport />} />
           <Route path='/terms' element={<Terms />} />
           <Route path='/policy' element={<Policy />} />
+          <Route path='/install-guide' element={<InstallGuide />} />
         </Routes>
       </UserContextProvider>
 

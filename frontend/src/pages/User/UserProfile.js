@@ -9,6 +9,7 @@ import { ToastContainer } from "react-toastify";
 import {
   MdDescription,
   MdHelp,
+  MdInstallMobile,
   MdLocationOn,
   MdNotifications,
   MdPolicy,
@@ -101,6 +102,14 @@ const UserProfile = () => {
                 >
                   <span className="font-semibold">Addresses</span>
                   <MdLocationOn className="text-2xl text-green-500" />
+                </Link>
+
+                <Link
+                  to="/install-guide"
+                  className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl p-4 shadow-sm hover:scale-105 transition"
+                >
+                  <span className="font-semibold">Installation Guide</span>
+                  <MdInstallMobile className="text-2xl text-green-500" />
                 </Link>
 
                 <Link

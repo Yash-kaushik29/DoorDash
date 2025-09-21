@@ -119,7 +119,7 @@ useEffect(() => {
       />
     </div>
 
-    <div className="flex justify-center items-center flex-1">
+    <div className="flex justify-center items-center flex-1 -mt-32">
       <div className="w-full max-w-md bg-white p-6 shadow-2xl rounded-3xl border-t-4 border-green-500">
         <h2 className="text-2xl text-center text-green-700 font-bold mb-6">
           Login with OTP
@@ -134,7 +134,7 @@ useEffect(() => {
               value={formData.phone}
               onChange={handleChange}
               required
-              className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-700"
               placeholder="Enter your mobile number"
             />
           </div>
@@ -148,7 +148,7 @@ useEffect(() => {
                 value={formData.otp}
                 onChange={handleChange}
                 required
-                className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+                className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-700"
                 placeholder="Enter OTP"
               />
             </div>

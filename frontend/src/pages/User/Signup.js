@@ -101,7 +101,7 @@ export default function Signup() {
           </div>
 
           {/* Signup Card */}
-          <div className="flex justify-center items-center flex-1 p-4">
+          <div className="flex justify-center items-center flex-1 p-4 -mt-32">
             <motion.div
               initial={{ opacity: 0, y: -50 }}
               animate={{ opacity: 1, y: 0 }}
@@ -122,7 +122,7 @@ export default function Signup() {
                     value={formData.username}
                     onChange={handleChange}
                     required
-                    className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+                    className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-700"
                     placeholder="Enter your name"
                   />
                 </div>
@@ -137,7 +137,7 @@ export default function Signup() {
                     value={formData.phone}
                     onChange={handleChange}
                     required
-                    className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+                    className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-700"
                     placeholder="Enter your mobile number"
                   />
                 </div>

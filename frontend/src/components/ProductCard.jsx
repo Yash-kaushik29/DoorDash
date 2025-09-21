@@ -17,7 +17,13 @@ const DietIcon = ({ type }) => {
   }
 };
 
-const ProductCard = ({ product, bestSeller, user, setUser, variant = "food" }) => {
+const ProductCard = ({
+  product,
+  bestSeller,
+  user,
+  setUser,
+  variant = "food",
+}) => {
   const [loading, setLoading] = useState(false);
 
   // pick which cart we’re working on
@@ -153,17 +159,29 @@ const ProductCard = ({ product, bestSeller, user, setUser, variant = "food" }) =
           alt={product.name}
           onError={(e) => (e.target.src = "https://via.placeholder.com/150")}
         />
+
+        {!product.inStock && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-60 rounded-md">
+            <span className="text-white font-bold text-sm">Out of Stock</span>
+          </div>
+        )}
         {product.inStock && (
           <div className="absolute bottom-0 w-full">
             {cartItem ? (
               <div className="bg-green-500 flex items-center justify-evenly px-2 rounded-b-md text-white">
-                <button onClick={() => handleDecrement(product._id)} disabled={loading}>
+                <button
+                  onClick={() => handleDecrement(product._id)}
+                  disabled={loading}
+                >
                   −
                 </button>
                 <span className="text-sm font-semibold">
                   {cartItem.quantity}
                 </span>
-                <button onClick={() => handleIncrement(product._id)} disabled={loading}>
+                <button
+                  onClick={() => handleIncrement(product._id)}
+                  disabled={loading}
+                >
                   +
                 </button>
               </div>
