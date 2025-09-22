@@ -12,7 +12,7 @@ const groceryCategories = [
   { name: "Snacks & Namkeens", img: "/groceryImages/snacks.png" },
   { name: "Bakery & Biscuits", img: "/groceryImages/bakery.png" },
   { name: "Instant Food", img: "/groceryImages/instant.png" },
-  { name: "Drinks", img: "/groceryImages/drinks.png" },
+  { name: "Beverages", img: "/groceryImages/drinks.png" },
   { name: "Spices & Masala", img: "/groceryImages/spices.png" },
   { name: "Dry Fruits & Nuts", img: "/groceryImages/dryfruits.png" },
   { name: "Household Items", img: "/groceryImages/household.png" },

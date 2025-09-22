@@ -15,6 +15,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const notificationsRoutes = require("./routes/notificationsRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const deliveryRoutes = require("./routes/deliveryRoutes");
+const groceryRoutes = require('./routes/groceryRoutes');
 const multer = require("multer");
 const axios = require("axios");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
@@ -82,6 +83,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/notification", notificationsRoutes);
+app.use('/api/grocery', groceryRoutes);
 
 app.use("/api/admin", adminRoutes);
 

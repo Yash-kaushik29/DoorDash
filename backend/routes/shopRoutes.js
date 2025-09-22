@@ -140,7 +140,7 @@ router.post("/add-products", async (req, res) => {
   let sellerToken = req.cookies?.sellerToken || authHeader;
 
   if (sellerToken && sellerToken.startsWith("Bearer ")) {
-    sellerToken = sellerToken.slice(7).trim(); // remove "Bearer "
+    sellerToken = sellerToken.slice(7).trim(); 
   }
 
   if (!sellerToken) {
@@ -174,14 +174,7 @@ router.post("/add-products", async (req, res) => {
         .json({ success: false, message: "Shop not found" });
     }
 
-    // Attach shop & seller info
     const preparedProducts = products.map((p) => {
-      if (p.basePrice > p.price) {
-        throw new Error(
-          `Invalid pricing: Product "${p.name}" has basePrice (${p.basePrice}) greater than price (${p.price})`
-        );
-      }
-
       return {
         ...p,
         shop: shop._id,

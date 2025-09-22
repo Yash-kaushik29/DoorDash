@@ -208,9 +208,18 @@ const ProductCard = ({
         <p className="mt-1 text-xs text-yellow-500">{product.shopName}</p>
       )}
 
-      <p className="mt-1 text-green-500 font-semibold text-sm">
-        ₹{product.price}
-      </p>
+      {product.price < product.basePrice ? (
+        <p className="mt-1 text-sm">
+          <span className="line-through text-gray-400 mr-2">
+            ₹{product.basePrice}
+          </span>
+          <span className="text-green-500 font-semibold">₹{product.price}</span>
+        </p>
+      ) : (
+        <p className="mt-1 text-green-500 font-semibold text-sm">
+          ₹{product.price}
+        </p>
+      )}
     </div>
   );
 };
