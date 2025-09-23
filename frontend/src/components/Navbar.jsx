@@ -97,7 +97,7 @@ const Navbar = () => {
       <main className="lg:pt-16"></main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white dark:bg-gray-900 shadow-md flex justify-around py-1 border-t dark:border-gray-700 z-10">
+      <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white dark:bg-gray-900 shadow-md flex justify-around py-1 border-t dark:border-gray-700 z-50">
         <Link
           to="/"
           className="p-2 flex flex-col items-center text-gray-600 dark:text-white hover:text-red-600 transition"

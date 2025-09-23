@@ -85,6 +85,10 @@ app.use("/api/order", orderRoutes);
 app.use("/api/notification", notificationsRoutes);
 app.use('/api/grocery', groceryRoutes);
 
+app.get('/api/check', async(req, res) => {
+  res.send({succes: true, message: "Backend connected"})
+})
+
 app.use("/api/admin", adminRoutes);
 
 app.use("/api/delivery", deliveryRoutes);

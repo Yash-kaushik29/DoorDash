@@ -9,32 +9,48 @@ import { UserContext } from "../../context/userContext";
 
 const CartPage = () => {
   const { user, setUser } = useContext(UserContext);
-  const [cartItems, setCartItems] = useState([]);
+  const [foodCartItems, setFoodCartItems] = useState([]);
+  const [groceryCartItems, setGroceryCartItems] = useState([]);
+  const [activeCart, setActiveCart] = useState("food"); 
   const [loading, setLoading] = useState(true);
   const [sellers, setSellers] = useState([]);
   const navigate = useNavigate();
 
+  // Fetch carts
   useEffect(() => {
-    const fetchCartItems = async () => {
+    const fetchCarts = async () => {
       try {
         const { data } = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/cart/getCart`,
           { withCredentials: true }
         );
 
-        setCartItems(data.cart);
+        setFoodCartItems(data.foodCart || []);
+        setGroceryCartItems(data.groceryCart || []);
 
-        const normalizedCart = data.cart.map((item) => ({
-          productId: item.product?._id?.toString(),
+        // Set context
+        const normalizedFoodCart = (data.foodCart || []).map((item) => ({
+          productId: item.product?._id,
           quantity: item.quantity,
         }));
+        const normalizedGroceryCart = (data.groceryCart || []).map((item) => ({
+          productId: item.product?._id,
+          quantity: item.quantity,
+        }));
+        setUser((prev) => ({
+          ...prev,
+          foodCart: normalizedFoodCart,
+          groceryCart: normalizedGroceryCart,
+        }));
 
-        setUser((prev) => ({ ...prev, foodCart: normalizedCart }));
-
-        const uniqueSellers = [
-          ...new Set(data.cart.map((item) => item.product.seller)),
+        const allSellers = [
+          ...new Set(
+            [...(data.foodCart || [])].map(
+              (item) => item.product.seller
+            )
+          ),
         ];
-        setSellers(uniqueSellers);
+        setSellers(allSellers);
       } catch (err) {
         console.error("Failed to fetch cart:", err);
       } finally {
@@ -42,137 +58,120 @@ const CartPage = () => {
       }
     };
 
-    fetchCartItems();
-  }, []);
+    fetchCarts();
+  }, [setUser]);
 
-  const handleIncrement = async (productId) => {
-    const prevItems = [...cartItems];
-    const prevCart = [...(user.foodCart || [])];
+  const updateCartItem = async (productId, type, cartKey) => {
+    const cartItems =
+      cartKey === "foodCart" ? [...foodCartItems] : [...groceryCartItems];
+    const prevContextCart = [...(user[cartKey] || [])];
 
-    setCartItems((prev) =>
-      prev.map((item) =>
+    // Update local state
+    const updatedItems = cartItems
+      .map((item) =>
         item.product._id === productId
-          ? { ...item, quantity: item.quantity + 1 }
+          ? {
+              ...item,
+              quantity: type === "inc" ? item.quantity + 1 : item.quantity - 1,
+            }
           : item
       )
-    );
+      .filter((item) => item.quantity > 0);
 
+    if (cartKey === "foodCart") setFoodCartItems(updatedItems);
+    else setGroceryCartItems(updatedItems);
+
+    // Update context
     setUser((prev) => ({
       ...prev,
-      foodCart: prev.foodCart.map((item) =>
-        item.productId === productId
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ),
-    }));
-
-    try {
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/cart/incrementQty`,
-        { productId },
-        { withCredentials: true }
-      );
-
-      if (!data.success) {
-        // Rollback
-        setCartItems(prevItems);
-        setUser((prevUser) => ({ ...prevUser, foodCart: prevCart }));
-        throw new Error("Increment failed");
-      }
-    } catch (error) {
-      setCartItems(prevItems);
-      setUser((prevUser) => ({ ...prevUser, foodCart: prevCart }));
-      toast.error("Failed to update quantity. Please try again.");
-    }
-  };
-
-  const handleDecrement = async (productId) => {
-    const prevItems = [...cartItems];
-    const prevCart = [...(user.foodCart || [])];
-
-    setCartItems((prev) =>
-      prev
-        .map((item) =>
-          item.product._id === productId
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-
-    setUser((prev) => ({
-      ...prev,
-      foodCart: prev.foodCart
+      [cartKey]: prev[cartKey]
         .map((item) =>
           item.productId === productId
-            ? { ...item, quantity: item.quantity - 1 }
+            ? {
+                ...item,
+                quantity: type === "inc" ? item.quantity + 1 : item.quantity - 1,
+              }
             : item
         )
         .filter((item) => item.quantity > 0),
     }));
 
+    // API call
     try {
+      const endpoint =
+        type === "inc"
+          ? "/api/cart/incrementQty"
+          : "/api/cart/decrementQty";
+
       const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/cart/decrementQty`,
-        { productId },
+        `${process.env.REACT_APP_API_URL}${endpoint}`,
+        { productId, cartKey },
         { withCredentials: true }
       );
 
       if (!data.success) {
         // Rollback
-        setCartItems(prevItems);
-        setUser((prevUser) => ({ ...prevUser, foodCart: prevCart }));
-        throw new Error("Decrement failed");
+        if (cartKey === "foodCart") setFoodCartItems(cartItems);
+        else setGroceryCartItems(cartItems);
+        setUser((prev) => ({ ...prev, [cartKey]: prevContextCart }));
+        throw new Error("Update failed");
       }
-    } catch (error) {
-      setCartItems(prevItems);
-      setUser((prevUser) => ({ ...prevUser, foodCart: prevCart }));
+    } catch (err) {
+      if (cartKey === "foodCart") setFoodCartItems(cartItems);
+      else setGroceryCartItems(cartItems);
+      setUser((prev) => ({ ...prev, [cartKey]: prevContextCart }));
       toast.error("Failed to update quantity. Please try again.");
     }
   };
 
-  const removeFromCart = async (productId) => {
-    const prevItems = [...cartItems];
-    const prevCart = [...(user.foodCart || [])];
+  const removeFromCart = async (productId, cartKey) => {
+    const cartItems =
+      cartKey === "foodCart" ? [...foodCartItems] : [...groceryCartItems];
+    const prevContextCart = [...(user[cartKey] || [])];
 
-    setCartItems((prev) =>
-      prev.filter((item) => item.product._id !== productId)
-    );
+    const updatedItems = cartItems.filter((item) => item.product._id !== productId);
 
-    setUser((prevUser) => ({
-      ...prevUser,
-      foodCart: prevUser.foodCart.filter((item) => item.productId !== productId),
+    if (cartKey === "foodCart") setFoodCartItems(updatedItems);
+    else setGroceryCartItems(updatedItems);
+
+    setUser((prev) => ({
+      ...prev,
+      [cartKey]: prev[cartKey].filter((item) => item.productId !== productId),
     }));
 
     try {
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/cart/removeFromCart`,
-        { productId },
+        { productId, cartKey },
         { withCredentials: true }
       );
 
       if (!data.success) {
-        // Rollback
-        setCartItems(prevItems);
-        setUser((prevUser) => ({ ...prevUser, foodCart: prevCart }));
+        if (cartKey === "foodCart") setFoodCartItems(cartItems);
+        else setGroceryCartItems(cartItems);
+        setUser((prev) => ({ ...prev, [cartKey]: prevContextCart }));
         throw new Error("Remove failed");
       }
-    } catch (error) {
-      console.error("Error removing from cart:", error.message);
-      setCartItems(prevItems);
-      setUser((prevUser) => ({ ...prevUser, foodCart: prevCart }));
+    } catch (err) {
+      if (cartKey === "foodCart") setFoodCartItems(cartItems);
+      else setGroceryCartItems(cartItems);
+      setUser((prev) => ({ ...prev, [cartKey]: prevContextCart }));
       toast.error("Failed to remove product. Please try again.");
     }
   };
 
-  const totalPrice = cartItems.reduce(
-    (sum, item) => sum + item?.product?.price * item?.quantity,
-    0
-  );
+  const getTotalPrice = (items) =>
+    items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   const handleCheckout = () => {
-    navigate("/checkout", { state: { cartItems, totalPrice, sellers } });
+    const cartItems = activeCart === "food" ? foodCartItems : groceryCartItems;
+    navigate("/checkout", {
+      state: { cartItems, totalPrice: getTotalPrice(cartItems), sellers, cartKey: activeCart },
+    });
   };
+
+  const currentCartItems =
+    activeCart === "food" ? foodCartItems : groceryCartItems;
 
   return (
     <div>
@@ -182,20 +181,44 @@ const CartPage = () => {
           Your Cart
         </h1>
 
+        {/* Cart Tabs */}
+        <div className="flex justify-center mb-6 space-x-4">
+          <button
+            className={`px-4 py-2 rounded-lg font-semibold ${
+              activeCart === "food"
+                ? "bg-green-500 text-white"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
+            }`}
+            onClick={() => setActiveCart("food")}
+          >
+            🍔 Food Cart
+          </button>
+          <button
+            className={`px-4 py-2 rounded-lg font-semibold ${
+              activeCart === "grocery"
+                ? "bg-green-500 text-white"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
+            }`}
+            onClick={() => setActiveCart("grocery")}
+          >
+            🛒 Grocery Cart
+          </button>
+        </div>
+
         {loading ? (
           <div className="flex justify-center items-center space-x-2 mt-12">
             <span className="w-3 h-3 bg-green-700 rounded-full animate-bounce [animation-delay:0s]"></span>
             <span className="w-3 h-3 bg-green-600 rounded-full animate-bounce [animation-delay:0.2s]"></span>
             <span className="w-3 h-3 bg-green-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
           </div>
-        ) : cartItems.length === 0 ? (
+        ) : currentCartItems.length === 0 ? (
           <p className="text-center text-gray-500 dark:text-gray-400">
-            Sad cart alert! Time to grab some treats 🍕🍔
+            Your {activeCart === "food" ? "food" : "grocery"} cart is empty.
           </p>
         ) : (
           <div className="bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-xl max-w-3xl mx-auto border border-green-100 dark:border-gray-700">
             <div className="space-y-6">
-              {cartItems.map((item) => (
+              {currentCartItems.map((item) => (
                 <div
                   key={item.product._id}
                   className="flex items-center justify-between border-b border-green-100 dark:border-gray-700 pb-4"
@@ -216,7 +239,7 @@ const CartPage = () => {
 
                   {/* Product Details */}
                   <div className="flex-1 ml-4">
-                    <h3 className="font-bold text-gray-900 dark:text-white text-lg">
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
                       {item.product.name}
                     </h3>
                     <p className="text-green-600 font-medium text-sm">
@@ -226,7 +249,6 @@ const CartPage = () => {
                       ₹{item.product?.price} x {item?.quantity}
                     </p>
 
-                    {/* Stock / Shop Status */}
                     {!item.product.inStock && (
                       <p className="text-red-500 text-xs font-semibold mt-1">
                         Out of Stock 🚫
@@ -245,8 +267,12 @@ const CartPage = () => {
                       className="text-red-500 hover:text-red-600 text-2xl cursor-pointer transition"
                       onClick={() =>
                         item.quantity > 1
-                          ? handleDecrement(item.product._id)
-                          : removeFromCart(item.product._id)
+                          ? updateCartItem(
+                              item.product._id,
+                              "dec",
+                              activeCart + "Cart"
+                            )
+                          : removeFromCart(item.product._id, activeCart + "Cart")
                       }
                     />
                     <span className="text-lg font-bold text-green-700 dark:text-green-300 w-6 text-center">
@@ -254,39 +280,24 @@ const CartPage = () => {
                     </span>
                     <IoAddCircle
                       className="text-green-500 hover:text-green-600 text-2xl cursor-pointer transition"
-                      onClick={() => handleIncrement(item.product._id)}
+                      onClick={() =>
+                        updateCartItem(item.product._id, "inc", activeCart + "Cart")
+                      }
                     />
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Warning if any shop is closed */}
-            {cartItems.some((item) => !item?.product?.shop?.isOpen) && (
-              <p className="text-red-500 text-sm font-semibold text-center mt-4">
-                ⚠️ Some items are from closed shops. Remove them before
-                checkout.
-              </p>
-            )}
-
-            {/* Multi-seller warning */}
-            {sellers.length > 1 && (
-              <div className="mt-4 p-3 bg-gradient-to-r from-yellow-100 to-yellow-50 border-l-4 border-yellow-500 text-yellow-800 rounded-lg text-sm font-medium shadow-sm">
-                ⚡ Your order has items from <b>{sellers.length}</b> shops. A{" "}
-                <span className="font-semibold">convenience fee</span> may
-                apply.
-              </div>
-            )}
-
-            {/* Total Price & Checkout */}
+            {/* Total & Checkout */}
             <div className="mt-6 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-inner">
               <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white">
                 <span>Total:</span>
-                <span>₹{totalPrice.toFixed(2)}</span>
+                <span>₹{getTotalPrice(currentCartItems).toFixed(2)}</span>
               </div>
               <button
                 className={`w-full py-3 mt-6 rounded-xl font-semibold transition shadow-lg ${
-                  cartItems.some(
+                  currentCartItems.some(
                     (item) =>
                       !item.product.inStock || !item?.product?.shop?.isOpen
                   )
@@ -294,12 +305,12 @@ const CartPage = () => {
                     : "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:scale-105 hover:shadow-xl"
                 }`}
                 onClick={handleCheckout}
-                disabled={cartItems.some(
+                disabled={currentCartItems.some(
                   (item) =>
                     !item.product.inStock || !item?.product?.shop?.isOpen
                 )}
               >
-                {cartItems.some(
+                {currentCartItems.some(
                   (item) =>
                     !item.product.inStock || !item?.product?.shop?.isOpen
                 )

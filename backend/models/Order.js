@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-// Function to generate a 6-character alphanumeric ID
 const generateId = () => {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let id = "";
@@ -13,6 +12,7 @@ const generateId = () => {
 const OrderSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    orderType: {type: String, reuired: true},
     id: { type: String, unique: true },
     items: [
       {
@@ -35,6 +35,7 @@ const OrderSchema = new mongoose.Schema(
     amount: { type: Number, required: true },
     taxes: { type: Number, required: true },
     convenienceFees: { type: Number, required: true },
+    serviceCharge: { type: Number, required: true },
     deliveryStatus: { type: String, default: "Processing" },
     deliveryCharge: {type: Number, required: true},
     paymentMethod: {type: String, default: "COD"},

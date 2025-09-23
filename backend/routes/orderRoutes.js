@@ -11,11 +11,14 @@ router.post("/create-order", async (req, res) => {
     userId,
     cartItems,
     paymentMethod,
-    taxes,
-    convenienceFees,
+    taxes = 0,
+    convenienceFees = 0,
+    serviceCharge = 0,
     address,
     paymentStatus,
-    deliveryCharge,
+    deliveryCharge = 0,
+    orderType, // "Food" or "Grocery"
+    cartKey,   // "foodCart" or "groceryCart" for clearing
   } = req.body;
 
   try {
@@ -26,14 +29,10 @@ router.post("/create-order", async (req, res) => {
     const orderItems = await Promise.all(
       cartItems.map(async (item) => {
         const product = await Product.findById(item.product).populate("seller");
-        if (!product) {
-          throw new Error("Product not found");
-        }
+        if (!product) throw new Error("Product not found");
 
         const sellerId = product.seller._id.toString();
-        if (!sellersNotified.includes(sellerId)) {
-          sellersNotified.push(sellerId);
-        }
+        if (!sellersNotified.includes(sellerId)) sellersNotified.push(sellerId);
 
         subTotal += product.price * item.quantity;
 
@@ -45,17 +44,20 @@ router.post("/create-order", async (req, res) => {
       })
     );
 
-    const totalAmount = subTotal + deliveryCharge + taxes + convenienceFees;
+    // Calculate total amount
+    const totalAmount = subTotal + deliveryCharge + (orderType === "Food" ? taxes + convenienceFees : serviceCharge);
 
     const newOrder = new Order({
       user: userId,
       items: orderItems,
       shippingAddress: address,
+      orderType,
       paymentMethod,
       totalAmount,
       amount: subTotal,
       taxes,
       convenienceFees,
+      serviceCharge,
       deliveryStatus: "Processing",
       deliveryCharge,
       paymentStatus,
@@ -64,27 +66,20 @@ router.post("/create-order", async (req, res) => {
 
     await newOrder.save();
 
-    await User.findByIdAndUpdate(userId, {
-      cart: [],
-      $push: {
-        notifications: {
-          message: `Your order with order ID: #${newOrder.id} is processed.`,
-          url: `/order/${newOrder._id}`,
-        },
-        orders: newOrder._id,
-      },
-    });
+    // Clear the respective cart after order creation
+    const updateCart = { $push: { notifications: { message: `Your order with order ID: #${newOrder.id} is processed.`, url: `/order/${newOrder._id}` }, orders: newOrder._id } };
+    updateCart[cartKey] = [];
 
-    // Notify sellers about new orders
+    await User.findByIdAndUpdate(userId, updateCart);
+
+    // Notify sellers
     await Promise.all(
       sellersNotified.map((sellerId) =>
         Seller.findByIdAndUpdate(sellerId, {
           $push: {
             notifications: {
               order: newOrder._id,
-              message: `New order received. You need to prepare ${
-                orderItems.filter((item) => item.seller === sellerId).length
-              } items.`,
+              message: `New order received. You need to prepare ${orderItems.filter((item) => item.seller === sellerId).length} items.`,
             },
             orders: newOrder._id,
           },

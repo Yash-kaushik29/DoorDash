@@ -5,6 +5,7 @@ import ProductCard from "../../components/ProductCard";
 import { UserContext } from "../../context/userContext";
 import { motion } from "framer-motion";
 import axios from "axios";
+import { ToastContainer } from "react-toastify";
 
 const GroceryProducts = () => {
   const { category } = useParams();
@@ -42,6 +43,7 @@ const GroceryProducts = () => {
 
   return (
     <>
+     <ToastContainer />
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 py-6">
         <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white capitalize">
