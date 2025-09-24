@@ -227,33 +227,68 @@ const OrderDetails = () => {
                 {formatPrice(order?.amount)}
               </span>
             </p>
+
             <p className="font-semibold">
               Delivery Fee:{" "}
               <span className="text-green-500 ml-2">
                 {formatPrice(order?.deliveryCharge)}
               </span>
             </p>
-            <p className="font-semibold">
-              Tax:{" "}
-              <span className="text-green-500 ml-2">
-                {formatPrice(order?.taxes)}
-              </span>
-            </p>
-            {order?.convenienceFees > 0 && (
+
+            {order?.orderType === "Food" && (
+              <>
+                <p className="font-semibold">
+                  Tax:{" "}
+                  <span className="text-green-500 ml-2">
+                    {formatPrice(order?.taxes)}
+                  </span>
+                </p>
+                {order?.convenienceFees > 0 && (
+                  <p className="font-semibold">
+                    Multiple Store Convenience Fee:{" "}
+                    <span className="text-green-500 ml-2">
+                      {formatPrice(order?.convenienceFees)}
+                    </span>
+                  </p>
+                )}
+              </>
+            )}
+
+            {order?.orderType === "Grocery" && order?.serviceCharge > 0 && (
               <p className="font-semibold">
-                Multiple Store Convenience Fee:{" "}
+                Service Charge:{" "}
                 <span className="text-green-500 ml-2">
-                  {formatPrice(order?.convenienceFees)}
+                  {formatPrice(order?.serviceCharge)}
                 </span>
               </p>
             )}
+
             <div className="h-[1px] bg-black dark:bg-white my-2"></div>
+
             <p className="font-semibold text-lg">
               Total:{" "}
               <span className="text-green-700 dark:text-green-300 ml-2 font-bold">
                 {formatPrice(order?.totalAmount)}
               </span>
             </p>
+
+            {/* Extra suggested info */}
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Payment Method:{" "}
+              <span className="font-medium">{order?.paymentMethod}</span>
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Placed On:{" "}
+              <span className="font-medium">
+                {new Date(order?.createdAt).toLocaleString()}
+              </span>
+            </p>
+            {order?.orderType === "Grocery" && (
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Items Ordered:{" "}
+                <span className="font-medium">{order?.items?.length}</span>
+              </p>
+            )}
           </div>
         </div>
       </div>
