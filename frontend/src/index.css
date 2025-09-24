@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&display=swap');
 
 body {
   margin: 0;
@@ -18,5 +19,9 @@ body {
 .dark body {
   background-color: #1b1e24; /* Dark background */
   color: white; /* Dark text */
+}
+
+.heading-font {
+  font-family: 'Cinzel', sans-serif;
 }
 

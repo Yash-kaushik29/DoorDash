@@ -89,10 +89,9 @@ const Home = () => {
       {/* Mobile App Name */}
       <div className="flex flex-col items-center pt-4 lg:hidden">
         <div className="flex items-center gap-2 text-3xl">
-          <span className="font-bold text-black dark:text-white">
+          <span className="font-bold text-black dark:text-white heading-font">
             Gully<span className="text-green-500">Foods</span>
           </span>
-          <GiNoodles className="font-bold text-green-500 -mt-1" />
         </div>
         <span className="italic text-gray-600 font-semibold dark:text-white text-lg text-center">
           Your lane, your taste, your GullyFoods ✨
