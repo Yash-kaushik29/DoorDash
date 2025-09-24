@@ -32,7 +32,7 @@ app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:3000", "https://door-dash-sigma.vercel.app", "https://gullyfoods.app/"],
+    origin: ["http://localhost:3000", "https://door-dash-sigma.vercel.app", "https://gullyfoods.app"],
     methods: ["POST", "PUT", "GET", "DELETE"],
   })
 );
