@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { IoIosCart } from "react-icons/io";
-import { RiAccountCircleLine } from "react-icons/ri";
+import { RiAccountCircleLine, RiDrinks2Line } from "react-icons/ri";
 import { FaSun, FaMoon, FaHistory, FaHome } from "react-icons/fa";
 import { UserContext } from "../context/userContext";
-import { GiNoodles } from "react-icons/gi";
+import { GiShakingHands, GiShoppingCart } from "react-icons/gi";
 
 const Navbar = () => {
   const { user } = useContext(UserContext);
@@ -41,11 +41,9 @@ const Navbar = () => {
           <Link to="/">
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2 text-xl">
-                <span className="font-bold text-black dark:text-white">
+                <span className="font-bold text-black dark:text-white heading-font">
                   Gully<span className="text-green-500">Foods</span>
                 </span>
-
-                <GiNoodles className="font-bold text-green-500 " />
               </div>
               <span className="italic text-gray-600 font-semibold dark:text-white">
                 Your lane, your taste, your GullyFoods ✨
@@ -60,15 +58,35 @@ const Navbar = () => {
                 <FaHistory size={20} />
               </button>
             </Link>
-            <Link to="/cart">
-              <div className="relative">
-                <IoIosCart size={22} />
-                {user && user.foodCart?.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                    {user.foodCart.length}
-                  </span>
-                )}
+            <Link
+              to="/cart"
+              className="p-2 flex flex-col items-center text-gray-600 dark:text-white hover:text-green-500 transition"
+            >
+              <div className="flex items-center gap-2">
+                {/* Food cart (shaker) */}
+                <div className="relative">
+                  <RiDrinks2Line size={20} />
+                  {user && user.foodCart?.length > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+                      {user.foodCart.length}
+                    </span>
+                  )}
+                </div>
+
+                <span className="text-sm">/</span>
+
+                {/* Grocery cart */}
+                <div className="relative">
+                  <GiShoppingCart size={20} />
+                  {user && user.groceryCart?.length > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+                      {user.groceryCart.length}
+                    </span>
+                  )}
+                </div>
               </div>
+
+              <span className="text-md">Carts</span>
             </Link>
 
             <button onClick={toggleTheme} className="p-2 transition">
@@ -118,15 +136,31 @@ const Navbar = () => {
           to="/cart"
           className="p-2 flex flex-col items-center text-gray-600 dark:text-white hover:text-green-500 transition"
         >
-          <div className="relative">
-            <IoIosCart size={22} />
-            {user && user.foodCart?.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                {user.foodCart.length}
-              </span>
-            )}
+          <div className="flex items-center gap-2">
+            {/* Food cart (shaker) */}
+            <div className="relative">
+              <RiDrinks2Line size={20} />
+              {user && user.foodCart?.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+                  {user.foodCart.length}
+                </span>
+              )}
+            </div>
+
+            <span className="text-sm">/</span>
+
+            {/* Grocery cart */}
+            <div className="relative">
+              <GiShoppingCart size={20} />
+              {user && user.groceryCart?.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+                  {user.groceryCart.length}
+                </span>
+              )}
+            </div>
           </div>
-          <span className="text-xs">Cart</span>
+
+          <span className="text-md">Carts</span>
         </Link>
 
         <button

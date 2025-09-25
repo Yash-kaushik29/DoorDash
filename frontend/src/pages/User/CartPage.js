@@ -11,7 +11,7 @@ const CartPage = () => {
   const { user, setUser } = useContext(UserContext);
   const [foodCartItems, setFoodCartItems] = useState([]);
   const [groceryCartItems, setGroceryCartItems] = useState([]);
-  const [activeCart, setActiveCart] = useState("food"); 
+  const [activeCart, setActiveCart] = useState("foodCart"); 
   const [loading, setLoading] = useState(true);
   const [sellers, setSellers] = useState([]);
   const navigate = useNavigate();
@@ -164,14 +164,14 @@ const CartPage = () => {
     items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   const handleCheckout = () => {
-    const cartItems = activeCart === "food" ? foodCartItems : groceryCartItems;
+    const cartItems = activeCart === "foodCart" ? foodCartItems : groceryCartItems;
     navigate("/checkout", {
       state: { cartItems, totalPrice: getTotalPrice(cartItems), sellers, cartKey: activeCart },
     });
   };
 
   const currentCartItems =
-    activeCart === "food" ? foodCartItems : groceryCartItems;
+    activeCart === "foodCart" ? foodCartItems : groceryCartItems;
 
   return (
     <div>
@@ -185,21 +185,21 @@ const CartPage = () => {
         <div className="flex justify-center mb-6 space-x-4">
           <button
             className={`px-4 py-2 rounded-lg font-semibold ${
-              activeCart === "food"
+              activeCart === "foodCart"
                 ? "bg-green-500 text-white"
                 : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
             }`}
-            onClick={() => setActiveCart("food")}
+            onClick={() => setActiveCart("foodCart")}
           >
             🍔 Food Cart
           </button>
           <button
             className={`px-4 py-2 rounded-lg font-semibold ${
-              activeCart === "grocery"
+              activeCart === "groceryCart"
                 ? "bg-green-500 text-white"
                 : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
             }`}
-            onClick={() => setActiveCart("grocery")}
+            onClick={() => setActiveCart("groceryCart")}
           >
             🛒 Grocery Cart
           </button>
@@ -213,7 +213,7 @@ const CartPage = () => {
           </div>
         ) : currentCartItems.length === 0 ? (
           <p className="text-center text-gray-500 dark:text-gray-400">
-            Your {activeCart === "food" ? "food" : "grocery"} cart is empty.
+            Your {activeCart === "foodCart" ? "food" : "grocery"} cart is empty.
           </p>
         ) : (
           <div className="bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-xl max-w-3xl mx-auto border border-green-100 dark:border-gray-700">

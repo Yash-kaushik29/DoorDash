@@ -14,7 +14,7 @@ const Checkout = () => {
     totalPrice: cartTotalPrice,
     sellers,
     cartKey,
-  } = location.state || { cartItems: [], totalPrice: 0, sellers: 1, cartKey: "food" };
+  } = location.state || { cartItems: [], totalPrice: 0, sellers: 1, cartKey: "foodCart" };
 
   const isFoodOrder = cartKey === "food";
 

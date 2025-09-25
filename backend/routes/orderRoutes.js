@@ -17,8 +17,8 @@ router.post("/create-order", async (req, res) => {
     address,
     paymentStatus,
     deliveryCharge = 0,
-    orderType, // "Food" or "Grocery"
-    cartKey,   // "foodCart" or "groceryCart" for clearing
+    orderType, 
+    cartKey,   
   } = req.body;
 
   try {
