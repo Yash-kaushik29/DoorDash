@@ -14,24 +14,25 @@ const GroceryProducts = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/grocery?category=${encodeURIComponent(category)}`
-      );
-      setProducts(res.data.products || []);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(
+          `${
+            process.env.REACT_APP_API_URL
+          }/api/grocery?category=${encodeURIComponent(category)}`
+        );
+        setProducts(res.data.products || []);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchProducts();
-}, [category]);
-
+    fetchProducts();
+  }, [category]);
 
   // Group by subcategory
   const grouped = products.reduce((acc, product) => {
@@ -43,7 +44,7 @@ const GroceryProducts = () => {
 
   return (
     <>
-     <ToastContainer />
+      <ToastContainer />
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 py-6">
         <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white capitalize">
@@ -66,6 +67,7 @@ const GroceryProducts = () => {
                 {items.map((product) => (
                   <motion.div
                     key={product._id}
+                    className="min-w-[140px]" 
                     whileTap={{ scale: 0.95 }}
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 300 }}

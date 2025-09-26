@@ -138,96 +138,93 @@ const ProductCard = ({
   };
 
   return (
-    <div
-  className={`relative ${
-    variant === "grocery"
-      ? "bg-white dark:bg-gray-800 p-2 rounded-md shadow hover:scale-105 transition w-32 flex-shrink-0"
-      : "bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transform transition duration-300 hover:scale-105"
-  }`}
->
-  {/* DISCOUNT BANNER */}
-  {product.basePrice > product.price && (
-    <span className="absolute -top-2 left-2 bg-yellow-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-lg z-10">
-      {Math.round(((product.basePrice - product.price) / product.basePrice) * 100)}%
-      <p>OFF</p>
-    </span>
-  )}
+    <div className="relative bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transform transition duration-300 hover:scale-105">
+      {/* DISCOUNT BANNER */}
+      {product.basePrice > product.price && (
+        <span className="absolute -top-2 left-2 bg-yellow-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-lg z-10">
+          {Math.round(
+            ((product.basePrice - product.price) / product.basePrice) * 100
+          )}
+          %<p>OFF</p>
+        </span>
+      )}
 
-  {bestSeller && (
-    <span className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-b-lg z-10">
-      Bestseller
-    </span>
-  )}
+      {bestSeller && (
+        <span className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-b-lg z-10">
+          Bestseller
+        </span>
+      )}
 
-  {/* IMAGE */}
-  <div className="relative">
-    <img
-      className="w-full h-32 object-cover rounded-md"
-      src={product.images?.[0] || "https://via.placeholder.com/150"}
-      alt={product.name}
-      onError={(e) => (e.target.src = "https://via.placeholder.com/150")}
-    />
+      {/* IMAGE */}
+      <div className="relative">
+        <img
+          className="w-full h-32 object-cover rounded-md"
+          src={product.images?.[0] || "https://via.placeholder.com/150"}
+          alt={product.name}
+          onError={(e) => (e.target.src = "https://via.placeholder.com/150")}
+        />
 
-    {!product.inStock && (
-      <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-60 rounded-md">
-        <span className="text-white font-bold text-sm">Out of Stock</span>
-      </div>
-    )}
-    {product.inStock && (
-      <div className="absolute bottom-0 w-full">
-        {cartItem ? (
-          <div className="bg-green-500 flex items-center justify-evenly px-2 rounded-b-md text-white">
-            <button
-              onClick={() => handleDecrement(product._id)}
-              disabled={loading}
-            >
-              −
-            </button>
-            <span className="text-sm font-semibold">{cartItem.quantity}</span>
-            <button
-              onClick={() => handleIncrement(product._id)}
-              disabled={loading}
-            >
-              +
-            </button>
+        {!product.inStock && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-60 rounded-md">
+            <span className="text-white font-bold text-sm">Out of Stock</span>
           </div>
-        ) : (
-          <button
-            className="w-full bg-green-500 text-white text-xs py-1 rounded-b-md hover:bg-green-600"
-            onClick={addProductToCart}
-            disabled={loading}
-          >
-            {loading ? "Adding..." : "Add"}
-          </button>
+        )}
+        {product.inStock && (
+          <div className="absolute bottom-0 w-full">
+            {cartItem ? (
+              <div className="bg-green-500 flex items-center justify-evenly px-2 rounded-b-md text-white">
+                <button
+                  onClick={() => handleDecrement(product._id)}
+                  disabled={loading}
+                >
+                  −
+                </button>
+                <span className="text-sm font-semibold">
+                  {cartItem.quantity}
+                </span>
+                <button
+                  onClick={() => handleIncrement(product._id)}
+                  disabled={loading}
+                >
+                  +
+                </button>
+              </div>
+            ) : (
+              <button
+                className="w-full bg-green-500 text-white text-xs py-1 rounded-b-md hover:bg-green-600"
+                onClick={addProductToCart}
+                disabled={loading}
+              >
+                {loading ? "Adding..." : "Add"}
+              </button>
+            )}
+          </div>
         )}
       </div>
-    )}
-  </div>
 
-  {/* INFO */}
-  <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-    {product.name}
-    {variant === "food" && <DietIcon type={product.dietType} />}
-  </h3>
+      {/* INFO */}
+      <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        {product.name}
+        {variant === "food" && <DietIcon type={product.dietType} />}
+      </h3>
 
-  {variant === "food" && (
-    <p className="mt-1 text-xs text-yellow-500">{product.shopName}</p>
-  )}
+      {variant === "food" && (
+        <p className="mt-1 text-xs text-yellow-500">{product.shopName}</p>
+      )}
 
-  {product.price < product.basePrice ? (
-    <p className="mt-1 text-sm">
-      <span className="line-through text-gray-400 mr-2">
-        ₹{product.basePrice}
-      </span>
-      <span className="text-green-500 font-semibold">₹{product.price}</span>
-    </p>
-  ) : (
-    <p className="mt-1 text-green-500 font-semibold text-sm">
-      ₹{product.price}
-    </p>
-  )}
-</div>
-
+      {product.price < product.basePrice ? (
+        <p className="mt-1 text-sm">
+          <span className="line-through text-gray-400 mr-2">
+            ₹{product.basePrice}
+          </span>
+          <span className="text-green-500 font-semibold">₹{product.price}</span>
+        </p>
+      ) : (
+        <p className="mt-1 text-green-500 font-semibold text-sm">
+          ₹{product.price}
+        </p>
+      )}
+    </div>
   );
 };
 

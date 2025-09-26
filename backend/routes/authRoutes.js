@@ -18,58 +18,76 @@ const generateNumericOtp = (length = 4) => {
 router.post("/send-otp", async (req, res) => {
   const { phone, username } = req.body.formData;
 
-  if (![phone])
+  if (!phone) {
     return res
       .status(400)
       .json({ success: false, message: "Phone number required" });
-
-  const existingPhone = await User.findOne({ phone });
-  const existingUsername = await User.findOne({ username });
-
-  if (existingPhone) {
-    return res
-      .status(409)
-      .send({ success: false, message: "Account already exists!" });
   }
-
-  if (existingUsername) {
-    return res
-      .status(409)
-      .send({ success: false, message: "Username is already taken!" });
-  }
-
-  const existingOtp = await Otp.findOne({ phone, otpFor: "signup" });
-
-  if (existingOtp) {
-    return res.status(429).json({
-      success: false,
-      message: "OTP already sent. Please try again after 2 minutes.",
-    });
-  }
-
-  const otp = generateNumericOtp();
-
-  console.log(otp);
 
   try {
-    // const response = await axios.get(
-    //   `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/+91${phone}/${otp}`
-    // );
+    // Check existing user
+    const existingPhone = await User.findOne({ phone });
+    const existingUsername = await User.findOne({ username });
 
-    // if (response.data.Status !== "Success") {
-    //   return res.status(500).json({
-    //     success: false,
-    //     message: "Failed to send OTP via SMS provider",
-    //   });
-    // }
+    if (existingPhone) {
+      return res
+        .status(409)
+        .json({ success: false, message: "Account already exists!" });
+    }
 
-    // const otpEntry = new Otp({ phone, otp, otpFor: "signup" });
-    // await otpEntry.save();
+    if (existingUsername) {
+      return res
+        .status(409)
+        .json({ success: false, message: "Username is already taken!" });
+    }
+
+    // Check OTP cooldown
+    const existingOtp = await Otp.findOne({ phone, otpFor: "signup" });
+    if (existingOtp) {
+      return res.status(429).json({
+        success: false,
+        message: "OTP already sent. Please try again after 2 minutes.",
+      });
+    }
+
+    // Send OTP via MessageCentral Verification API
+    const url = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=${process.env.MESSAGECENTRAL_CUSTOMER_ID}&flowType=SMS&mobileNumber=${phone}`;
+
+    const response = await axios.post(url, null, {
+      headers: {
+        authToken:
+          "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJDLUIxQUU0QUJCMDIyMzQ1MSIsImlhdCI6MTc1ODgyMTQ0NCwiZXhwIjoxOTE2NTAxNDQ0fQ.OFc7r_QYfUxKW-SWFNAFNJmCN1mcwQy_muBHXnVCbQqKHnUzeI7eT8QYsbhSsRPxLYtBUY6EAKDveP-28EWvYA",
+      },
+    });
+
+    console.log(url, response.data);
+
+    // Check response
+    if (response.data.status !== "SUCCESS") {
+      return res.status(500).json({
+        success: false,
+        message:
+          response.data.message ||
+          "Failed to send OTP via MessageCentral verification API",
+      });
+    }
+
+    // Save a record in DB for cooldown purposes (optional)
+    const otpEntry = new Otp({ phone, otpFor: "signup" });
+    await otpEntry.save();
 
     res.json({ success: true, message: "OTP sent successfully" });
   } catch (error) {
-    console.error("Mail error:", error);
-    res.status(500).json({ success: false, message: "Failed to send OTP" });
+    console.error(
+      "MessageCentral error:",
+      error.response?.data || error.message
+    );
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to send OTP via MessageCentral",
+      });
   }
 });
 
@@ -133,9 +151,9 @@ router.post("/user-signup", async (req, res) => {
     if (existingUser) {
       res.send({ success: false, message: "Phone is already in use!" });
     } else {
-      // const existingOtp = await Otp.findOne({ phone, otpFor: "signup" });
-      const existingOtp = true
-      if (existingOtp && otp === "1111") {
+      const existingOtp = await Otp.findOne({ phone, otpFor: "signup" });
+
+      if (existingOtp && otp === existingOtp) {
         const newUser = new User({ username, phone });
         await newUser.save();
 

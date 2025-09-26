@@ -79,6 +79,7 @@ const SearchQuery = () => {
                 bestSeller={false}
                 user={user}
                 setUser={setUser}
+                variant={product.shopType === 'Grocery' ? "grocery" : "food"}
               />
             ))}
           </div>

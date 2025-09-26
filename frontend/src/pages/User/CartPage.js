@@ -270,9 +270,9 @@ const CartPage = () => {
                           ? updateCartItem(
                               item.product._id,
                               "dec",
-                              activeCart + "Cart"
+                              activeCart
                             )
-                          : removeFromCart(item.product._id, activeCart + "Cart")
+                          : removeFromCart(item.product._id, activeCart)
                       }
                     />
                     <span className="text-lg font-bold text-green-700 dark:text-green-300 w-6 text-center">
@@ -281,7 +281,7 @@ const CartPage = () => {
                     <IoAddCircle
                       className="text-green-500 hover:text-green-600 text-2xl cursor-pointer transition"
                       onClick={() =>
-                        updateCartItem(item.product._id, "inc", activeCart + "Cart")
+                        updateCartItem(item.product._id, "inc", activeCart)
                       }
                     />
                   </div>

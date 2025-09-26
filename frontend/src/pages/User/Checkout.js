@@ -337,7 +337,7 @@ const Checkout = () => {
         </div>
 
         {/* Checkout Button */}
-        <button
+        {/* <button
           onClick={handleCheckout}
           disabled={!selectedAddress}
           className={`w-full py-3 mt-2 rounded-xl font-bold text-lg transition 
@@ -345,7 +345,7 @@ const Checkout = () => {
           `}
         >
           {paymentMethod === "Razorpay" ? "Proceed to Pay 💳" : "Place Order 🎉"}
-        </button>
+        </button> */}
       </div>
     </div>
   );
