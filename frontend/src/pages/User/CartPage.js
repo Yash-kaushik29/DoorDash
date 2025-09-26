@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { MdDelete } from "react-icons/md";
 import { IoAddCircle, IoRemoveCircle } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
@@ -11,9 +10,8 @@ const CartPage = () => {
   const { user, setUser } = useContext(UserContext);
   const [foodCartItems, setFoodCartItems] = useState([]);
   const [groceryCartItems, setGroceryCartItems] = useState([]);
-  const [activeCart, setActiveCart] = useState("foodCart"); 
+  const [activeCart, setActiveCart] = useState("foodCart");
   const [loading, setLoading] = useState(true);
-  const [sellers, setSellers] = useState([]);
   const navigate = useNavigate();
 
   // Fetch carts
@@ -42,15 +40,6 @@ const CartPage = () => {
           foodCart: normalizedFoodCart,
           groceryCart: normalizedGroceryCart,
         }));
-
-        const allSellers = [
-          ...new Set(
-            [...(data.foodCart || [])].map(
-              (item) => item.product.seller
-            )
-          ),
-        ];
-        setSellers(allSellers);
       } catch (err) {
         console.error("Failed to fetch cart:", err);
       } finally {
@@ -61,12 +50,12 @@ const CartPage = () => {
     fetchCarts();
   }, [setUser]);
 
+  // Update cart item
   const updateCartItem = async (productId, type, cartKey) => {
     const cartItems =
       cartKey === "foodCart" ? [...foodCartItems] : [...groceryCartItems];
     const prevContextCart = [...(user[cartKey] || [])];
 
-    // Update local state
     const updatedItems = cartItems
       .map((item) =>
         item.product._id === productId
@@ -78,6 +67,7 @@ const CartPage = () => {
       )
       .filter((item) => item.quantity > 0);
 
+    // Update local state
     if (cartKey === "foodCart") setFoodCartItems(updatedItems);
     else setGroceryCartItems(updatedItems);
 
@@ -96,27 +86,17 @@ const CartPage = () => {
         .filter((item) => item.quantity > 0),
     }));
 
-    // API call
     try {
       const endpoint =
-        type === "inc"
-          ? "/api/cart/incrementQty"
-          : "/api/cart/decrementQty";
-
+        type === "inc" ? "/api/cart/incrementQty" : "/api/cart/decrementQty";
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}${endpoint}`,
         { productId, cartKey },
         { withCredentials: true }
       );
-
-      if (!data.success) {
-        // Rollback
-        if (cartKey === "foodCart") setFoodCartItems(cartItems);
-        else setGroceryCartItems(cartItems);
-        setUser((prev) => ({ ...prev, [cartKey]: prevContextCart }));
-        throw new Error("Update failed");
-      }
+      if (!data.success) throw new Error("Update failed");
     } catch (err) {
+      // Rollback
       if (cartKey === "foodCart") setFoodCartItems(cartItems);
       else setGroceryCartItems(cartItems);
       setUser((prev) => ({ ...prev, [cartKey]: prevContextCart }));
@@ -124,6 +104,7 @@ const CartPage = () => {
     }
   };
 
+  // Remove item from cart
   const removeFromCart = async (productId, cartKey) => {
     const cartItems =
       cartKey === "foodCart" ? [...foodCartItems] : [...groceryCartItems];
@@ -145,14 +126,9 @@ const CartPage = () => {
         { productId, cartKey },
         { withCredentials: true }
       );
-
-      if (!data.success) {
-        if (cartKey === "foodCart") setFoodCartItems(cartItems);
-        else setGroceryCartItems(cartItems);
-        setUser((prev) => ({ ...prev, [cartKey]: prevContextCart }));
-        throw new Error("Remove failed");
-      }
+      if (!data.success) throw new Error("Remove failed");
     } catch (err) {
+      // Rollback
       if (cartKey === "foodCart") setFoodCartItems(cartItems);
       else setGroceryCartItems(cartItems);
       setUser((prev) => ({ ...prev, [cartKey]: prevContextCart }));
@@ -166,12 +142,15 @@ const CartPage = () => {
   const handleCheckout = () => {
     const cartItems = activeCart === "foodCart" ? foodCartItems : groceryCartItems;
     navigate("/checkout", {
-      state: { cartItems, totalPrice: getTotalPrice(cartItems), sellers, cartKey: activeCart },
+      state: { cartItems, totalPrice: getTotalPrice(cartItems), cartKey: activeCart },
     });
   };
 
   const currentCartItems =
     activeCart === "foodCart" ? foodCartItems : groceryCartItems;
+
+  // Dynamic sellers array
+  const currentSellers = [...new Set(currentCartItems.map((item) => item.product.seller))];
 
   return (
     <div>
@@ -216,19 +195,17 @@ const CartPage = () => {
             Your {activeCart === "foodCart" ? "food" : "grocery"} cart is empty.
           </p>
         ) : (
-          <div className="bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-xl max-w-3xl mx-auto border border-green-100 dark:border-gray-700">
-            <div className="space-y-6">
+          <div className="bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-xl max-w-3xl mx-auto border border-green-100 dark:border-gray-700 flex flex-col">
+            
+            {/* Scrollable Cart Items */}
+            <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
               {currentCartItems.map((item) => (
                 <div
                   key={item.product._id}
                   className="flex items-center justify-between border-b border-green-100 dark:border-gray-700 pb-4"
                 >
-                  {/* Product Image */}
                   <img
-                    src={
-                      item?.product?.images[0] ||
-                      "https://via.placeholder.com/100"
-                    }
+                    src={item?.product?.images[0] || "https://via.placeholder.com/100"}
                     alt={item.product.name}
                     className={`w-16 h-16 object-cover rounded-xl shadow-md ${
                       !item.product.inStock || !item.product?.shop?.isOpen
@@ -236,19 +213,16 @@ const CartPage = () => {
                         : ""
                     }`}
                   />
-
-                  {/* Product Details */}
                   <div className="flex-1 ml-4">
-                    <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-md">
                       {item.product.name}
                     </h3>
-                    <p className="text-green-600 font-medium text-sm">
+                    <p className="text-green-600 font-medium text-xs">
                       {item.product.shopName}
                     </p>
                     <p className="text-gray-500 dark:text-gray-400 text-sm">
                       ₹{item.product?.price} x {item?.quantity}
                     </p>
-
                     {!item.product.inStock && (
                       <p className="text-red-500 text-xs font-semibold mt-1">
                         Out of Stock 🚫
@@ -260,18 +234,12 @@ const CartPage = () => {
                       </p>
                     )}
                   </div>
-
-                  {/* Quantity Controls */}
                   <div className="flex items-center gap-2 bg-green-100 dark:bg-gray-700 px-3 py-1 rounded-full shadow-inner">
                     <IoRemoveCircle
                       className="text-red-500 hover:text-red-600 text-2xl cursor-pointer transition"
                       onClick={() =>
                         item.quantity > 1
-                          ? updateCartItem(
-                              item.product._id,
-                              "dec",
-                              activeCart
-                            )
+                          ? updateCartItem(item.product._id, "dec", activeCart)
                           : removeFromCart(item.product._id, activeCart)
                       }
                     />
@@ -289,8 +257,24 @@ const CartPage = () => {
               ))}
             </div>
 
+            {/* Warnings */}
+            {currentCartItems.some((item) => !item?.product?.shop?.isOpen) && (
+              <p className="text-red-500 text-sm font-semibold text-center mt-4">
+                ⚠️ Some items are from closed shops. Remove them before
+                checkout.
+              </p>
+            )}
+
+            {currentSellers.length > 1 && (
+              <div className="mt-4 p-3 bg-gradient-to-r from-yellow-100 to-yellow-50 border-l-4 border-yellow-500 text-yellow-800 rounded-lg text-sm font-medium shadow-sm">
+                ⚡ Your order has items from <b>{currentSellers.length}</b> shops. Extra{" "}
+                <span className="font-semibold">convenience fee</span> may
+                apply.
+              </div>
+            )}
+
             {/* Total & Checkout */}
-            <div className="mt-6 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-inner">
+            <div className="mt-6 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-inner sticky bottom-0">
               <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white">
                 <span>Total:</span>
                 <span>₹{getTotalPrice(currentCartItems).toFixed(2)}</span>

@@ -56,7 +56,7 @@ router.post("/send-otp", async (req, res) => {
     const response = await axios.post(url, null, {
       headers: {
         authToken:
-          "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJDLUIxQUU0QUJCMDIyMzQ1MSIsImlhdCI6MTc1ODgyMTQ0NCwiZXhwIjoxOTE2NTAxNDQ0fQ.OFc7r_QYfUxKW-SWFNAFNJmCN1mcwQy_muBHXnVCbQqKHnUzeI7eT8QYsbhSsRPxLYtBUY6EAKDveP-28EWvYA",
+          process.env.authToken,
       },
     });
 
