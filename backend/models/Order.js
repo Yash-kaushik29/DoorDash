@@ -12,7 +12,7 @@ const generateId = () => {
 const OrderSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    orderType: {type: String, reuired: true},
+    orderType: {type: String, required: true},
     id: { type: String, unique: true },
     items: [
       {

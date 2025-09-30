@@ -141,7 +141,7 @@ const ProductCard = ({
     <div className="relative bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transform transition duration-300 hover:scale-105">
       {/* DISCOUNT BANNER */}
       {product.basePrice > product.price && (
-        <span className="absolute -top-2 left-2 bg-yellow-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-lg z-10">
+        <span className={`absolute -top-2 left-2 bg-yellow-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-lg z-10 ${Math.round(((product.basePrice - product.price) / product.basePrice) * 100) > 20 && "animate-pulse"}`}>
           {Math.round(
             ((product.basePrice - product.price) / product.basePrice) * 100
           )}

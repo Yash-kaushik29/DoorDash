@@ -67,17 +67,19 @@ const GroceryProducts = () => {
                 {items.map((product) => (
                   <motion.div
                     key={product._id}
-                    className="min-w-[140px]" 
+                    className="w-[160px] h-[280px] flex-shrink-0"
                     whileTap={{ scale: 0.95 }}
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    <ProductCard
-                      user={user}
-                      setUser={setUser}
-                      product={product}
-                      variant="grocery"
-                    />
+                    <div className="w-full h-full">
+                      <ProductCard
+                        user={user}
+                        setUser={setUser}
+                        product={product}
+                        variant="grocery"
+                      />
+                    </div>
                   </motion.div>
                 ))}
               </div>

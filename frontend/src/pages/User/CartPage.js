@@ -142,7 +142,7 @@ const CartPage = () => {
   const handleCheckout = () => {
     const cartItems = activeCart === "foodCart" ? foodCartItems : groceryCartItems;
     navigate("/checkout", {
-      state: { cartItems, totalPrice: getTotalPrice(cartItems), cartKey: activeCart },
+      state: { cartItems, totalPrice: getTotalPrice(cartItems), cartKey: activeCart, sellers: currentSellers },
     });
   };
 

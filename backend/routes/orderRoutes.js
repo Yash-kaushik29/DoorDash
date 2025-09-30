@@ -5,6 +5,8 @@ const Product = require("../models/Product");
 const Order = require("../models/Order");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const PDFDocument = require("pdfkit");
+const QRCode = require("qrcode");
 
 router.post("/create-order", async (req, res) => {
   const {
@@ -17,8 +19,8 @@ router.post("/create-order", async (req, res) => {
     address,
     paymentStatus,
     deliveryCharge = 0,
-    orderType, 
-    cartKey,   
+    orderType,
+    cartKey,
   } = req.body;
 
   try {
@@ -45,7 +47,10 @@ router.post("/create-order", async (req, res) => {
     );
 
     // Calculate total amount
-    const totalAmount = subTotal + deliveryCharge + (orderType === "Food" ? taxes + convenienceFees : serviceCharge);
+    const totalAmount =
+      subTotal +
+      deliveryCharge +
+      (orderType === "Food" ? taxes + convenienceFees : serviceCharge);
 
     const newOrder = new Order({
       user: userId,
@@ -67,7 +72,15 @@ router.post("/create-order", async (req, res) => {
     await newOrder.save();
 
     // Clear the respective cart after order creation
-    const updateCart = { $push: { notifications: { message: `Your order with order ID: #${newOrder.id} is processed.`, url: `/order/${newOrder._id}` }, orders: newOrder._id } };
+    const updateCart = {
+      $push: {
+        notifications: {
+          message: `Your order with order ID: #${newOrder.id} is processed.`,
+          url: `/order/${newOrder._id}`,
+        },
+        orders: newOrder._id,
+      },
+    };
     updateCart[cartKey] = [];
 
     await User.findByIdAndUpdate(userId, updateCart);
@@ -79,7 +92,9 @@ router.post("/create-order", async (req, res) => {
           $push: {
             notifications: {
               order: newOrder._id,
-              message: `New order received. You need to prepare ${orderItems.filter((item) => item.seller === sellerId).length} items.`,
+              message: `New order received. You need to prepare ${
+                orderItems.filter((item) => item.seller === sellerId).length
+              } items.`,
             },
             orders: newOrder._id,
           },
@@ -129,12 +144,10 @@ router.post("/submit-review", async (req, res) => {
     console.log(ratings);
 
     if (!orderId || !ratings) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Order ID and ratings are required.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Order ID and ratings are required.",
+      });
     }
 
     // Find the order
@@ -166,6 +179,151 @@ router.post("/submit-review", async (req, res) => {
   } catch (error) {
     console.error("Error submitting review:", error);
     res.status(500).json({ message: "Server error." });
+  }
+});
+
+// Helper to handle page breaks
+function checkPageSpace(doc, neededHeight = 50) {
+  if (doc.y + neededHeight > doc.page.height - doc.page.margins.bottom) {
+    doc.addPage();
+    doc.y = doc.page.margins.top;
+  }
+}
+
+router.get("/download-invoice/:orderId", async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId).populate("items.product").exec();
+    if (!order) return res.status(404).send("Order not found");
+
+    const doc = new PDFDocument({ margin: 50, size: "A4" });
+    const fileName = `Invoice-${order._id}.pdf`;
+
+    res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
+    res.setHeader("Content-Type", "application/pdf");
+    doc.pipe(res);
+
+    // ===== HEADER =====
+    doc.fontSize(25).text("GullyFoods", { align: "center" });
+    doc.moveDown(0.5);
+    doc.fontSize(14).text("Invoice", { align: "center" });
+    doc.moveDown(1);
+
+    // ===== ORDER SUMMARY =====
+    const totalProducts = order.items.reduce((sum, item) => sum + item.quantity, 0);
+    doc.fontSize(12)
+      .text(`Order ID: #${order.id}`)
+      .text(`Date & Time: ${order.createdAt.toLocaleString()}`)
+      .text(`Products Count: ${totalProducts}`)
+      .text(`Payment Method: ${order.paymentMethod}`);
+    doc.moveDown();
+
+    // ===== SHIPPING ADDRESS =====
+    const addr = order.shippingAddress;
+    doc.fontSize(12).text("Delivery Address:", { underline: true });
+    doc.text(`${addr.fullName}`);
+    doc.text(`${addr.phone}`);
+    doc.text(`${addr.addressLine}, ${addr.area}${addr.landMark ? `, ${addr.landMark}` : ""}`);
+    doc.moveDown();
+
+    // ===== PRODUCTS TABLE =====
+    const tableXStart = 50;
+    const colNo = 50, colName = 90, colQty = 350, colTotal = 450;
+    const colWidth = 100, colQtyWidth = 50;
+
+    doc.fontSize(12).fillColor("#2e86de").text("Products", tableXStart, doc.y, { underline: true });
+    doc.moveDown(0.3);
+
+    // Table Header
+    let headerY = doc.y;
+    doc.font("Helvetica-Bold").fontSize(10).fillColor("#2e86de");
+    doc.text("No", colNo, headerY, { width: 30 });
+    doc.text("Name", colName, headerY, { width: 250 });
+    doc.text("Qty", colQty, headerY, { width: colQtyWidth, align: "center" });
+    doc.text("Total", colTotal, headerY, { width: colWidth, align: "right" });
+    doc.moveDown(0.3);
+    doc.strokeColor("#dcdde1").lineWidth(1).moveTo(colNo, doc.y).lineTo(doc.page.width - 50, doc.y).stroke();
+    doc.moveDown(1.2);
+
+    // Table Rows with page break
+    doc.font("Helvetica").fontSize(10).fillColor("black");
+    order.items.forEach((item, i) => {
+      checkPageSpace(doc, 30); // Ensure row fits
+      let rowY = doc.y;
+      const name = item.product?.name || "Product";
+      const qty = item.quantity;
+      const totalPrice = item.product?.price ? item.product.price * qty : 0;
+
+      doc.text(`${i + 1}`, colNo, rowY, { width: 30 });
+      doc.text(name, colName, rowY, { width: 250 });
+      doc.text(qty, colQty, rowY, { width: colQtyWidth, align: "center" });
+      doc.text(`₹${totalPrice.toFixed(2)}`, colTotal, rowY, { width: colWidth, align: "right" });
+      doc.moveDown(1.2);
+    });
+
+    doc.moveDown(0.5);
+
+    // ===== PAYMENT & QR SECTION =====
+    checkPageSpace(doc, 50); // Space for payment box 
+    const paymentStartY = doc.y;
+
+    // Light background box for payment summary
+    const boxX = 45;
+    const boxWidth = doc.page.width - 90;
+    let boxHeight = 0;
+
+    const itemsTotal = order.items.reduce((sum, item) => sum + (item.product?.price || 0) * item.quantity, 0);
+    const paymentLines = [];
+    paymentLines.push({ label: "Items Total", value: `₹${itemsTotal.toFixed(2)}` });
+
+    if (order.orderType === "Food") {
+      paymentLines.push({ label: "Taxes", value: `₹${order.taxes.toFixed(2)}` });
+      paymentLines.push({ label: "Convenience Fees", value: `₹${order.convenienceFees.toFixed(2)}` });
+    } else if (order.orderType === "Grocery") {
+      paymentLines.push({ label: "Service Charge", value: `₹${order.serviceCharge.toFixed(2)}` });
+    }
+
+    paymentLines.push({ label: "Delivery Charge", value: `₹${order.deliveryCharge.toFixed(2)}` });
+    boxHeight = paymentLines.length * 20 + 40; // Space for TOTAL
+    doc.rect(boxX, paymentStartY, boxWidth, boxHeight).fillAndStroke("#f5f6fa", "#dcdde1");
+
+    // Inline payment lines
+    let textY = paymentStartY + 15;
+    const labelX = boxX + 15;
+    doc.fontSize(12).font("Helvetica").fillColor("black");
+    paymentLines.forEach(line => {
+      doc.text(`${line.label}: ${line.value}`, labelX, textY);
+      textY += 20;
+    });
+
+    // TOTAL
+    doc.fontSize(14).font("Helvetica-Bold").text(`TOTAL: ₹${order.totalAmount.toFixed(2)}`, labelX, textY);
+    doc.moveDown(1);
+
+    
+    // ===== QR CODE =====
+    checkPageSpace(doc, 150); //Space for QR + text
+    const orderUrl = `https://gullyfoods.app/order/${order._id}`;
+    const qrDataUrl = await QRCode.toDataURL(orderUrl);
+
+    const qrWidth = 120;
+    const qrX = (doc.page.width - qrWidth) / 2;
+    doc.image(qrDataUrl, qrX, doc.y + 10, { width: qrWidth });
+
+    // Thank-you text
+    doc.moveDown(8);
+    doc.fontSize(12).font("Helvetica-Bold").fillColor("#38D16B").text(
+      "Thank you for ordering with GullyFoods!",
+      { align: "center" }
+    );
+    doc.fontSize(10).font("Helvetica").fillColor("black").text(
+      "We hope to serve you again soon!",
+      { align: "center" }
+    );
+
+    doc.end();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
   }
 });
 
@@ -322,48 +480,63 @@ router.get("/getAllOrders", async (req, res) => {
   const { sellerToken } = req.cookies;
 
   if (!sellerToken) {
-    return res.status(401).json({ success: false, message: "Unauthorized access" });
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized access" });
   }
 
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
-  jwt.verify(sellerToken, process.env.JWT_SECRET_KEY, {}, async (err, seller) => {
-    if (err) {
-      return res.status(403).json({ success: false, message: "Invalid token" });
+  jwt.verify(
+    sellerToken,
+    process.env.JWT_SECRET_KEY,
+    {},
+    async (err, seller) => {
+      if (err) {
+        return res
+          .status(403)
+          .json({ success: false, message: "Invalid token" });
+      }
+
+      try {
+        // Fetch orders where the seller has at least one item
+        const orders = await Order.find({ "items.seller": seller.sellerID })
+          .populate("items.product", "id name price")
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .lean();
+
+        // Filter items inside each order to include only those belonging to this seller
+        const filteredOrders = orders.map((order) => ({
+          ...order,
+          items: order.items.filter(
+            (item) => item.seller.toString() === seller.sellerID
+          ),
+        }));
+
+        // Count total orders for pagination
+        const totalOrders = await Order.countDocuments({
+          "items.seller": seller.sellerID,
+        });
+
+        res.status(200).json({
+          success: true,
+          orders: filteredOrders,
+          totalOrders,
+          currentPage: page,
+          totalPages: Math.ceil(totalOrders / limit),
+        });
+      } catch (error) {
+        console.error("Error fetching seller orders:", error);
+        res
+          .status(500)
+          .json({ success: false, message: "Internal server error" });
+      }
     }
-
-    try {
-      // Fetch orders where the seller has at least one item
-      const orders = await Order.find({ "items.seller": seller.sellerID })
-        .populate("items.product", "id name price")
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean();
-
-      // Filter items inside each order to include only those belonging to this seller
-      const filteredOrders = orders.map((order) => ({
-        ...order,
-        items: order.items.filter((item) => item.seller.toString() === seller.sellerID),
-      }));
-
-      // Count total orders for pagination
-      const totalOrders = await Order.countDocuments({ "items.seller": seller.sellerID });
-
-      res.status(200).json({
-        success: true,
-        orders: filteredOrders,
-        totalOrders,
-        currentPage: page,
-        totalPages: Math.ceil(totalOrders / limit),
-      });
-    } catch (error) {
-      console.error("Error fetching seller orders:", error);
-      res.status(500).json({ success: false, message: "Internal server error" });
-    }
-  });
+  );
 });
 
 router.get("/getUserOrders", async (req, res) => {

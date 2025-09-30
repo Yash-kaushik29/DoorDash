@@ -12,6 +12,7 @@ import OrderDetailsLoader from "../../components/OrderDetailsLoader";
 import ReviewSection from "../../components/ReviewSection";
 import { ToastContainer, toast } from "react-toastify";
 import { IoIosCart } from "react-icons/io";
+import DownloadInvoiceButton from "../../components/DownloadInvoiceButton";
 
 const OrderDetails = () => {
   const { orderId } = useParams();
@@ -123,7 +124,10 @@ const OrderDetails = () => {
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200 py-6 px-2 sm:px-6">
         {/* Order Summary */}
         <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 mt-4">
-          <h2 className="text-2xl font-semibold mb-4">Order #{order?.id}</h2>
+          <div className="flex items-center gap-2 mb-4" >
+            <h2 className="text-2xl font-semibold">Order #{order?.id}</h2>
+            {order.deliveryStatus === "Delivered" && <DownloadInvoiceButton orderId={order._id} />}
+          </div>
 
           {/* Status Row */}
           <div className="flex flex-col xs:flex-row justify-start xs:justify-between items-start xs:items-center mb-4 gap-2 sm:gap-4">
