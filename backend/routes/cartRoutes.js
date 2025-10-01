@@ -141,8 +141,6 @@ router.post("/removeFromCart", authenticateUser, async (req, res) => {
   }
 });
 
-
-
 router.get("/getCart", authenticateUser, async (req, res) => {
   const currUser = req.user;
 

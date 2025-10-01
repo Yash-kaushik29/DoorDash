@@ -16,6 +16,7 @@ const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
   const [shops, setShops] = useState([]);
   const [products, setProducts] = useState([]);
+  const token = localStorage.getItem("GullyFoodsUserToken");
 
   const fetchPopularShops = async () => {
     try {
@@ -74,6 +75,7 @@ const Home = () => {
         bestSeller={true}
         user={user}
         setUser={setUser}
+        token={token}
       />
     ));
   }, [products, user, setUser]);

@@ -96,6 +96,7 @@ export default function Login() {
 
       if (res.data.success) {
         toast.success("Login Successful! 🎉");
+        localStorage.setItem("GullyFoodsUserToken", res.data.token);
         setUser(res.data.user);
         navigate("/");
       } else {

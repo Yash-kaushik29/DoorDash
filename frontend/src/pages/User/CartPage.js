@@ -14,19 +14,20 @@ const CartPage = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const token = localStorage.getItem("GullyFoodsUserToken");
+
   // Fetch carts
   useEffect(() => {
     const fetchCarts = async () => {
       try {
         const { data } = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/cart/getCart`,
-          { withCredentials: true }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
         setFoodCartItems(data.foodCart || []);
         setGroceryCartItems(data.groceryCart || []);
 
-        // Set context
         const normalizedFoodCart = (data.foodCart || []).map((item) => ({
           productId: item.product?._id,
           quantity: item.quantity,
@@ -35,6 +36,7 @@ const CartPage = () => {
           productId: item.product?._id,
           quantity: item.quantity,
         }));
+
         setUser((prev) => ({
           ...prev,
           foodCart: normalizedFoodCart,
@@ -79,7 +81,8 @@ const CartPage = () => {
           item.productId === productId
             ? {
                 ...item,
-                quantity: type === "inc" ? item.quantity + 1 : item.quantity - 1,
+                quantity:
+                  type === "inc" ? item.quantity + 1 : item.quantity - 1,
               }
             : item
         )
@@ -92,13 +95,15 @@ const CartPage = () => {
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}${endpoint}`,
         { productId, cartKey },
-        { withCredentials: true }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
+
       if (!data.success) throw new Error("Update failed");
     } catch (err) {
       // Rollback
       if (cartKey === "foodCart") setFoodCartItems(cartItems);
       else setGroceryCartItems(cartItems);
+
       setUser((prev) => ({ ...prev, [cartKey]: prevContextCart }));
       toast.error("Failed to update quantity. Please try again.");
     }
@@ -110,7 +115,9 @@ const CartPage = () => {
       cartKey === "foodCart" ? [...foodCartItems] : [...groceryCartItems];
     const prevContextCart = [...(user[cartKey] || [])];
 
-    const updatedItems = cartItems.filter((item) => item.product._id !== productId);
+    const updatedItems = cartItems.filter(
+      (item) => item.product._id !== productId
+    );
 
     if (cartKey === "foodCart") setFoodCartItems(updatedItems);
     else setGroceryCartItems(updatedItems);
@@ -124,13 +131,15 @@ const CartPage = () => {
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/cart/removeFromCart`,
         { productId, cartKey },
-        { withCredentials: true }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
+
       if (!data.success) throw new Error("Remove failed");
     } catch (err) {
       // Rollback
       if (cartKey === "foodCart") setFoodCartItems(cartItems);
       else setGroceryCartItems(cartItems);
+
       setUser((prev) => ({ ...prev, [cartKey]: prevContextCart }));
       toast.error("Failed to remove product. Please try again.");
     }
@@ -140,9 +149,15 @@ const CartPage = () => {
     items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   const handleCheckout = () => {
-    const cartItems = activeCart === "foodCart" ? foodCartItems : groceryCartItems;
+    const cartItems =
+      activeCart === "foodCart" ? foodCartItems : groceryCartItems;
     navigate("/checkout", {
-      state: { cartItems, totalPrice: getTotalPrice(cartItems), cartKey: activeCart, sellers: currentSellers },
+      state: {
+        cartItems,
+        totalPrice: getTotalPrice(cartItems),
+        cartKey: activeCart,
+        sellers: currentSellers,
+      },
     });
   };
 
@@ -150,7 +165,9 @@ const CartPage = () => {
     activeCart === "foodCart" ? foodCartItems : groceryCartItems;
 
   // Dynamic sellers array
-  const currentSellers = [...new Set(currentCartItems.map((item) => item.product.seller))];
+  const currentSellers = [
+    ...new Set(currentCartItems.map((item) => item.product.seller)),
+  ];
 
   return (
     <div>
@@ -196,7 +213,6 @@ const CartPage = () => {
           </p>
         ) : (
           <div className="bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-xl max-w-3xl mx-auto border border-green-100 dark:border-gray-700 flex flex-col">
-            
             {/* Scrollable Cart Items */}
             <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
               {currentCartItems.map((item) => (
@@ -205,7 +221,10 @@ const CartPage = () => {
                   className="flex items-center justify-between border-b border-green-100 dark:border-gray-700 pb-4"
                 >
                   <img
-                    src={item?.product?.images[0] || "https://via.placeholder.com/100"}
+                    src={
+                      item?.product?.images[0] ||
+                      "https://via.placeholder.com/100"
+                    }
                     alt={item.product.name}
                     className={`w-16 h-16 object-cover rounded-xl shadow-md ${
                       !item.product.inStock || !item.product?.shop?.isOpen
@@ -267,7 +286,8 @@ const CartPage = () => {
 
             {currentSellers.length > 1 && (
               <div className="mt-4 p-3 bg-gradient-to-r from-yellow-100 to-yellow-50 border-l-4 border-yellow-500 text-yellow-800 rounded-lg text-sm font-medium shadow-sm">
-                ⚡ Your order has items from <b>{currentSellers.length}</b> shops. Extra{" "}
+                ⚡ Your order has items from <b>{currentSellers.length}</b>{" "}
+                shops. Extra{" "}
                 <span className="font-semibold">convenience fee</span> may
                 apply.
               </div>

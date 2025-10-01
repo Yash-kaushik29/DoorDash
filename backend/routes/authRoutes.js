@@ -256,6 +256,7 @@ router.post("/user-login", async (req, res) => {
           .send({
             success: true,
             message: "Logged In Successfully!",
+            token: token,
             user: {
               username: existingUser.username,
               _id: existingUser._id,
@@ -319,34 +320,39 @@ router.post("/seller-login", async (req, res) => {
   }
 });
 
-router.get("/getUser", (req, res) => {
-  const { token } = req.cookies;
+router.get("/getUser", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ success: false, message: "Please login first!" });
+    }
 
-  if (token) {
-    jwt.verify(token, process.env.JWT_SECRET_KEY, {}, async (err, user) => {
+    const token = authHeader.split(" ")[1];
+
+    jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decoded) => {
       if (err) {
-        res.json({ success: false, message: "Please login first!" });
-      } else {
-        const currUser = await User.findOne({
-          _id: user.userID,
-        });
-
-        if (!currUser) {
-          return res.json({ success: false, message: "Please login again!" });
-        }
-        res.json({
-          user: {
-            _id: currUser._id,
-            name: currUser.username,
-            foodCart: currUser.foodCart,
-            groceryCart: currUser.groceryCart,
-            phone: currUser.phone,
-          },
-        });
+        return res.status(401).json({ success: false, message: "Invalid or expired token!" });
       }
+
+      const currUser = await User.findById(decoded.userID);
+      if (!currUser) {
+        return res.status(401).json({ success: false, message: "User not found! Please login again." });
+      }
+
+      res.json({
+        success: true,
+        user: {
+          _id: currUser._id,
+          username: currUser.username,
+          foodCart: currUser.foodCart,
+          groceryCart: currUser.groceryCart,
+          phone: currUser.phone,
+        },
+      });
     });
-  } else {
-    res.json({ success: false, message: "Internal server error!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error!" });
   }
 });
 

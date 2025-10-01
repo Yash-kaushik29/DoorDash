@@ -51,7 +51,9 @@ const ProductCard = ({
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/cart/addToCart`,
         { productId: product._id, cartKey },
-        { withCredentials: true }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       if (!data.success) throw new Error(data.message);
       toast.success("Product added to cart!");
@@ -64,8 +66,12 @@ const ProductCard = ({
     }
   };
 
+  const token = localStorage.getItem("GullyFoodsUserToken");
+
   const handleIncrement = async (productId) => {
     if (loading) return;
+
+    // Optimistic UI update
     setUser((prev) => ({
       ...prev,
       [cartKey]: prev[cartKey].map((i) =>
@@ -77,7 +83,7 @@ const ProductCard = ({
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/cart/incrementQty`,
         { productId, cartKey },
-        { withCredentials: true }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!data.success) throw new Error(data.message);
     } catch {
@@ -92,6 +98,7 @@ const ProductCard = ({
 
     if (item.quantity === 1) return removeFromCart(productId);
 
+    // Optimistic UI update
     setUser((prev) => ({
       ...prev,
       [cartKey]: prev[cartKey].map((i) =>
@@ -103,7 +110,7 @@ const ProductCard = ({
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/cart/decrementQty`,
         { productId, cartKey },
-        { withCredentials: true }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!data.success) throw new Error(data.message);
     } catch {
@@ -115,6 +122,7 @@ const ProductCard = ({
     if (loading) return;
     const prevCart = [...(user?.[cartKey] || [])];
 
+    // Optimistic UI update
     setUser((prev) => ({
       ...prev,
       [cartKey]: prev[cartKey].filter((i) => i.productId !== productId),
@@ -125,11 +133,12 @@ const ProductCard = ({
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/cart/removeFromCart`,
         { productId, cartKey },
-        { withCredentials: true }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!data.success) throw new Error(data.message);
       toast.success("Product removed from cart!");
     } catch (err) {
+      // rollback
       setUser((prev) => ({ ...prev, [cartKey]: prevCart }));
       toast.error(err.message || "Something went wrong.");
     } finally {
@@ -141,7 +150,13 @@ const ProductCard = ({
     <div className="relative bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transform transition duration-300 hover:scale-105">
       {/* DISCOUNT BANNER */}
       {product.basePrice > product.price && (
-        <span className={`absolute -top-2 left-2 bg-yellow-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-lg z-10 ${Math.round(((product.basePrice - product.price) / product.basePrice) * 100) > 20 && "animate-pulse"}`}>
+        <span
+          className={`absolute -top-2 left-2 bg-yellow-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-lg z-10 ${
+            Math.round(
+              ((product.basePrice - product.price) / product.basePrice) * 100
+            ) > 20 && "animate-pulse"
+          }`}
+        >
           {Math.round(
             ((product.basePrice - product.price) / product.basePrice) * 100
           )}
