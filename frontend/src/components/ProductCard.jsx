@@ -23,6 +23,7 @@ const ProductCard = ({
   user,
   setUser,
   variant = "food",
+  token
 }) => {
   const [loading, setLoading] = useState(false);
 
@@ -65,8 +66,6 @@ const ProductCard = ({
       setLoading(false);
     }
   };
-
-  const token = localStorage.getItem("GullyFoodsUserToken");
 
   const handleIncrement = async (productId) => {
     if (loading) return;

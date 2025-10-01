@@ -16,6 +16,8 @@ const SearchQuery = () => {
   const [hasMore, setHasMore] = useState(true);
   const { user, setUser } = useContext(UserContext);
 
+  const token = localStorage.getItem("GullyFoodsUserToken");
+
   useEffect(() => {
     // Reset products and pagination when query changes
     setProducts([]);
@@ -30,9 +32,9 @@ const SearchQuery = () => {
       setLoading(true);
       try {
         const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/common/search/${encodeURIComponent(
-            query
-          )}?page=${page}`
+          `${
+            process.env.REACT_APP_API_URL
+          }/api/common/search/${encodeURIComponent(query)}?page=${page}`
         );
 
         setProducts((prev) => (page === 1 ? data : [...prev, ...data]));
@@ -63,7 +65,9 @@ const SearchQuery = () => {
           next={() => setPage((prev) => prev + 1)} // Load next page
           hasMore={hasMore} // Keep fetching until no more data
           loader={
-            <p className="text-center text-gray-500">Loading more products...</p>
+            <p className="text-center text-gray-500">
+              Loading more products...
+            </p>
           }
           endMessage={
             <p className="text-center text-gray-400">
@@ -79,7 +83,8 @@ const SearchQuery = () => {
                 bestSeller={false}
                 user={user}
                 setUser={setUser}
-                variant={product.shopType === 'Grocery' ? "grocery" : "food"}
+                variant={product.shopType === "Grocery" ? "grocery" : "food"}
+                token={token}
               />
             ))}
           </div>

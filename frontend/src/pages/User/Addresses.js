@@ -50,7 +50,7 @@ const Addresses = () => {
     }
 
     fetchAddresses();
-  }, [userId, userAddresses]);
+  }, [userId]);
 
   const closeModal = () => {
     setShowModal(false);

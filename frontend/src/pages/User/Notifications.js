@@ -11,24 +11,29 @@ const Notifications = () => {
   const { user } = useContext(UserContext);
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const token = localStorage.getItem("GullyFoodsUserToken");
 
   useEffect(() => {
     const fetchNotifications = async () => {
       setIsLoading(true);
       try {
-        if (!user || !user._id) return;
+        if (!token) return;
 
         const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/notification/getNotifications/${user._id}`,
-          { withCredentials: true }
+          `${process.env.REACT_APP_API_URL}/api/notification/getNotifications`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
-        setNotifications(data);
-        setFilteredNotifications(data); // Initially show all
+        setNotifications(data.notifications);
+        setFilteredNotifications(data.notifications);
       } catch (error) {
         console.error("Error fetching notifications:", error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     };
 
@@ -48,8 +53,10 @@ const Notifications = () => {
   const showNotification = async (notif) => {
     const { data } = await axios.post(
       `${process.env.REACT_APP_API_URL}/api/notification/readNotification`,
-      { userId: user._id, notificationId: notif._id },
-      { withCredentials: true }
+      { notificationId: notif._id },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
     );
 
     if (data.success) {

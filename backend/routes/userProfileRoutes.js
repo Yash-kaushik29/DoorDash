@@ -6,15 +6,6 @@ const Seller = require("../models/Seller");
 
 const router = express.Router();
 
-router.get("/logout", async (req, res) => {
-  try {
-    res.cookie("token", "").send({ success: true });
-  } catch (error) {
-    console.log(error);
-    res.status(501).send({ success: false });
-  }
-});
-
 router.put("/updateDetails/:userId", async (req, res) => {
   const { name, email } = req.body;
   const {userId} = req.params;

@@ -2,6 +2,7 @@ const express = require("express");
 const User = require("../models/User");
 const Seller = require("../models/Seller");
 const jwt = require("jsonwebtoken");
+const authenticateUser = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -38,50 +39,45 @@ router.get("/unread-order-notifications", async (req, res) => {
   }
 });
 
-router.get("/getNotifications/:userId", async (req, res) => {
+router.get("/getNotifications", authenticateUser, async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId, "notifications");
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const currUser = req.user; // from middleware
 
-    // Sort notifications from latest to oldest (descending order)
-    const sortedNotifications = user.notifications.sort(
+    if (!currUser) 
+      return res.status(404).json({ message: "User not found" });
+
+    // Sort notifications from latest to oldest
+    const sortedNotifications = (currUser.notifications || []).sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
 
-    res.json(sortedNotifications);
+    res.json({ success: true, notifications: sortedNotifications });
   } catch (error) {
     console.error("Error fetching notifications:", error);
     res.status(500).json({ message: "Server error", error });
   }
 });
 
-router.post("/readNotification", async (req, res) => {
+router.post("/readNotification", authenticateUser, async (req, res) => {
   try {
-    const { userId, notificationId } = req.body;
+    const { notificationId } = req.body;
 
-    if (!userId || !notificationId) {
+    if (!notificationId) {
       return res
         .status(400)
-        .json({ message: "User ID and Notification ID are required" });
+        .json({ message: "Notification ID is required" });
     }
 
-    // Find the user and update the notification
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    const currUser = req.user; 
 
-    // Find the notification in user's notifications array
-    const notification = user.notifications.id(notificationId);
+    const notification = currUser.notifications.id(notificationId);
     if (!notification) {
       return res.status(404).json({ message: "Notification not found" });
     }
 
-    // Mark as read
     notification.read = true;
 
-    // Save the user document
-    await user.save();
+    await currUser.save();
 
     res.json({ success: true, message: "Notification marked as read" });
   } catch (error) {

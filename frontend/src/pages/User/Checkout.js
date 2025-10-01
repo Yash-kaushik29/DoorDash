@@ -14,7 +14,13 @@ const Checkout = () => {
     totalPrice: cartTotalPrice,
     sellers,
     cartKey,
-  } = location.state || { cartItems: [], totalPrice: 0, sellers: 1, cartKey: "foodCart" };
+  } = location.state || {
+    cartItems: [],
+    totalPrice: 0,
+    sellers: 1,
+    cartKey: "foodCart",
+  };
+  const token = localStorage.getItem("GullyFoodsUserToken");
 
   const isFoodOrder = cartKey === "foodCart";
 
@@ -25,7 +31,9 @@ const Checkout = () => {
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   // Food order fields
-  const [taxes, setTaxes] = useState(isFoodOrder ? (cartTotalPrice * 5) / 100 : 0);
+  const [taxes, setTaxes] = useState(
+    isFoodOrder ? (cartTotalPrice * 5) / 100 : 0
+  );
   const convenienceFees = isFoodOrder ? (sellers.length - 1) * 15 : 0;
 
   if (cartItems.length === 0) navigate("/cart");
@@ -52,24 +60,23 @@ const Checkout = () => {
   };
 
   // Grocery delivery charge (distance + num of items)
- const getGroceryDeliveryCharge = (distance, numItems) => {
-  let base = 0;
+  const getGroceryDeliveryCharge = (distance, numItems) => {
+    let base = 0;
 
-  // Distance-based base charge
-  if (distance <= 2) base = 20;
-  else if (distance <= 4) base = 25;
-  else if (distance <= 8) base = 45;
-  else base = distance * 10;
+    // Distance-based base charge
+    if (distance <= 2) base = 20;
+    else if (distance <= 4) base = 25;
+    else if (distance <= 8) base = 45;
+    else base = distance * 10;
 
-  // Minimal per-item tiered pricing
-  let extra = 0;
-  if (numItems >= 5 && numItems <= 10) extra = 5;
-  else if (numItems >= 11 && numItems <= 15) extra = 10;
-  else if (numItems > 15) extra = 15;
+    // Minimal per-item tiered pricing
+    let extra = 0;
+    if (numItems >= 5 && numItems <= 10) extra = 5;
+    else if (numItems >= 11 && numItems <= 15) extra = 10;
+    else if (numItems > 15) extra = 15;
 
-  return base + extra;
-};
-
+    return base + extra;
+  };
 
   // Grocery service charge based on cartItemsPrice
   const getGroceryServiceCharge = (cartPrice) => {
@@ -109,7 +116,8 @@ const Checkout = () => {
     );
 
     if (isFoodOrder) setDeliveryCharge(getFoodDeliveryCharge(distance));
-    else setDeliveryCharge(getGroceryDeliveryCharge(distance, cartItems.length));
+    else
+      setDeliveryCharge(getGroceryDeliveryCharge(distance, cartItems.length));
   };
 
   const handleCheckout = async () => {
@@ -142,9 +150,13 @@ const Checkout = () => {
         const { data } = await axios.post(
           `${process.env.REACT_APP_API_URL}/api/order/create-order`,
           orderPayload,
-          { withCredentials: true }
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
-        if (data.success) {
+        if(data.success) {
           toast.success("🎉 Order Placed Successfully!");
           setTimeout(() => navigate(`/order/${data.order._id}`), 2000);
         } else toast.error(data.message);
@@ -184,15 +196,19 @@ const Checkout = () => {
           );
 
           if (verifyRes.data.success) {
-            const res = await axios.post(
+            const { data } = await axios.post(
               `${process.env.REACT_APP_API_URL}/api/order/create-order`,
               orderPayload,
-              { withCredentials: true }
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
             );
-            if (res.data.success) {
+            if (data.success) {
               toast.success("🎉 Order Placed Successfully!");
-              setTimeout(() => navigate(`/order/${res.data.order._id}`), 2000);
-            } else toast.error(res.data.message);
+              setTimeout(() => navigate(`/order/${data.order._id}`), 2000);
+            } else toast.error(data.message);
           } else toast.error("❌ Payment Verification Failed!");
         },
       });
@@ -206,7 +222,9 @@ const Checkout = () => {
   // Total calculation dynamically
   const totalAmount =
     cartTotalPrice +
-    (isFoodOrder ? taxes + convenienceFees + deliveryCharge : getGroceryServiceCharge(cartTotalPrice) + deliveryCharge);
+    (isFoodOrder
+      ? taxes + convenienceFees + deliveryCharge
+      : getGroceryServiceCharge(cartTotalPrice) + deliveryCharge);
 
   if (isPlacingOrder) {
     return (
@@ -258,9 +276,15 @@ const Checkout = () => {
                       : "border-gray-300 dark:border-gray-600 hover:border-green-400"
                   }`}
               >
-                <p className="font-semibold text-gray-900 dark:text-white">{addr.fullName}</p>
-                <p className="text-sm text-gray-700 dark:text-gray-300">{addr.phone}</p>
-                <p className="text-sm text-gray-800 dark:text-gray-400">{addr.addressLine}, {addr.area}</p>
+                <p className="font-semibold text-gray-900 dark:text-white">
+                  {addr.fullName}
+                </p>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  {addr.phone}
+                </p>
+                <p className="text-sm text-gray-800 dark:text-gray-400">
+                  {addr.addressLine}, {addr.area}
+                </p>
               </div>
             ))}
           </div>
@@ -268,17 +292,23 @@ const Checkout = () => {
 
         {/* Order Summary */}
         <div className="mb-6 space-y-2">
-          <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">Order Summary 🛒</h3>
+          <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">
+            Order Summary 🛒
+          </h3>
           <div className="flex justify-between">
             <span>Cart Total:</span>
-            <span className="text-green-500 font-semibold">₹{cartTotalPrice}</span>
+            <span className="text-green-500 font-semibold">
+              ₹{cartTotalPrice}
+            </span>
           </div>
 
           {isFoodOrder && (
             <>
               <div className="flex justify-between">
                 <span>Delivery Fee 🚚:</span>
-                <span className="text-green-500 font-semibold">₹{deliveryCharge}</span>
+                <span className="text-green-500 font-semibold">
+                  ₹{deliveryCharge}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>GST (5%) 💰:</span>
@@ -287,7 +317,9 @@ const Checkout = () => {
               {convenienceFees > 0 && (
                 <div className="flex justify-between">
                   <span>Multi-store Fee ⚡:</span>
-                  <span className="text-green-500 font-semibold">₹{convenienceFees}</span>
+                  <span className="text-green-500 font-semibold">
+                    ₹{convenienceFees}
+                  </span>
                 </div>
               )}
             </>
@@ -297,11 +329,15 @@ const Checkout = () => {
             <>
               <div className="flex justify-between">
                 <span>Service Charge 📝:</span>
-                <span className="text-green-500 font-semibold">₹{getGroceryServiceCharge(cartTotalPrice)}</span>
+                <span className="text-green-500 font-semibold">
+                  ₹{getGroceryServiceCharge(cartTotalPrice)}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Delivery Fee 🚚:</span>
-                <span className="text-green-500 font-semibold">₹{deliveryCharge}</span>
+                <span className="text-green-500 font-semibold">
+                  ₹{deliveryCharge}
+                </span>
               </div>
             </>
           )}
@@ -315,12 +351,18 @@ const Checkout = () => {
 
         {/* Payment Method */}
         <div className="space-y-3 mb-6">
-          <label className="font-semibold text-gray-800 dark:text-gray-100">Select Payment Method 💳:</label>
+          <label className="font-semibold text-gray-800 dark:text-gray-100">
+            Select Payment Method 💳:
+          </label>
           <div className="flex space-x-4">
             <button
               onClick={() => setPaymentMethod("COD")}
               className={`p-3 w-1/2 rounded-xl font-semibold transition transform hover:scale-105
-                ${paymentMethod === "COD" ? "bg-green-500 text-white" : "bg-gray-200 dark:bg-gray-500"}
+                ${
+                  paymentMethod === "COD"
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-200 dark:bg-gray-500"
+                }
               `}
             >
               Cash on Delivery
@@ -328,7 +370,11 @@ const Checkout = () => {
             <button
               onClick={() => setPaymentMethod("Razorpay")}
               className={`p-3 w-1/2 rounded-xl font-semibold transition transform hover:scale-105
-                ${paymentMethod === "Razorpay" ? "bg-blue-500 text-white" : "bg-gray-200 dark:bg-gray-500"}
+                ${
+                  paymentMethod === "Razorpay"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 dark:bg-gray-500"
+                }
               `}
             >
               Pay with Razorpay
@@ -341,10 +387,16 @@ const Checkout = () => {
           onClick={handleCheckout}
           disabled={!selectedAddress}
           className={`w-full py-3 mt-2 rounded-xl font-bold text-lg transition 
-            ${selectedAddress ? "bg-green-500 hover:bg-green-600 text-white" : "bg-gray-300 cursor-not-allowed text-gray-600"}
+            ${
+              selectedAddress
+                ? "bg-green-500 hover:bg-green-600 text-white"
+                : "bg-gray-300 cursor-not-allowed text-gray-600"
+            }
           `}
         >
-          {paymentMethod === "Razorpay" ? "Proceed to Pay 💳" : "Place Order 🎉"}
+          {paymentMethod === "Razorpay"
+            ? "Proceed to Pay 💳"
+            : "Place Order 🎉"}
         </button>
       </div>
     </div>

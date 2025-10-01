@@ -64,14 +64,19 @@ const RecentOrders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const token = localStorage.getItem("GullyFoodsUserToken");
+
   useEffect(() => {
     let isMounted = true;
     const fetchOrders = async (page = 1) => {
       try {
         setLoading(true);
+
         const { data } = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/order/getUserOrders?page=${page}&limit=5`,
-          { withCredentials: true }
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
 
         if (!isMounted) return;

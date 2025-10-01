@@ -12,6 +12,7 @@ const GroceryProducts = () => {
   const [products, setProducts] = useState([]);
   const { user, setUser } = useContext(UserContext);
   const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("GullyFoodsUserToken");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -78,6 +79,7 @@ const GroceryProducts = () => {
                         setUser={setUser}
                         product={product}
                         variant="grocery"
+                        token={token}
                       />
                     </div>
                   </motion.div>

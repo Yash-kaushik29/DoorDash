@@ -7,6 +7,7 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const PDFDocument = require("pdfkit");
 const QRCode = require("qrcode");
+const authenticateUser = require('../middleware/authMiddleware');
 
 router.post("/create-order", async (req, res) => {
   const {
@@ -539,60 +540,38 @@ router.get("/getAllOrders", async (req, res) => {
   );
 });
 
-router.get("/getUserOrders", async (req, res) => {
-  const { token } = req.cookies;
+router.get("/getUserOrders", authenticateUser, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
 
-  if (!token) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized access" });
+  try {
+    const existingUser = req.user;
+
+    // Pagination logic
+    const totalOrders = await Order.countDocuments({ user: existingUser._id });
+    const totalPages = Math.ceil(totalOrders / limit);
+
+    const orders = await Order.find({ user: existingUser._id })
+      .populate({
+        path: "items.product",
+        select: "id name price",
+      })
+      .select("id items amount deliveryStatus createdAt")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.json({
+      success: true,
+      orders,
+      totalPages,
+      currentPage: page,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
-
-  jwt.verify(token, process.env.JWT_SECRET_KEY, {}, async (err, user) => {
-    if (err) {
-      return res.status(403).json({ success: false, message: "Invalid token" });
-    }
-
-    try {
-      const existingUser = await User.findById(user.userID);
-
-      if (!existingUser) {
-        return res
-          .status(404)
-          .json({ success: false, message: "User not found" });
-      }
-
-      // Pagination logic
-      const totalOrders = await Order.countDocuments({
-        user: existingUser._id,
-      });
-      const totalPages = Math.ceil(totalOrders / limit);
-
-      const orders = await Order.find({ user: existingUser._id })
-        .populate({
-          path: "items.product",
-          select: "id name price",
-        })
-        .select("id items amount deliveryStatus createdAt")
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit);
-
-      res.json({
-        success: true,
-        orders,
-        totalPages,
-        currentPage: page,
-      });
-    } catch (error) {
-      console.error(error);
-      res
-        .status(500)
-        .json({ success: false, message: "Internal server error" });
-    }
-  });
 });
+
 
 module.exports = router;

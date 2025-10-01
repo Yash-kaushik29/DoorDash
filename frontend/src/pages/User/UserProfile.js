@@ -27,22 +27,14 @@ const UserProfile = () => {
   }
 
   const handleLogout = async () => {
-    const { data } = await axios.get(
-      `${process.env.REACT_APP_API_URL}/api/user-profile/logout`,
-      {
-        withCredentials: true,
-      }
-    );
+    localStorage.removeItem("GullyFoodsUserToken");
+    setUser(null);
+    toast.success("Logged out successfully!");
 
-    if (data.success === true) {
-      toast.success("You have been logged out!");
-      setTimeout(() => {
-        setUser(null);
-        navigate("/");
-      }, 1000);
-    } else {
-      toast.error("Failed to logout!");
-    }
+    setTimeout(() => {
+      setUser(null);
+      navigate("/");
+    }, 1000);
   };
 
   return (

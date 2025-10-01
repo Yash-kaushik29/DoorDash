@@ -42,6 +42,7 @@ export default function Signup() {
 
       if (response.data.success) {
         toast.success("Signup Successful! 🎉");
+        localStorage.setItem("GullyFoodsUserToken", response.data.token);
         setUser(response.data.user);
         setTimeout(() => {
           navigate("/");

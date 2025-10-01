@@ -169,16 +169,10 @@ router.post("/user-signup", async (req, res) => {
 
         await Otp.deleteOne({ _id: existingOtp._id });
 
-        res
-          .cookie("token", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-          })
-          .send({
+        res.send({
             success: true,
             message: "Registered Successfully!",
+            token,
             user: {
               username: newUser.username,
               _id: newUser._id,
