@@ -21,6 +21,7 @@ const ProductForm = () => {
   const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const token = localStorage.getItem("GullyFoodsSellerToken");
 
   // Fetch Product Details if Editing
   const fetchProductDetails = async () => {
@@ -69,7 +70,12 @@ const ProductForm = () => {
     e.preventDefault();
 
     // Basic Validation
-    if (!product.name || !product.price || !product.dietType || images.length === 0) {
+    if (
+      !product.name ||
+      !product.price ||
+      !product.dietType ||
+      images.length === 0
+    ) {
       toast.error("Please fill all required fields!");
       return;
     }
@@ -84,25 +90,25 @@ const ProductForm = () => {
         method: productId ? "put" : "post",
         url: apiUrl,
         data: { product, productId, images },
-        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (data.success) {
         toast.success(
           productId ? "Changes saved!" : "Product added successfully!"
         );
-        // setTimeout(() => {
-        //   navigate(`/seller/my-products`);
-        // }, 2000);
-        // setImages([]);
+        setTimeout(() => {
+          navigate(`/seller/my-products`);
+        }, 2000);
+        setImages([]);
       } else {
         toast.error(data.message);
       }
     } catch (error) {
       console.error("Error submitting product:", error);
-      toast.error(
-        error.response?.data?.message || "Error submitting product."
-      );
+      toast.error(error.response?.data?.message || "Error submitting product.");
     } finally {
       setLoading(false);
     }
@@ -142,16 +148,13 @@ const ProductForm = () => {
           <input
             type="string"
             value={product.price}
-            onChange={(e) =>
-              setProduct({ ...product, price: e.target.value })
-            }
+            onChange={(e) => setProduct({ ...product, price: e.target.value })}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-100"
             required
           />
         </div>
 
         {/* Diet-Type */}
-        
 
         {/* Categories */}
         <div>
@@ -183,7 +186,7 @@ const ProductForm = () => {
         </div>
 
         {/* Images */}
-        <PhotosUploader images={images} setImages={setImages} />
+        <PhotosUploader images={images} setImages={setImages} upload={false} />
 
         <button
           type="submit"

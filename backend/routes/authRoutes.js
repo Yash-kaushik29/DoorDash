@@ -5,6 +5,8 @@ const Seller = require("../models/Seller");
 const Otp = require("../models/Otp");
 const bcrypt = require("bcrypt");
 const axios = require("axios");
+const authenticateSeller = require('../middleware/sellerAuthMiddleware');
+
 const router = express();
 
 const generateNumericOtp = (length = 4) => {
@@ -55,8 +57,7 @@ router.post("/send-otp", async (req, res) => {
 
     const response = await axios.post(url, null, {
       headers: {
-        authToken:
-          process.env.authToken,
+        authToken: process.env.authToken,
       },
     });
 
@@ -82,12 +83,10 @@ router.post("/send-otp", async (req, res) => {
       "MessageCentral error:",
       error.response?.data || error.message
     );
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to send OTP via MessageCentral",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to send OTP via MessageCentral",
+    });
   }
 });
 
@@ -170,17 +169,17 @@ router.post("/user-signup", async (req, res) => {
         await Otp.deleteOne({ _id: existingOtp._id });
 
         res.send({
-            success: true,
-            message: "Registered Successfully!",
-            token,
-            user: {
-              username: newUser.username,
-              _id: newUser._id,
-              foodCart: newUser.foodCart,
-              groceryCart: newUser.groceryCart,
-              phone: newUser.phone,
-            },
-          });
+          success: true,
+          message: "Registered Successfully!",
+          token,
+          user: {
+            username: newUser.username,
+            _id: newUser._id,
+            foodCart: newUser.foodCart,
+            groceryCart: newUser.groceryCart,
+            phone: newUser.phone,
+          },
+        });
       } else {
         res.send({ success: false, message: "OTP does not match!" });
       }
@@ -293,18 +292,11 @@ router.post("/seller-login", async (req, res) => {
 
         console.log(token);
 
-        res
-          .cookie("sellerToken", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-          })
-          .send({
-            success: true,
-            message: "Logged In Successfully!",
-            token,
-          });
+        res.send({
+          success: true,
+          message: "Logged In Successfully!",
+          token,
+        });
       } else {
         res.send({ success: false, message: "Invalid credentails!" });
       }
@@ -318,19 +310,28 @@ router.get("/getUser", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ success: false, message: "Please login first!" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Please login first!" });
     }
 
     const token = authHeader.split(" ")[1];
 
     jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decoded) => {
       if (err) {
-        return res.status(401).json({ success: false, message: "Invalid or expired token!" });
+        return res
+          .status(401)
+          .json({ success: false, message: "Invalid or expired token!" });
       }
 
       const currUser = await User.findById(decoded.userID);
       if (!currUser) {
-        return res.status(401).json({ success: false, message: "User not found! Please login again." });
+        return res
+          .status(401)
+          .json({
+            success: false,
+            message: "User not found! Please login again.",
+          });
       }
 
       res.json({
@@ -350,63 +351,52 @@ router.get("/getUser", async (req, res) => {
   }
 });
 
-router.get("/getSellerDetails", async (req, res) => {
+router.get("/getSellerDetails", authenticateSeller, async (req, res) => {
   try {
-    const { sellerToken } = req.cookies;
+    const existingSeller = req.seller; 
 
-    if (!sellerToken) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
+    const sellerDetails = await Seller.findById(existingSeller._id)
+      .select("username email shop salesHistory products")
+      .populate({
+        path: "orders",
+        match: { deliveryStatus: { $nin: ["Cancelled", "Delivered"] } },
+        select: "_id",
+      })
+      .lean();
+
+    if (!sellerDetails) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
-    jwt.verify(sellerToken, process.env.JWT_SECRET_KEY, async (err, seller) => {
-      if (err) {
-        return res
-          .status(403)
-          .json({ success: false, message: "Invalid token" });
-      }
+    // calculate today's sales
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-      const sellerDetails = await Seller.findOne({ _id: seller.sellerID })
-        .select("username email shop salesHistory products")
-        .populate({
-          path: "orders",
-          match: { deliveryStatus: { $nin: ["Cancelled", "Delivered"] } },
-          select: "_id",
-        })
-        .lean();
+    const todaySales =
+      sellerDetails.salesHistory?.filter((entry) => {
+        const saleDate = new Date(entry.date);
+        return saleDate >= today;
+      }) || [];
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+    const todaySalesTotal = todaySales.reduce(
+      (sum, entry) => sum + entry.amount,
+      0
+    );
 
-      const todaySales =
-        sellerDetails.salesHistory?.filter((entry) => {
-          const saleDate = new Date(entry.date);
-          return saleDate >= today;
-        }) || [];
+    const responseData = {
+      _id: sellerDetails._id,
+      username: sellerDetails.username,
+      email: sellerDetails.email,
+      shop: sellerDetails.shop,
+      sales: sellerDetails.sales,
+      productsCount: sellerDetails.products.length,
+      pendingOrdersCount: sellerDetails.orders?.length || 0,
+      todaySalesTotal,
+    };
 
-      const todaySalesTotal = todaySales.reduce(
-        (sum, entry) => sum + entry.amount,
-        0
-      );
-
-      if (!sellerDetails) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Seller not found" });
-      }
-
-      const responseData = {
-        _id: sellerDetails._id,
-        username: sellerDetails.username,
-        email: sellerDetails.email,
-        shop: sellerDetails.shop,
-        sales: sellerDetails.sales,
-        productsCount: sellerDetails.products.length,
-        pendingOrdersCount: sellerDetails.orders?.length || 0,
-        todaySalesTotal: todaySalesTotal,
-      };
-
-      res.status(200).json({ success: true, sellerDetails: responseData });
-    });
+    res.status(200).json({ success: true, sellerDetails: responseData });
   } catch (error) {
     console.error("Error in fetching seller details:", error);
     res.status(500).json({ success: false, message: "Server error" });

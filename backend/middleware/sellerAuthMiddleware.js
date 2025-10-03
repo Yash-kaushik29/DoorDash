@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const Seller = require("../models/Seller");
 
 const authenticateUser = async (req, res, next) => {
   try {
@@ -21,14 +21,14 @@ const authenticateUser = async (req, res, next) => {
         });
       }
 
-      const currUser = await User.findById(decoded.userID);
-      if (!currUser) {
+      const currSeller = await Seller.findById(decoded.sellerID);
+      if (!currSeller) {
         return res
           .status(404)
-          .send({ success: false, message: "User not found!" });
+          .send({ success: false, message: "Seller not found!" });
       }
 
-      req.user = currUser; 
+      req.seller = currSeller; 
       next();
     });
   } catch (error) {
@@ -38,5 +38,6 @@ const authenticateUser = async (req, res, next) => {
       .send({ success: false, message: "Internal server error!" });
   }
 };
+
 
 module.exports = authenticateUser;

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SellerHeader from "../../components/SellerHeader";
 import axios from "axios";
-import SellerDashboardSkeleton from '../../skeletons/SellerDashboardSkeleton ';
+import SellerDashboardSkeleton from "../../skeletons/SellerDashboardSkeleton ";
 import notificationSound from "../../sound/notificationSound.mp3";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -13,15 +13,18 @@ const SellerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const token = localStorage.getItem("doordash-seller");
+  const token = localStorage.getItem("GullyFoodsSellerToken");
 
   useEffect(() => {
     const unlockAudio = () => {
-      audio.play().then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        document.removeEventListener("click", unlockAudio);
-      }).catch(() => {});
+      audio
+        .play()
+        .then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+          document.removeEventListener("click", unlockAudio);
+        })
+        .catch(() => {});
     };
     document.addEventListener("click", unlockAudio);
     return () => document.removeEventListener("click", unlockAudio);
@@ -34,7 +37,11 @@ const SellerDashboard = () => {
       try {
         const { data } = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/notification/unread-order-notifications`,
-          { withCredentials: true }
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         if (data.success && data.count > 0) {
           audio.play();
@@ -54,7 +61,11 @@ const SellerDashboard = () => {
     try {
       const { data } = await axios.get(
         `${process.env.REACT_APP_API_URL}/api/auth/getSellerDetails`,
-        { withCredentials: true }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (data.success) setSeller(data.sellerDetails);
@@ -73,7 +84,7 @@ const SellerDashboard = () => {
   }, [token, navigate]);
 
   const takeToLogin = () => {
-    localStorage.setItem("doordash-seller", "");
+    localStorage.setItem("GullyFoodsSellerToken", "");
     window.location.reload();
   };
 
@@ -120,21 +131,36 @@ const SellerDashboard = () => {
 
       {/* Quick Actions */}
       <div className="max-w-5xl mx-auto p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <Link className="action-card bg-green-500 hover:bg-green-600" to="/seller/add-product">
+        <Link
+          className="action-card bg-green-500 hover:bg-green-600"
+          to="/seller/add-product"
+        >
           ➕ Add Product
         </Link>
-        <Link className="action-card bg-blue-500 hover:bg-blue-600" to="/seller/my-products">
+        <Link
+          className="action-card bg-blue-500 hover:bg-blue-600"
+          to="/seller/my-products"
+        >
           🛒 View Products
         </Link>
-        <Link className="action-card bg-yellow-500 hover:bg-yellow-600" to="/seller/my-orders">
+        <Link
+          className="action-card bg-yellow-500 hover:bg-yellow-600"
+          to="/seller/my-orders"
+        >
           📦 Manage Orders
         </Link>
         {seller?.shop ? (
-          <Link className="action-card bg-purple-500 hover:bg-purple-600" to={`/seller/edit-shop/${seller.shop}`}>
+          <Link
+            className="action-card bg-purple-500 hover:bg-purple-600"
+            to={`/seller/edit-shop/${seller.shop}`}
+          >
             🏪 Edit Shop Details
           </Link>
         ) : (
-          <Link className="action-card bg-teal-500 hover:bg-teal-600" to="/seller/add-shop">
+          <Link
+            className="action-card bg-teal-500 hover:bg-teal-600"
+            to="/seller/add-shop"
+          >
             🏪 Add Shop
           </Link>
         )}
@@ -143,15 +169,21 @@ const SellerDashboard = () => {
       {/* Stats Section */}
       <div className="max-w-5xl mx-auto p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <div className="stat-card bg-white dark:bg-gray-800 text-green-500">
-          <h2 className="text-lg font-semibold text-gray-700 dark:text-white">Total Sales</h2>
+          <h2 className="text-lg font-semibold text-gray-700 dark:text-white">
+            Total Sales
+          </h2>
           <p className="text-2xl font-bold">₹{seller.todaySalesTotal}</p>
         </div>
         <div className="stat-card bg-white dark:bg-gray-800 text-yellow-500">
-          <h2 className="text-lg font-semibold text-gray-700 dark:text-white">Pending Orders</h2>
+          <h2 className="text-lg font-semibold text-gray-700 dark:text-white">
+            Pending Orders
+          </h2>
           <p className="text-2xl font-bold">{seller?.pendingOrdersCount}</p>
         </div>
         <div className="stat-card bg-white dark:bg-gray-800 text-blue-500">
-          <h2 className="text-lg font-semibold text-gray-700 dark:text-white">Total Products</h2>
+          <h2 className="text-lg font-semibold text-gray-700 dark:text-white">
+            Total Products
+          </h2>
           <p className="text-2xl font-bold">{seller?.productsCount}</p>
         </div>
       </div>
@@ -167,7 +199,7 @@ const SellerDashboard = () => {
           border-radius: 0.5rem;
           color: white;
           text-align: center;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
           transition: all 0.2s ease;
         }
         .action-card:hover {
@@ -177,7 +209,7 @@ const SellerDashboard = () => {
           padding: 1rem;
           border-radius: 0.5rem;
           text-align: center;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
           transition: all 0.2s ease;
         }
       `}</style>

@@ -126,7 +126,7 @@ const OrderDetails = () => {
         <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 mt-4">
           <div className="flex items-center gap-2 mb-4" >
             <h2 className="text-2xl font-semibold">Order #{order?.id}</h2>
-            {order.deliveryStatus === "Delivered" && <DownloadInvoiceButton orderId={order._id} />}
+            {order.deliveryStatus === "Delivered" && order.orderType === 'Grocery' && <DownloadInvoiceButton orderId={order._id} />}
           </div>
 
           {/* Status Row */}

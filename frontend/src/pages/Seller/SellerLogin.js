@@ -39,7 +39,7 @@ export default function SellerLogin() {
       if (response.data.success) {
         toast.success("Login Successful! 🎉");
         setTimeout(() => {
-            localStorage.setItem('doordash-seller', response.data.token);
+          localStorage.setItem('GullyFoodsSellerToken', response.data.token);
           navigate("/seller");
         }, 2000);
       } else {
@@ -67,7 +67,7 @@ export default function SellerLogin() {
           className="w-full max-w-md bg-white p-6 shadow-xl rounded-2xl backdrop-blur-lg bg-opacity-90"
         >
           <h2 className="text-2xl text-center text-green-600 font-bold mb-4">
-            User Login
+            Seller Login
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">

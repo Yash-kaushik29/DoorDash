@@ -3,30 +3,13 @@ const User = require("../models/User");
 const Seller = require("../models/Seller");
 const jwt = require("jsonwebtoken");
 const authenticateUser = require("../middleware/authMiddleware");
+const authenticateSeller = require('../middleware/sellerAuthMiddleware');
 
 const router = express.Router();
 
-router.get("/unread-order-notifications", async (req, res) => {
-  const { sellerToken } = req.cookies;
-
-  if (!sellerToken) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized access" });
-  }
-
+router.get("/unread-order-notifications", authenticateSeller, async (req, res) => {
   try {
-    const decoded = jwt.verify(sellerToken, process.env.JWT_SECRET_KEY);
-    const existingSeller = await Seller.findById(
-      decoded.sellerID,
-      "notifications"
-    );
-
-    if (!existingSeller) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Seller not found" });
-    }
+    const existingSeller = req.seller; 
 
     const unread = existingSeller.notifications.filter(
       (notif) => notif.read === false && notif.order
@@ -86,27 +69,9 @@ router.post("/readNotification", authenticateUser, async (req, res) => {
   }
 });
 
-router.get("/getSellerNotifications", async (req, res) => {
-  const { sellerToken } = req.cookies;
-
-  if (!sellerToken) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized access" });
-  }
-
+router.get("/getSellerNotifications", authenticateSeller, async (req, res) => {
   try {
-    const decoded = jwt.verify(sellerToken, process.env.JWT_SECRET_KEY);
-    const existingSeller = await Seller.findById(
-      decoded.sellerID,
-      "notifications"
-    );
-
-    if (!existingSeller) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Seller not found" });
-    }
+    const existingSeller = req.seller; 
 
     const sortedNotifications = existingSeller.notifications.sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
@@ -122,63 +87,34 @@ router.get("/getSellerNotifications", async (req, res) => {
   }
 });
 
-router.put("/read/:id", async (req, res) => {
-  const { sellerToken } = req.cookies;
+router.put("/read/:id", authenticateSeller, async (req, res) => {
+  try {
+    const existingSeller = req.seller; 
+    const notifId = req.params.id;
 
-  if (!sellerToken) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized: No token provided" });
-  }
+    const notificationIndex = existingSeller.notifications.findIndex(
+      (notif) => notif._id.toString() === notifId
+    );
 
-  jwt.verify(
-    sellerToken,
-    process.env.JWT_SECRET_KEY,
-    {},
-    async (err, seller) => {
-      if (err) {
-        return res
-          .status(403)
-          .json({ success: false, message: "Forbidden: Invalid token" });
-      }
-
-      try {
-        const existingSeller = await Seller.findById(seller.sellerID);
-        if (!existingSeller) {
-          return res
-            .status(404)
-            .json({ success: false, message: "Seller not found" });
-        }
-
-        // Find the notification by ID
-        const notificationIndex = existingSeller.notifications.findIndex(
-          (notif) => notif._id.toString() === req.params.id
-        );
-
-        if (notificationIndex === -1) {
-          return res
-            .status(404)
-            .json({ success: false, message: "Notification not found" });
-        }
-
-        // Mark the notification as read
-        existingSeller.notifications[notificationIndex].read = true;
-
-        // Save the updated seller document
-        await existingSeller.save();
-
-        res.status(200).json({
-          success: true,
-          message: "Notification marked as read",
-        });
-      } catch (error) {
-        console.error("Error marking notification as read:", error);
-        res
-          .status(500)
-          .json({ success: false, message: "Internal server error" });
-      }
+    if (notificationIndex === -1) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Notification not found" });
     }
-  );
+
+    // Mark as read
+    existingSeller.notifications[notificationIndex].read = true;
+
+    await existingSeller.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Notification marked as read",
+    });
+  } catch (error) {
+    console.error("Error marking notification as read:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
 });
 
 module.exports = router;

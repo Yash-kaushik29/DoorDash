@@ -7,7 +7,8 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const PDFDocument = require("pdfkit");
 const QRCode = require("qrcode");
-const authenticateUser = require('../middleware/authMiddleware');
+const authenticateUser = require("../middleware/authMiddleware");
+const authenticateSeller = require("../middleware/sellerAuthMiddleware");
 
 router.post("/create-order", async (req, res) => {
   const {
@@ -193,7 +194,9 @@ function checkPageSpace(doc, neededHeight = 50) {
 
 router.get("/download-invoice/:orderId", async (req, res) => {
   try {
-    const order = await Order.findById(req.params.orderId).populate("items.product").exec();
+    const order = await Order.findById(req.params.orderId)
+      .populate("items.product")
+      .exec();
     if (!order) return res.status(404).send("Order not found");
 
     const doc = new PDFDocument({ margin: 50, size: "A4" });
@@ -210,8 +213,12 @@ router.get("/download-invoice/:orderId", async (req, res) => {
     doc.moveDown(1);
 
     // ===== ORDER SUMMARY =====
-    const totalProducts = order.items.reduce((sum, item) => sum + item.quantity, 0);
-    doc.fontSize(12)
+    const totalProducts = order.items.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+    doc
+      .fontSize(12)
       .text(`Order ID: #${order.id}`)
       .text(`Date & Time: ${order.createdAt.toLocaleString()}`)
       .text(`Products Count: ${totalProducts}`)
@@ -223,15 +230,26 @@ router.get("/download-invoice/:orderId", async (req, res) => {
     doc.fontSize(12).text("Delivery Address:", { underline: true });
     doc.text(`${addr.fullName}`);
     doc.text(`${addr.phone}`);
-    doc.text(`${addr.addressLine}, ${addr.area}${addr.landMark ? `, ${addr.landMark}` : ""}`);
+    doc.text(
+      `${addr.addressLine}, ${addr.area}${
+        addr.landMark ? `, ${addr.landMark}` : ""
+      }`
+    );
     doc.moveDown();
 
     // ===== PRODUCTS TABLE =====
     const tableXStart = 50;
-    const colNo = 50, colName = 90, colQty = 350, colTotal = 450;
-    const colWidth = 100, colQtyWidth = 50;
+    const colNo = 50,
+      colName = 90,
+      colQty = 350,
+      colTotal = 450;
+    const colWidth = 100,
+      colQtyWidth = 50;
 
-    doc.fontSize(12).fillColor("#2e86de").text("Products", tableXStart, doc.y, { underline: true });
+    doc
+      .fontSize(12)
+      .fillColor("#2e86de")
+      .text("Products", tableXStart, doc.y, { underline: true });
     doc.moveDown(0.3);
 
     // Table Header
@@ -242,7 +260,12 @@ router.get("/download-invoice/:orderId", async (req, res) => {
     doc.text("Qty", colQty, headerY, { width: colQtyWidth, align: "center" });
     doc.text("Total", colTotal, headerY, { width: colWidth, align: "right" });
     doc.moveDown(0.3);
-    doc.strokeColor("#dcdde1").lineWidth(1).moveTo(colNo, doc.y).lineTo(doc.page.width - 50, doc.y).stroke();
+    doc
+      .strokeColor("#dcdde1")
+      .lineWidth(1)
+      .moveTo(colNo, doc.y)
+      .lineTo(doc.page.width - 50, doc.y)
+      .stroke();
     doc.moveDown(1.2);
 
     // Table Rows with page break
@@ -257,14 +280,17 @@ router.get("/download-invoice/:orderId", async (req, res) => {
       doc.text(`${i + 1}`, colNo, rowY, { width: 30 });
       doc.text(name, colName, rowY, { width: 250 });
       doc.text(qty, colQty, rowY, { width: colQtyWidth, align: "center" });
-      doc.text(`₹${totalPrice.toFixed(2)}`, colTotal, rowY, { width: colWidth, align: "right" });
+      doc.text(`₹${totalPrice.toFixed(2)}`, colTotal, rowY, {
+        width: colWidth,
+        align: "right",
+      });
       doc.moveDown(1.2);
     });
 
     doc.moveDown(0.5);
 
     // ===== PAYMENT & QR SECTION =====
-    checkPageSpace(doc, 50); // Space for payment box 
+    checkPageSpace(doc, 50); // Space for payment box
     const paymentStartY = doc.y;
 
     // Light background box for payment summary
@@ -272,35 +298,57 @@ router.get("/download-invoice/:orderId", async (req, res) => {
     const boxWidth = doc.page.width - 90;
     let boxHeight = 0;
 
-    const itemsTotal = order.items.reduce((sum, item) => sum + (item.product?.price || 0) * item.quantity, 0);
+    const itemsTotal = order.items.reduce(
+      (sum, item) => sum + (item.product?.price || 0) * item.quantity,
+      0
+    );
     const paymentLines = [];
-    paymentLines.push({ label: "Items Total", value: `₹${itemsTotal.toFixed(2)}` });
+    paymentLines.push({
+      label: "Items Total",
+      value: `₹${itemsTotal.toFixed(2)}`,
+    });
 
     if (order.orderType === "Food") {
-      paymentLines.push({ label: "Taxes", value: `₹${order.taxes.toFixed(2)}` });
-      paymentLines.push({ label: "Convenience Fees", value: `₹${order.convenienceFees.toFixed(2)}` });
+      paymentLines.push({
+        label: "Taxes",
+        value: `₹${order.taxes.toFixed(2)}`,
+      });
+      paymentLines.push({
+        label: "Convenience Fees",
+        value: `₹${order.convenienceFees.toFixed(2)}`,
+      });
     } else if (order.orderType === "Grocery") {
-      paymentLines.push({ label: "Service Charge", value: `₹${order.serviceCharge.toFixed(2)}` });
+      paymentLines.push({
+        label: "Service Charge",
+        value: `₹${order.serviceCharge.toFixed(2)}`,
+      });
     }
 
-    paymentLines.push({ label: "Delivery Charge", value: `₹${order.deliveryCharge.toFixed(2)}` });
+    paymentLines.push({
+      label: "Delivery Charge",
+      value: `₹${order.deliveryCharge.toFixed(2)}`,
+    });
     boxHeight = paymentLines.length * 20 + 40; // Space for TOTAL
-    doc.rect(boxX, paymentStartY, boxWidth, boxHeight).fillAndStroke("#f5f6fa", "#dcdde1");
+    doc
+      .rect(boxX, paymentStartY, boxWidth, boxHeight)
+      .fillAndStroke("#f5f6fa", "#dcdde1");
 
     // Inline payment lines
     let textY = paymentStartY + 15;
     const labelX = boxX + 15;
     doc.fontSize(12).font("Helvetica").fillColor("black");
-    paymentLines.forEach(line => {
+    paymentLines.forEach((line) => {
       doc.text(`${line.label}: ${line.value}`, labelX, textY);
       textY += 20;
     });
 
     // TOTAL
-    doc.fontSize(14).font("Helvetica-Bold").text(`TOTAL: ₹${order.totalAmount.toFixed(2)}`, labelX, textY);
+    doc
+      .fontSize(14)
+      .font("Helvetica-Bold")
+      .text(`TOTAL: ₹${order.totalAmount.toFixed(2)}`, labelX, textY);
     doc.moveDown(1);
 
-    
     // ===== QR CODE =====
     checkPageSpace(doc, 150); //Space for QR + text
     const orderUrl = `https://gullyfoods.app/order/${order._id}`;
@@ -312,14 +360,16 @@ router.get("/download-invoice/:orderId", async (req, res) => {
 
     // Thank-you text
     doc.moveDown(8);
-    doc.fontSize(12).font("Helvetica-Bold").fillColor("#38D16B").text(
-      "Thank you for ordering with GullyFoods!",
-      { align: "center" }
-    );
-    doc.fontSize(10).font("Helvetica").fillColor("black").text(
-      "We hope to serve you again soon!",
-      { align: "center" }
-    );
+    doc
+      .fontSize(12)
+      .font("Helvetica-Bold")
+      .fillColor("#38D16B")
+      .text("Thank you for ordering with GullyFoods!", { align: "center" });
+    doc
+      .fontSize(10)
+      .font("Helvetica")
+      .fillColor("black")
+      .text("We hope to serve you again soon!", { align: "center" });
 
     doc.end();
   } catch (err) {
@@ -328,216 +378,133 @@ router.get("/download-invoice/:orderId", async (req, res) => {
   }
 });
 
-router.get("/getOrder/:orderId", async (req, res) => {
-  const { orderId } = req.params;
-  const { sellerToken } = req.cookies;
+router.get("/getOrder/:orderId", authenticateSeller, async (req, res) => {
+  try {
+    const sellerId = req.seller._id;
+    const { orderId } = req.params;
 
-  if (!sellerToken) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized access" });
-  }
+    const order = await Order.findById(orderId)
+      .populate("items.product", "name basePrice images")
+      .lean();
 
-  jwt.verify(
-    sellerToken,
-    process.env.JWT_SECRET_KEY,
-    {},
-    async (err, seller) => {
-      if (err) {
-        return res
-          .status(403)
-          .json({ success: false, message: "Invalid token" });
-      }
-
-      try {
-        const existingSeller = await Seller.findById(seller.sellerID);
-
-        if (!existingSeller) {
-          return res
-            .status(404)
-            .json({ success: false, message: "Seller not found" });
-        }
-
-        const order = await Order.findById(orderId)
-          .populate("items.product", "name basePrice images")
-          .lean(); // ✅ Using lean() for performance
-
-        if (!order) {
-          return res
-            .status(404)
-            .json({ success: false, message: "Order not found" });
-        }
-
-        const sellerProducts = order.items
-          .filter(
-            (item) => item.seller.toString() === existingSeller._id.toString()
-          )
-          .map((item) => ({
-            _id: item.product._id,
-            productName: item.product.name,
-            price: item.product.basePrice,
-            image: item.product.images[0],
-            quantity: item.quantity,
-            status: item.status,
-          }));
-
-        await Seller.updateOne(
-          {
-            _id: seller.sellerID,
-            "notifications.order": orderId,
-          },
-          {
-            $set: { "notifications.$.read": true },
-          }
-        );
-
-        res.status(200).json({
-          success: true,
-          orderId: order.id,
-          products: sellerProducts,
-        });
-      } catch (error) {
-        console.error("Error fetching order:", error);
-        res
-          .status(500)
-          .json({ success: false, message: "Internal server error" });
-      }
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
-  );
+
+    const sellerProducts = order.items
+      .filter((item) => item.seller.toString() === sellerId.toString())
+      .map((item) => ({
+        _id: item.product._id,
+        productName: item.product.name,
+        price: item.product.basePrice,
+        image: item.product.images[0],
+        quantity: item.quantity,
+        status: item.status,
+      }));
+
+    // Mark the notification as read
+    await Seller.updateOne(
+      { _id: sellerId, "notifications.order": orderId },
+      { $set: { "notifications.$.read": true } }
+    );
+
+    res.status(200).json({
+      success: true,
+      orderId: order.id,
+      products: sellerProducts,
+    });
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
 });
 
-router.put("/confirm-order/:orderId", async (req, res) => {
-  const { orderId } = req.params;
-  const { selectedProducts } = req.body;
-  const { sellerToken } = req.cookies;
+router.put("/confirm-order/:orderId", authenticateSeller, async (req, res) => {
+  try {
+    const sellerId = req.seller._id;
+    const { orderId } = req.params;
+    const { selectedProducts } = req.body;
 
-  if (!sellerToken) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized access" });
-  }
+    const existingSeller = req.seller;
 
-  jwt.verify(
-    sellerToken,
-    process.env.JWT_SECRET_KEY,
-    {},
-    async (err, seller) => {
-      if (err) {
-        return res
-          .status(403)
-          .json({ success: false, message: "Invalid token" });
-      }
-
-      try {
-        const existingSeller = await Seller.findById(seller.sellerID);
-        if (!existingSeller) {
-          return res
-            .status(404)
-            .json({ success: false, message: "Seller not found" });
-        }
-
-        // Populate products to access price
-        const order = await Order.findById(orderId).populate("items.product");
-        if (!order) {
-          return res
-            .status(404)
-            .json({ success: false, message: "Order not found" });
-        }
-
-        let isUpdated = false;
-        let cancelledAmount = 0;
-
-        order.items.forEach((item) => {
-          if (item.seller.toString() === seller.sellerID.toString()) {
-            if (selectedProducts.includes(item.product._id.toString())) {
-              item.status = "Preparing";
-            } else {
-              item.status = "Cancelled";
-              cancelledAmount += (item.product?.price || 0) * item.quantity;
-            }
-            isUpdated = true;
-          }
-        });
-
-        if (isUpdated) {
-          order.amount = Math.max(0, (order.amount || 0) - cancelledAmount);
-          await order.save();
-        }
-
-        res
-          .status(200)
-          .json({ success: true, message: "Order updated successfully" });
-      } catch (error) {
-        console.error("Error confirming order:", error);
-        res
-          .status(500)
-          .json({ success: false, message: "Internal server error" });
-      }
+    const order = await Order.findById(orderId).populate("items.product");
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
     }
-  );
+
+    let isUpdated = false;
+    let cancelledAmount = 0;
+
+    order.items.forEach((item) => {
+      if (item.seller.toString() === sellerId.toString()) {
+        if (selectedProducts.includes(item.product._id.toString())) {
+          item.status = "Preparing";
+        } else {
+          item.status = "Cancelled";
+          cancelledAmount += (item.product?.price || 0) * item.quantity;
+        }
+        isUpdated = true;
+      }
+    });
+
+    if (isUpdated) {
+      order.amount = Math.max(0, (order.amount || 0) - cancelledAmount);
+      await order.save();
+    }
+
+    res
+      .status(200)
+      .json({ success: true, message: "Order updated successfully" });
+  } catch (error) {
+    console.error("Error confirming order:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
 });
 
-router.get("/getAllOrders", async (req, res) => {
-  const { sellerToken } = req.cookies;
+router.get("/getAllOrders", authenticateSeller, async (req, res) => {
+  try {
+    const sellerId = req.seller._id;
 
-  if (!sellerToken) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized access" });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Fetch orders containing this seller’s products
+    const orders = await Order.find({ "items.seller": sellerId })
+      .populate("items.product", "id name price")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // Keep only the items for this seller in each order
+    const filteredOrders = orders.map((order) => ({
+      ...order,
+      items: order.items.filter(
+        (item) => item.seller.toString() === sellerId.toString()
+      ),
+    }));
+
+    // Count total orders for pagination
+    const totalOrders = await Order.countDocuments({
+      "items.seller": sellerId,
+    });
+
+    res.status(200).json({
+      success: true,
+      orders: filteredOrders,
+      totalOrders,
+      currentPage: page,
+      totalPages: Math.ceil(totalOrders / limit),
+    });
+  } catch (error) {
+    console.error("Error fetching seller orders:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
-
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
-
-  jwt.verify(
-    sellerToken,
-    process.env.JWT_SECRET_KEY,
-    {},
-    async (err, seller) => {
-      if (err) {
-        return res
-          .status(403)
-          .json({ success: false, message: "Invalid token" });
-      }
-
-      try {
-        // Fetch orders where the seller has at least one item
-        const orders = await Order.find({ "items.seller": seller.sellerID })
-          .populate("items.product", "id name price")
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .lean();
-
-        // Filter items inside each order to include only those belonging to this seller
-        const filteredOrders = orders.map((order) => ({
-          ...order,
-          items: order.items.filter(
-            (item) => item.seller.toString() === seller.sellerID
-          ),
-        }));
-
-        // Count total orders for pagination
-        const totalOrders = await Order.countDocuments({
-          "items.seller": seller.sellerID,
-        });
-
-        res.status(200).json({
-          success: true,
-          orders: filteredOrders,
-          totalOrders,
-          currentPage: page,
-          totalPages: Math.ceil(totalOrders / limit),
-        });
-      } catch (error) {
-        console.error("Error fetching seller orders:", error);
-        res
-          .status(500)
-          .json({ success: false, message: "Internal server error" });
-      }
-    }
-  );
 });
 
 router.get("/getUserOrders", authenticateUser, async (req, res) => {
@@ -572,6 +539,5 @@ router.get("/getUserOrders", authenticateUser, async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
-
 
 module.exports = router;

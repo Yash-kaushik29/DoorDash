@@ -42,7 +42,13 @@ const ProductsList = () => {
       try {
         const { data } = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/shop/get-products`,
-          { withCredentials: true }
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem(
+                "GullyFoodsSellerToken"
+              )}`,
+            },
+          }
         );
 
         if (data.success) {
@@ -71,7 +77,9 @@ const ProductsList = () => {
       <ToastContainer position="top-right" autoClose={3000} />
       <SellerHeader />
       <div className="max-w-7xl mx-auto p-4">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">My Products</h1>
+        <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">
+          My Products
+        </h1>
 
         {/* Search Bar */}
         <input
@@ -90,21 +98,19 @@ const ProductsList = () => {
 
         {/* Product Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {!loading && filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
-              <ProductListCard
-                key={product._id}
-                product={product}
-                onToggleStock={toggleStock}
-              />
-            ))
-          ) : (
-            !loading && (
-              <div className="text-center text-gray-500 col-span-full">
-                No products found.
-              </div>
-            )
-          )}
+          {!loading && filteredProducts.length > 0
+            ? filteredProducts.map((product) => (
+                <ProductListCard
+                  key={product._id}
+                  product={product}
+                  onToggleStock={toggleStock}
+                />
+              ))
+            : !loading && (
+                <div className="text-center text-gray-500 col-span-full">
+                  No products found.
+                </div>
+              )}
         </div>
       </div>
     </>

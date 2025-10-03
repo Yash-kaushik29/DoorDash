@@ -16,6 +16,8 @@ const ShopPage = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
 
+  const token = localStorage.getItem("GullyFoodsUserToken");
+
   const handleButtonClick = (category) => {
     setSelectedCategory((prev) => (prev === category ? "" : category));
   };
@@ -121,6 +123,7 @@ const ShopPage = () => {
                         product={product}
                         user={user}
                         setUser={setUser}
+                        token={token}
                       />
                     ))
                   ) : (

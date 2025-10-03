@@ -13,6 +13,8 @@ const SellerOrder = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
+  const token = localStorage.getItem("GullyFoodsSellerToken");
+
   const toggleProductSelection = (productId) => {
     setSelectedProducts((prevSelected) =>
       prevSelected.includes(productId)
@@ -34,8 +36,12 @@ const SellerOrder = () => {
       setLoading(true);
       try {
         const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/order/getorder/${orderId}`,
-          { withCredentials: true }
+          `${process.env.REACT_APP_API_URL}/api/order/getOrder/${orderId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         setOrder(data);
       } catch (error) {
@@ -53,7 +59,11 @@ const SellerOrder = () => {
       const { data } = await axios.put(
         `${process.env.REACT_APP_API_URL}/api/order/confirm-order/${orderId}`,
         { selectedProducts },
-        { withCredentials: true }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (data.success) {
@@ -89,7 +99,10 @@ const SellerOrder = () => {
       <div className="p-6 max-w-4xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg">
         <div className="mb-6 border-b pb-4">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Order ID: <span className="text-blue-600 dark:text-blue-400">#{order.orderId}</span>
+            Order ID:{" "}
+            <span className="text-blue-600 dark:text-blue-400">
+              #{order.orderId}
+            </span>
           </h2>
 
           <div className="mt-4 space-y-4">
@@ -123,7 +136,9 @@ const SellerOrder = () => {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {product.productName}
                   </h3>
-                  <p className="text-gray-800 dark:text-gray-300">Qty: {product.quantity}</p>
+                  <p className="text-gray-800 dark:text-gray-300">
+                    Qty: {product.quantity}
+                  </p>
                   <p>
                     Status:{" "}
                     <span
@@ -147,7 +162,10 @@ const SellerOrder = () => {
 
           <div className="flex justify-between items-center mt-6">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-              Total Value: <span className="text-green-600 dark:text-green-400">₹{totalAmount()}</span>
+              Total Value:{" "}
+              <span className="text-green-600 dark:text-green-400">
+                ₹{totalAmount()}
+              </span>
             </h3>
             <button
               onClick={() => confirmOrder()}

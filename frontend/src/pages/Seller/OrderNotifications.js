@@ -9,6 +9,7 @@ const OrderNotifications = () => {
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const token = localStorage.getItem("GullyFoodsSellerToken");
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -17,7 +18,11 @@ const OrderNotifications = () => {
       try {
         const { data } = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/notification/getSellerNotifications`,
-          { withCredentials: true }
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
         if (data.success) {
@@ -52,15 +57,18 @@ const OrderNotifications = () => {
       await axios.put(
         `${process.env.REACT_APP_API_URL}/api/notification/read/${notifId}`,
         {},
-        { withCredentials: true }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
   };
 
-  if (loading)
-    return <p className="text-center text-gray-500">Loading...</p>;
+  if (loading) return <p className="text-center text-gray-500">Loading...</p>;
 
   if (error)
     return (
@@ -101,9 +109,7 @@ const OrderNotifications = () => {
         </div>
 
         {filteredNotifications.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400">
-            No notifications
-          </p>
+          <p className="text-gray-500 dark:text-gray-400">No notifications</p>
         ) : (
           filteredNotifications.map((notif, index) => (
             <div

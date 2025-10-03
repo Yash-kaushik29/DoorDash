@@ -8,10 +8,10 @@ import { GiNoodles } from "react-icons/gi";
 const SellerHeader = ({ sellerId }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const token = localStorage.getItem("doordash-seller");
+  const token = localStorage.getItem("GullyFoodsSellerToken");
 
   useEffect(() => {
-    const storedTheme = localStorage.getItem("doordashTheme");
+    const storedTheme = localStorage.getItem("GullyFoodsTheme");
     if (storedTheme) {
       setIsDarkMode(storedTheme === "dark");
       document.documentElement.classList.toggle("dark", storedTheme === "dark");
@@ -24,7 +24,7 @@ const SellerHeader = ({ sellerId }) => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
     document.documentElement.classList.toggle("dark", newMode);
-    localStorage.setItem("doordashTheme", newMode ? "dark" : "light");
+    localStorage.setItem("GullyFoodsTheme", newMode ? "dark" : "light");
   };
 
   return (

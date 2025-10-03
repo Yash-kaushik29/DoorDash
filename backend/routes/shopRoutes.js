@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const Shop = require("../models/Shop");
 const Seller = require("../models/Seller");
 const Product = require("../models/Product");
+const authenticateSeller = require('../middleware/sellerAuthMiddleware');
 
 router.put("/edit-shop", async (req, res) => {
   const { shop, shopId, images } = req.body;
@@ -26,73 +27,45 @@ router.put("/edit-shop", async (req, res) => {
   }
 });
 
-router.post("/add-shop", async (req, res) => {
-  const { sellerToken } = req.cookies;
+router.post("/add-shop", authenticateSeller, async (req, res) => {
+  try {
+    const existingSeller = req.seller; 
 
-  if (!sellerToken) {
-    return res.status(401).json({ success: false, message: "Unauthorized" });
+    if (existingSeller.shop) {
+      return res.json({ success: false, message: "Shop already exists!" });
+    }
+
+    const { shop, images } = req.body;
+
+    const newShop = new Shop({
+      ...shop,
+      owner: existingSeller._id,
+      images,
+    });
+
+    await newShop.save();
+
+    existingSeller.shop = newShop._id;
+    await existingSeller.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Shop added successfully",
+      shop: newShop,
+    });
+  } catch (error) {
+    console.error("Error adding shop:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
-
-  jwt.verify(sellerToken, process.env.JWT_SECRET_KEY, async (err, seller) => {
-    if (err) {
-      return res.status(403).json({ success: false, message: "Invalid token" });
-    }
-    try {
-      const existingSeller = await Seller.findById(seller.sellerID);
-
-      if (!existingSeller) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Seller not found" });
-      }
-
-      if (existingSeller.shop) {
-        return res.json({ success: false, message: "Shop already exists!" });
-      }
-
-      const { shop, images } = req.body;
-      const newShop = new Shop({ ...shop, owner: existingSeller._id, images });
-
-      await newShop.save();
-      existingSeller.shop = newShop._id;
-      await existingSeller.save();
-
-      res
-        .status(201)
-        .json({
-          success: true,
-          message: "Shop added successfully",
-          shop: newShop,
-        });
-    } catch (error) {
-      console.error("Error adding shop:", error);
-      res
-        .status(500)
-        .json({ success: false, message: "Internal server error" });
-    }
-  });
 });
 
-router.post("/add-product", async (req, res) => {
-  const { sellerToken } = req.cookies;
-
-  if (!sellerToken) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized: No token provided" });
-  }
-
+router.post("/add-product", authenticateSeller, async (req, res) => {
   try {
-    const decoded = jwt.verify(sellerToken, process.env.JWT_SECRET_KEY);
-    const existingSeller = await Seller.findById(decoded.sellerID);
-
-    if (!existingSeller) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Seller not found" });
-    }
-
+    const existingSeller = req.seller; // comes from middleware
     const { product, images } = req.body;
+
     if (!product.name || !product.price || !product.dietType) {
       return res
         .status(400)
@@ -112,7 +85,7 @@ router.post("/add-product", async (req, res) => {
       shop: shop._id,
       shopName: shop.name,
       shopType: shop.category,
-      seller: existingSeller,
+      seller: existingSeller._id,
     });
 
     await newProduct.save();
@@ -134,13 +107,13 @@ router.post("/add-product", async (req, res) => {
   }
 });
 
-// Only for bulk addition by admin
+// Only for bulk addition by adminK
 router.post("/add-products", async (req, res) => {
   const authHeader = req.headers["authorization"];
   let sellerToken = req.cookies?.sellerToken || authHeader;
 
   if (sellerToken && sellerToken.startsWith("Bearer ")) {
-    sellerToken = sellerToken.slice(7).trim(); 
+    sellerToken = sellerToken.slice(7).trim();
   }
 
   if (!sellerToken) {
@@ -254,37 +227,24 @@ router.put("/edit-product", async (req, res) => {
   }
 });
 
-router.get("/get-products", async (req, res) => {
+router.get("/get-products", authenticateSeller, async (req, res) => {
   try {
-    const { sellerToken } = req.cookies;
+    const seller = req.seller;
 
-    if (!sellerToken) {
+    if (!seller.shop) {
       return res
-        .status(401)
-        .json({ success: false, message: "Unauthorized: No token provided" });
+        .status(400)
+        .json({ success: false, message: "Seller does not have a shop yet" });
     }
 
-    // Verify Token
-    const decoded = jwt.verify(sellerToken, process.env.JWT_SECRET_KEY);
-    if (!decoded?.sellerID) {
-      return res.status(400).json({ success: false, message: "Invalid token" });
-    }
-
-    // Find Seller
-    const existingSeller = await Seller.findById(decoded.sellerID).lean();
-    if (!existingSeller) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Seller not found" });
-    }
-
-    // Fetch Products
-    const products = await Product.find({ shop: existingSeller.shop }).lean();
+    const products = await Product.find({ shop: seller.shop }).lean();
 
     res.status(200).json({ success: true, products });
   } catch (error) {
     console.error("Error fetching products:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 });
 
@@ -480,7 +440,7 @@ router.put("/update-profile", async (req, res) => {
 
 router.get("/get-restaurants", async (req, res) => {
   try {
-    const restaurants = await Shop.find({ category: { $ne: "Groceries" } });
+    const restaurants = await Shop.find({ category: { $ne: "Grocery" } });
 
     if (!restaurants || restaurants.length === 0) {
       return res

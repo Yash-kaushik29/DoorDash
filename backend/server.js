@@ -21,6 +21,7 @@ const axios = require("axios");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("./cloudinary.js");
 const cronRoutes = require('./routes/cronRoutes.js');
+const QRCode = require("qrcode");
 
 const app = express();
 dotenv.config();
@@ -112,6 +113,31 @@ app.get("/api/location/reverse-geocode", async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Reverse geocoding failed" });
+  }
+});
+
+app.get("/promo/qr", async (req, res) => {
+  try {
+    // Generate the URL you want the QR to redirect to
+    const promoUrl = `https://gullyfoods.app`;
+
+    // Generate QR as a PNG buffer
+    const qrImageBuffer = await QRCode.toBuffer(promoUrl, {
+      type: "png",
+      width: 300,
+      margin: 2,
+      color: {
+        dark: "#000000",
+        light: "#ffffff",
+      },
+    });
+
+    // Set headers and send image
+    res.setHeader("Content-Type", "image/png");
+    res.send(qrImageBuffer);
+  } catch (error) {
+    console.error("Error generating QR:", error);
+    res.status(500).json({ success: false, message: "Failed to generate QR" });
   }
 });
 
