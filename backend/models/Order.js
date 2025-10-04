@@ -12,7 +12,7 @@ const generateId = () => {
 const OrderSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    orderType: {type: String, required: true},
+    orderType: {type: String, required: true, default: "Food"},
     id: { type: String, unique: true },
     items: [
       {
@@ -33,11 +33,11 @@ const OrderSchema = new mongoose.Schema(
     },
     totalAmount: {type: Number, required: true},
     amount: { type: Number, required: true },
-    taxes: { type: Number, required: true },
-    convenienceFees: { type: Number, required: true },
-    serviceCharge: { type: Number, required: true },
+    taxes: { type: Number, default: 0 },
+    convenienceFees: { type: Number, default: 0 },
+    serviceCharge: { type: Number, default: 0 },
     deliveryStatus: { type: String, default: "Processing" },
-    deliveryCharge: {type: Number, required: true},
+    deliveryCharge: {type: Number, default: 0},
     paymentMethod: {type: String, default: "COD"},
     paymentStatus: { type: String, default: "Unpaid" },
     hasReviewed: {type: Boolean, default: false},

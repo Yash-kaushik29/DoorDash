@@ -384,7 +384,7 @@ router.get("/getOrder/:orderId", authenticateSeller, async (req, res) => {
     const { orderId } = req.params;
 
     const order = await Order.findById(orderId)
-      .populate("items.product", "name basePrice images")
+      .populate("items.product", "name basePrice price images")
       .lean();
 
     if (!order) {
@@ -398,7 +398,8 @@ router.get("/getOrder/:orderId", authenticateSeller, async (req, res) => {
       .map((item) => ({
         _id: item.product._id,
         productName: item.product.name,
-        price: item.product.basePrice,
+        basePrice: item.product.basePrice,
+        price: item.product.price,
         image: item.product.images[0],
         quantity: item.quantity,
         status: item.status,
@@ -413,6 +414,8 @@ router.get("/getOrder/:orderId", authenticateSeller, async (req, res) => {
     res.status(200).json({
       success: true,
       orderId: order.id,
+      orderType: order.orderType,
+      deliveryStatus: order.deliveryStatus,
       products: sellerProducts,
     });
   } catch (error) {

@@ -82,7 +82,14 @@ const SellerOrder = () => {
   const totalAmount = () => {
     return order.products
       .filter((product) => product.status !== "Cancelled")
-      .reduce((total, product) => total + product.price * product.quantity, 0);
+      .reduce(
+        (total, product) =>
+          total +
+          (order.orderType === "Food"
+            ? product.basePrice * product.quantity
+            : product.price * product.quantity),
+        0
+      );
   };
 
   if (loading)
@@ -136,20 +143,39 @@ const SellerOrder = () => {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {product.productName}
                   </h3>
+
                   <p className="text-gray-800 dark:text-gray-300">
                     Qty: {product.quantity}
                   </p>
+
+                  {(() => {
+                    const unitPrice =
+                      order.orderType === "Food"
+                        ? product.basePrice
+                        : product.price;
+                    const totalValue = product.quantity * unitPrice;
+
+                    return (
+                      <p className="text-gray-900 dark:text-gray-200 font-medium">
+                        Value: {product.quantity} × ₹{unitPrice} ={" "}
+                        <span className="font-semibold text-green-500">
+                          ₹{totalValue.toFixed(2)}
+                        </span>
+                      </p>
+                    );
+                  })()}
+
                   <p>
                     Status:{" "}
                     <span
                       className={`mt-1 text-sm font-semibold ${
                         product.status === "Delivered"
-                          ? "text-green-600 dark:text-green-400" // ✅ Green for Delivered
+                          ? "text-green-600 dark:text-green-400"
                           : product.status === "Cancelled"
-                          ? "text-red-600 dark:text-red-400" // ✅ Red for Cancelled
+                          ? "text-red-600 dark:text-red-400"
                           : product.status === "Preparing"
-                          ? "text-yellow-600 dark:text-yellow-400" // ✅ Yellow for Preparing
-                          : "text-blue-600 dark:text-blue-400" // ✅ Blue for any other status
+                          ? "text-yellow-600 dark:text-yellow-400"
+                          : "text-blue-600 dark:text-blue-400"
                       }`}
                     >
                       {product.status}
@@ -167,13 +193,15 @@ const SellerOrder = () => {
                 ₹{totalAmount()}
               </span>
             </h3>
-            <button
+            {order.deliveryStatus !== 'Delivered' && (
+              <button
               onClick={() => confirmOrder()}
               className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition shadow-md"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Processing..." : "Confirm Order"}
             </button>
+            )}
           </div>
         </div>
       </div>

@@ -11,6 +11,8 @@ import ShopCard from "../../components/ShopCard";
 import ProductCard from "../../components/ProductCard";
 import { Link } from "react-router-dom";
 import InstallPrompt from "../../components/InstallPrompt";
+import { motion } from "framer-motion";
+
 
 const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
@@ -58,7 +60,17 @@ const Home = () => {
         .fill(0)
         .map((_, i) => <HomePageSkeleton key={i} />);
     }
-    return shops.map((shop, i) => <ShopCard key={i} shop={shop} />);
+    return shops.map((shop, i) => (
+      <motion.div
+        key={shop._id || i}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: i * 0.08, duration: 0.4 }}
+        className="snap-center"
+      >
+        <ShopCard shop={shop} />
+      </motion.div>
+    ));
   }, [shops]);
 
   // Memoized Product Cards
@@ -131,10 +143,17 @@ const Home = () => {
       </section>
 
       {/* Popular Shops */}
-      <section className="py-8 container mx-auto px-4">
-        <h2 className="text-3xl font-bold mb-4">Popular Shops</h2>
-        <div className="flex gap-4 overflow-x-auto scrollbar-hide py-2">{memoizedShops}</div>
-      </section>
+       <section className="py-8 container mx-auto px-4">
+      <h2 className="text-3xl font-bold mb-4">Popular Shops</h2>
+      <div
+        className="
+          flex gap-4 overflow-x-auto scrollbar-hide pt-2 pb-4
+          snap-x snap-mandatory
+        "
+      >
+        {memoizedShops}
+      </div>
+    </section>
 
       {/* Featured Products */}
       <section className="py-8 container mx-auto px-4">
@@ -145,7 +164,7 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8 mt-12">
+      <footer className="bg-gray-800 text-white py-12 mt-12">
         <div className="container mx-auto text-center space-y-2">
           <p>&copy; 2025 GullyFoods. All rights reserved.</p>
           <div className="flex justify-center gap-4 mt-2">

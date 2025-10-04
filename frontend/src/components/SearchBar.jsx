@@ -10,12 +10,10 @@ const SearchBar = () => {
   const navigate = useNavigate();
 
   const handleSearch = () => {
-    
-    if(query === '') {
-      toast.error('Please enter a valid key!');
-    }
-    else {
-      navigate(`/search/${query.toLocaleLowerCase()}`);
+    if (query.trim() === "") {
+      toast.error("Please enter a valid key!");
+    } else {
+      navigate(`/search/${query.toLowerCase()}`);
     }
   };
 
@@ -33,12 +31,13 @@ const SearchBar = () => {
     recognition.start();
 
     recognition.onstart = () => {
-      setIsListening(true); // Update mic state
+      setIsListening(true);
     };
 
     recognition.onresult = (event) => {
       const result = event.results[0][0].transcript;
-      setQuery(result); // Set the query to the recognized text
+      setQuery(result);
+      handleSearch(); // auto trigger search after voice input
     };
 
     recognition.onerror = (event) => {
@@ -46,7 +45,7 @@ const SearchBar = () => {
     };
 
     recognition.onend = () => {
-      setIsListening(false); // Update mic state after recognition ends
+      setIsListening(false);
     };
   };
 
@@ -60,6 +59,9 @@ const SearchBar = () => {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search..."
           className="w-full px-10 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-md transition duration-200 ease-in-out text-gray-700"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSearch();
+          }}
         />
 
         <button
@@ -77,7 +79,6 @@ const SearchBar = () => {
         </button>
       </div>
 
-      {/* Show listening indicator when the mic is active */}
       {isListening && (
         <span className="text-green-500 text-sm font-semibold mt-2">
           🗣️ Listening...

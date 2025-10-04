@@ -310,7 +310,8 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
     for (const item of order.items) {
       if (item.status !== "Cancelled" && item.product.seller) {
         const sellerId = item.product.seller.toString();
-        const amount = item.quantity * parseFloat(item.product.basePrice);
+        const unitPrice = order.orderType === 'Food' ? item.product.basePrice : item.product.price;
+        const amount = item.quantity * parseFloat(unitPrice);
 
         if (!sellerSalesMap[sellerId]) {
           sellerSalesMap[sellerId] = 0;
@@ -326,7 +327,7 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
       if (!seller) continue;
 
       const totalAmount = sellerSalesMap[sellerId];
-      const commissionRate = seller.commissionRate || 0; // fallback to 0 if not set
+      const commissionRate = seller.commissionRate || 0; 
       const sellerEarnings = totalAmount * (1 - commissionRate);
 
       await Seller.findByIdAndUpdate(sellerId, {
