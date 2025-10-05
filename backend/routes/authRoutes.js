@@ -5,7 +5,8 @@ const Seller = require("../models/Seller");
 const Otp = require("../models/Otp");
 const bcrypt = require("bcrypt");
 const axios = require("axios");
-const authenticateSeller = require('../middleware/sellerAuthMiddleware');
+const authenticateSeller = require("../middleware/sellerAuthMiddleware");
+var request = require("request");
 
 const router = express();
 
@@ -17,77 +18,56 @@ const generateNumericOtp = (length = 4) => {
   return otp;
 };
 
-router.post("/send-otp", async (req, res) => {
-  const { phone, username } = req.body.formData;
+router.post("/send-otp", (req, res) => {
+  const { phone } = req.body.formData;
 
   if (!phone) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Phone number required" });
+    return res.status(400).json({
+      success: false,
+      message: "Phone number required",
+    });
   }
 
-  try {
-    // Check existing user
-    const existingPhone = await User.findOne({ phone });
-    const existingUsername = await User.findOne({ username });
+  var options = {
+    method: "POST",
+    url: `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=${process.env.MESSAGECENTRAL_CUSTOMER_ID}&flowType=SMS&mobileNumber=${phone}`,
+    headers: {
+      authToken: process.env.MESSAGECENTRAL_AUTH_TOKEN,
+    },
+  };
 
-    if (existingPhone) {
-      return res
-        .status(409)
-        .json({ success: false, message: "Account already exists!" });
-    }
-
-    if (existingUsername) {
-      return res
-        .status(409)
-        .json({ success: false, message: "Username is already taken!" });
-    }
-
-    // Check OTP cooldown
-    const existingOtp = await Otp.findOne({ phone, otpFor: "signup" });
-    if (existingOtp) {
-      return res.status(429).json({
-        success: false,
-        message: "OTP already sent. Please try again after 2 minutes.",
-      });
-    }
-
-    // Send OTP via MessageCentral Verification API
-    const url = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=${process.env.MESSAGECENTRAL_CUSTOMER_ID}&flowType=SMS&mobileNumber=${phone}`;
-
-    const response = await axios.post(url, null, {
-      headers: {
-        authToken: process.env.authToken,
-      },
-    });
-
-    console.log(url, response.data);
-
-    // Check response
-    if (response.data.status !== "SUCCESS") {
+  request(options, (error, response) => {
+    if (error) {
+      console.error("MessageCentral error:", error);
       return res.status(500).json({
         success: false,
-        message:
-          response.data.message ||
-          "Failed to send OTP via MessageCentral verification API",
+        message: "Failed to send OTP via MessageCentral 🚨",
       });
     }
 
-    // Save a record in DB for cooldown purposes (optional)
-    const otpEntry = new Otp({ phone, otpFor: "signup" });
-    await otpEntry.save();
+    let result;
+    try {
+      result = JSON.parse(response.body);
+    } catch (e) {
+      return res.status(500).json({
+        success: false,
+        message: "Invalid response from MessageCentral ❌",
+      });
+    }
 
-    res.json({ success: true, message: "OTP sent successfully" });
-  } catch (error) {
-    console.error(
-      "MessageCentral error:",
-      error.response?.data || error.message
-    );
-    res.status(500).json({
-      success: false,
-      message: "Failed to send OTP via MessageCentral",
-    });
-  }
+    if (result.message === "SUCCESS") {
+      return res.json({
+        success: true,
+        message: "OTP sent successfully 🎉",
+        requestId: result.requestId, 
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: result.message || "Failed to send OTP via MessageCentral ❌",
+      });
+    }
+  });
 });
 
 router.post("/send-login-otp", async (req, res) => {
@@ -326,12 +306,10 @@ router.get("/getUser", async (req, res) => {
 
       const currUser = await User.findById(decoded.userID);
       if (!currUser) {
-        return res
-          .status(401)
-          .json({
-            success: false,
-            message: "User not found! Please login again.",
-          });
+        return res.status(401).json({
+          success: false,
+          message: "User not found! Please login again.",
+        });
       }
 
       res.json({
@@ -353,7 +331,7 @@ router.get("/getUser", async (req, res) => {
 
 router.get("/getSellerDetails", authenticateSeller, async (req, res) => {
   try {
-    const existingSeller = req.seller; 
+    const existingSeller = req.seller;
 
     const sellerDetails = await Seller.findById(existingSeller._id)
       .select("username email shop salesHistory products")

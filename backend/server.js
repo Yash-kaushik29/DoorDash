@@ -22,6 +22,7 @@ const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("./cloudinary.js");
 const cronRoutes = require('./routes/cronRoutes.js');
 const QRCode = require("qrcode");
+const Coupons  = require("./models/Coupons.js");
 
 const app = express();
 dotenv.config();
@@ -138,6 +139,22 @@ app.get("/promo/qr", async (req, res) => {
   } catch (error) {
     console.error("Error generating QR:", error);
     res.status(500).json({ success: false, message: "Failed to generate QR" });
+  }
+});
+
+app.post("/add-coupons", async (req, res) => {
+  try {
+    const { coupons } = req.body; 
+
+    if (!Array.isArray(coupons) || coupons.length === 0) {
+      return res.status(400).json({ success: false, message: "Coupons array required" });
+    }
+
+    const insertedCoupons = await Coupons.insertMany(coupons, { ordered: false }); 
+    res.json({ success: true, insertedCoupons });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Error inserting coupons", error: err.message });
   }
 });
 

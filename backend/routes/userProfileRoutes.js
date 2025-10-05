@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const bcrypt = require('bcrypt');
 const Seller = require("../models/Seller");
+const Coupon = require("../models/Coupons");
+const authenticateUser = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -306,5 +308,51 @@ router.put("/change-seller-password/:sellerId", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 }); 
+
+router.post("/assign-coupons", async (req, res) => {
+  try {
+    const { phone, coupons } = req.body; 
+
+    const user = await User.findOne({ phone });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    for (let c of coupons) {
+      const couponDoc = await Coupon.findOne({ name: c.name });
+      if (!couponDoc) {
+        return res.status(400).json({ success: false, message: `Coupon ${c.name} not found` });
+      }
+
+      user.activeCoupons.push({ coupon: couponDoc._id, count: c.count || 1 });
+    }
+
+    await user.save();
+    res.json({ success: true, message: "Coupons assigned", activeCoupons: user.activeCoupons });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+router.get("/active-coupons", authenticateUser, async (req, res) => {
+  try {
+    const existingUser = req.user;
+
+    // Populate coupon details
+    const user = await User.findById(existingUser._id).populate("activeCoupons.coupon");
+    if (!user)
+      return res.status(404).json({ success: false, message: "User not found" });
+
+    res.json({
+      success: true,
+      activeCoupons: user.activeCoupons || []
+    });
+  } catch (error) {
+    console.error("Error fetching active coupons:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
 
 module.exports = router;

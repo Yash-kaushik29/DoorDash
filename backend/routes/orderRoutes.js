@@ -18,11 +18,13 @@ router.post("/create-order", async (req, res) => {
     taxes = 0,
     convenienceFees = 0,
     serviceCharge = 0,
+    discount = 0,
     address,
     paymentStatus,
     deliveryCharge = 0,
     orderType,
     cartKey,
+    coupon,
   } = req.body;
 
   try {
@@ -52,7 +54,8 @@ router.post("/create-order", async (req, res) => {
     const totalAmount =
       subTotal +
       deliveryCharge +
-      (orderType === "Food" ? taxes + convenienceFees : serviceCharge);
+      (orderType === "Food" ? taxes + convenienceFees : serviceCharge) -
+      discount;
 
     const newOrder = new Order({
       user: userId,
@@ -65,6 +68,7 @@ router.post("/create-order", async (req, res) => {
       taxes,
       convenienceFees,
       serviceCharge,
+      discount,
       deliveryStatus: "Processing",
       deliveryCharge,
       paymentStatus,
@@ -86,6 +90,18 @@ router.post("/create-order", async (req, res) => {
     updateCart[cartKey] = [];
 
     await User.findByIdAndUpdate(userId, updateCart);
+    if (coupon) {
+      const userUpdate = await User.findOneAndUpdate(
+        { _id: userId, "activeCoupons._id": coupon },
+        { $inc: { "activeCoupons.$.count": -1 } },
+        { new: true }
+      );
+
+      await User.updateOne(
+        { _id: userId },
+        { $pull: { activeCoupons: { _id: coupon, count: { $lte: 0 } } } }
+      );
+    }
 
     // Notify sellers
     await Promise.all(

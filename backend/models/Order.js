@@ -36,6 +36,7 @@ const OrderSchema = new mongoose.Schema(
     taxes: { type: Number, default: 0 },
     convenienceFees: { type: Number, default: 0 },
     serviceCharge: { type: Number, default: 0 },
+    discount: {type: Number, default: 0},
     deliveryStatus: { type: String, default: "Processing" },
     deliveryCharge: {type: Number, default: 0},
     paymentMethod: {type: String, default: "COD"},

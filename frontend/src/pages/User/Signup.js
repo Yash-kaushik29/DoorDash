@@ -61,11 +61,6 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match. ❌");
-      return;
-    }
-
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/auth/send-otp`,
@@ -80,7 +75,6 @@ export default function Signup() {
         toast.error(response.data.message + " ❌");
       }
     } catch (error) {
-      console.error(error);
       toast.error(
         error.response?.data?.message || "Signup Failed. Please try again. ❌"
       );

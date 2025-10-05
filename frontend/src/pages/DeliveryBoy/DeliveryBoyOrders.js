@@ -125,7 +125,7 @@ const DeliveryBoyOrders = () => {
                   </p>
                   <p className="text-gray-600 dark:text-gray-400">
                     Total Amount:{" "}
-                    <span className="text-green-500">₹{order.amount}</span>
+                    <span className="text-green-500">₹{order.totalAmount}</span>
                   </p>
                   <p className="text-gray-600 dark:text-gray-400">
                     Ordered On: {new Date(order.createdAt).toLocaleDateString()}

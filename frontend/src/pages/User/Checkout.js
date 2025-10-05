@@ -1,14 +1,20 @@
 import { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import { UserContext } from "../../context/userContext";
-import Navbar from "../../components/Navbar";
 import axios from "axios";
+
+import Navbar from "../../components/Navbar";
+import { UserContext } from "../../context/userContext";
+import CheckoutPayment from "../../components/CheckoutPayment"; // Payment & Place Order button
+import CheckoutCoupons from "../../components/CheckoutCoupons"; // Coupons UI
+import CheckoutSummary from "../../components/CheckoutSummary"; // Order summary & total
+import CheckoutAddress from "../../components/CheckoutAddress ";
 
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, ready } = useContext(UserContext);
+
   const {
     cartItems,
     totalPrice: cartTotalPrice,
@@ -20,76 +26,50 @@ const Checkout = () => {
     sellers: 1,
     cartKey: "foodCart",
   };
-  const token = localStorage.getItem("GullyFoodsUserToken");
 
-  const isFoodOrder = cartKey === "foodCart";
-
-  const [paymentMethod, setPaymentMethod] = useState("COD");
-  const [userAddresses, setUserAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const [userAddresses, setUserAddresses] = useState([]);
+  const [activeCoupons, setActiveCoupons] = useState([]);
+  const [selectedCoupon, setSelectedCoupon] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("COD");
   const [deliveryCharge, setDeliveryCharge] = useState(0);
+  const [discount, setDiscount] = useState(0);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
-  // Food order fields
-  const [taxes, setTaxes] = useState(
-    isFoodOrder ? (cartTotalPrice * 5) / 100 : 0
-  );
+  const token = localStorage.getItem("GullyFoodsUserToken");
+  const isFoodOrder = cartKey === "foodCart";
+
+  const taxes = isFoodOrder ? (cartTotalPrice * 5) / 100 : 0;
   const convenienceFees = isFoodOrder ? (sellers.length - 1) * 15 : 0;
 
   if (cartItems.length === 0) navigate("/cart");
 
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const toRad = (value) => (value * Math.PI) / 180;
-    const R = 6371; // km
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
+  // Fetch active coupons
+  useEffect(() => {
+    const fetchActiveCoupons = async () => {
+      if (!token) return;
+      try {
+        const { data } = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/user-profile/active-coupons`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-  // Food delivery charge
-  const getFoodDeliveryCharge = (distance) => {
-    if (distance <= 2) return 20;
-    if (distance <= 4) return 25;
-    if (distance <= 8) return 45;
-    if (distance <= 20) return 70;
-    return distance * 10;
-  };
+        if (data.success) setActiveCoupons(data.activeCoupons);
+        else toast.error(data.message);
+      } catch (error) {
+        console.error("Error fetching active coupons:", error);
+        toast.error("Failed to load coupons");
+      }
+    };
 
-  // Grocery delivery charge (distance + num of items)
-  const getGroceryDeliveryCharge = (distance, numItems) => {
-    let base = 0;
+    fetchActiveCoupons();
+  }, [token]);
 
-    // Distance-based base charge
-    if (distance <= 2) base = 20;
-    else if (distance <= 4) base = 25;
-    else if (distance <= 8) base = 45;
-    else base = distance * 10;
-
-    // Minimal per-item tiered pricing
-    let extra = 0;
-    if (numItems >= 5 && numItems <= 10) extra = 5;
-    else if (numItems >= 11 && numItems <= 15) extra = 10;
-    else if (numItems > 15) extra = 15;
-
-    return base + extra;
-  };
-
-  // Grocery service charge based on cartItemsPrice
-  const getGroceryServiceCharge = (cartPrice) => {
-    if (cartPrice < 300) return 20;
-    if (cartPrice < 500) return 15;
-    if (cartPrice < 700) return 10;
-    return 0;
-  };
-
+  // Fetch addresses
   useEffect(() => {
     if (ready && !user) navigate("/user/profile");
     if (ready) fetchAddresses();
-  }, [user]);
+  }, [user, ready]);
 
   const fetchAddresses = async () => {
     try {
@@ -105,9 +85,55 @@ const Checkout = () => {
     }
   };
 
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const toRad = (value) => (value * Math.PI) / 180;
+    const R = 6371; // km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const getFoodDeliveryCharge = (distance) => {
+    if (distance <= 2) return 20;
+    if (distance <= 4) return 25;
+    if (distance <= 8) return 45;
+    if (distance <= 20) return 70;
+    return distance * 10;
+  };
+
+  const getGroceryDeliveryCharge = (distance, numItems) => {
+    let base =
+      distance <= 2
+        ? 20
+        : distance <= 4
+        ? 25
+        : distance <= 8
+        ? 45
+        : distance * 10;
+    let extra =
+      numItems >= 5 && numItems <= 10
+        ? 5
+        : numItems >= 11 && numItems <= 15
+        ? 10
+        : numItems > 15
+        ? 15
+        : 0;
+    return base + extra;
+  };
+
+  const getGroceryServiceCharge = (cartPrice) => {
+    if (cartPrice < 300) return 20;
+    if (cartPrice < 500) return 15;
+    if (cartPrice < 700) return 10;
+    return 0;
+  };
+
   const handleSelectAddress = (addr) => {
     setSelectedAddress(addr);
-
     const distance = calculateDistance(
       28.83811395386716,
       78.24223013771964,
@@ -121,42 +147,39 @@ const Checkout = () => {
   };
 
   const handleCheckout = async () => {
-    if (!selectedAddress) {
-      toast.error("Please select a delivery address.");
-      return;
-    }
+    if (!selectedAddress)
+      return toast.error("Please select a delivery address.");
     if (isPlacingOrder) return;
     setIsPlacingOrder(true);
 
-    let serviceCharge = 0;
-    if (!isFoodOrder) serviceCharge = getGroceryServiceCharge(cartTotalPrice);
+    const serviceCharge = !isFoodOrder
+      ? getGroceryServiceCharge(cartTotalPrice)
+      : 0;
+
+    const orderPayload = {
+      userId: user._id,
+      cartItems,
+      orderType: isFoodOrder ? "Food" : "Grocery",
+      deliveryCharge,
+      serviceCharge,
+      taxes: isFoodOrder ? taxes : undefined,
+      convenienceFees: isFoodOrder ? convenienceFees : undefined,
+      discount,
+      coupon: selectedCoupon ? selectedCoupon._id : null,
+      address: selectedAddress,
+      paymentMethod: paymentMethod === "Razorpay" ? "Online" : "COD",
+      paymentStatus: paymentMethod === "Razorpay" ? "Paid" : "Unpaid",
+      cartKey,
+    };
 
     try {
-      const orderPayload = {
-        userId: user._id,
-        cartItems,
-        orderType: isFoodOrder ? "Food" : "Grocery",
-        deliveryCharge,
-        serviceCharge,
-        taxes: isFoodOrder ? taxes : undefined,
-        convenienceFees: isFoodOrder ? convenienceFees : undefined,
-        address: selectedAddress,
-        paymentMethod: paymentMethod === "Razorpay" ? "Online" : "COD",
-        paymentStatus: paymentMethod === "Razorpay" ? "Paid" : "Unpaid",
-        cartKey,
-      };
-
       if (paymentMethod === "COD") {
         const { data } = await axios.post(
           `${process.env.REACT_APP_API_URL}/api/order/create-order`,
           orderPayload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        if(data.success) {
+        if (data.success) {
           toast.success("🎉 Order Placed Successfully!");
           setTimeout(() => navigate(`/order/${data.order._id}`), 2000);
         } else toast.error(data.message);
@@ -184,7 +207,7 @@ const Checkout = () => {
         amount: data.order.amount,
         currency: "INR",
         description: "Payment for Order",
-        handler: async function (response) {
+        handler: async (response) => {
           const verifyRes = await axios.post(
             `${process.env.REACT_APP_API_URL}/api/payment/verify-payment`,
             {
@@ -199,11 +222,7 @@ const Checkout = () => {
             const { data } = await axios.post(
               `${process.env.REACT_APP_API_URL}/api/order/create-order`,
               orderPayload,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
+              { headers: { Authorization: `Bearer ${token}` } }
             );
             if (data.success) {
               toast.success("🎉 Order Placed Successfully!");
@@ -219,7 +238,6 @@ const Checkout = () => {
     }
   };
 
-  // Total calculation dynamically
   const totalAmount =
     cartTotalPrice +
     (isFoodOrder
@@ -245,159 +263,55 @@ const Checkout = () => {
   }
 
   return (
-    <div className="mx-2 pb-20 bg-stone-50 dark:bg-gray-900 min-h-screen">
+    <div className="mx-2 pb-20 pt-6 bg-stone-50 dark:bg-gray-900 min-h-screen">
       <ToastContainer position="top-right" autoClose={3000} />
       <Navbar />
-      <div className="max-w-lg mx-auto mt-8 p-6 rounded-2xl shadow-xl bg-white dark:bg-gray-800">
+
+      <div className="max-w-lg mx-auto p-6 rounded-2xl shadow-xl bg-white dark:bg-gray-800">
         <h2 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-white">
-          Choose Delivery Address 🏠
+          Checkout 🛒
         </h2>
 
-        {userAddresses.length === 0 ? (
-          <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-            <p>No saved addresses found.</p>
-            <button
-              onClick={() => navigate(`/user/addresses/${user._id}`)}
-              className="mt-2 text-green-500 underline hover:text-green-600"
-            >
-              ➕ Add a new address
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-3 mb-6">
-            {userAddresses.map((addr, index) => (
-              <div
-                key={index}
-                onClick={() => handleSelectAddress(addr)}
-                className={`p-4 rounded-xl cursor-pointer transition-all duration-200 border-2
-                  ${
-                    selectedAddress?._id === addr._id
-                      ? "border-green-500 bg-green-50 dark:bg-green-900"
-                      : "border-gray-300 dark:border-gray-600 hover:border-green-400"
-                  }`}
-              >
-                <p className="font-semibold text-gray-900 dark:text-white">
-                  {addr.fullName}
-                </p>
-                <p className="text-sm text-gray-700 dark:text-gray-300">
-                  {addr.phone}
-                </p>
-                <p className="text-sm text-gray-800 dark:text-gray-400">
-                  {addr.addressLine}, {addr.area}
-                </p>
-              </div>
-            ))}
-          </div>
+        {/* Address Selection */}
+        {user && (
+          <CheckoutAddress
+          userAddresses={userAddresses}
+          selectedAddress={selectedAddress}
+          handleSelectAddress={handleSelectAddress}
+          navigate={navigate}
+          userId={user._id}
+        />
         )}
 
         {/* Order Summary */}
-        <div className="mb-6 space-y-2">
-          <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">
-            Order Summary 🛒
-          </h3>
-          <div className="flex justify-between">
-            <span>Cart Total:</span>
-            <span className="text-green-500 font-semibold">
-              ₹{cartTotalPrice}
-            </span>
-          </div>
+        <CheckoutSummary
+          cartTotalPrice={cartTotalPrice}
+          selectedCoupon={selectedCoupon}
+          totalAmount={totalAmount}
+          isFoodOrder={isFoodOrder}
+          taxes={taxes}
+          deliveryCharge={deliveryCharge}
+          convenienceFees={convenienceFees}
+          discount={discount}
+          getGroceryServiceCharge={getGroceryServiceCharge}
+        />
 
-          {isFoodOrder && (
-            <>
-              <div className="flex justify-between">
-                <span>Delivery Fee 🚚:</span>
-                <span className="text-green-500 font-semibold">
-                  ₹{deliveryCharge}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>GST (5%) 💰:</span>
-                <span className="text-green-500 font-semibold">₹{taxes}</span>
-              </div>
-              {convenienceFees > 0 && (
-                <div className="flex justify-between">
-                  <span>Multi-store Fee ⚡:</span>
-                  <span className="text-green-500 font-semibold">
-                    ₹{convenienceFees}
-                  </span>
-                </div>
-              )}
-            </>
-          )}
+        {/* Payment Method & Place Order */}
+        <CheckoutPayment
+          paymentMethod={paymentMethod}
+          setPaymentMethod={setPaymentMethod}
+          handleCheckout={handleCheckout}
+          selectedAddress={selectedAddress}
+        />
 
-          {!isFoodOrder && (
-            <>
-              <div className="flex justify-between">
-                <span>Service Charge 📝:</span>
-                <span className="text-green-500 font-semibold">
-                  ₹{getGroceryServiceCharge(cartTotalPrice)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Delivery Fee 🚚:</span>
-                <span className="text-green-500 font-semibold">
-                  ₹{deliveryCharge}
-                </span>
-              </div>
-            </>
-          )}
-
-          <div className="h-[1px] bg-gray-300 dark:bg-gray-600 my-2"></div>
-          <div className="flex justify-between text-xl font-bold">
-            <span>Total:</span>
-            <span className="text-green-600">₹{totalAmount}</span>
-          </div>
-        </div>
-
-        {/* Payment Method */}
-        <div className="space-y-3 mb-6">
-          <label className="font-semibold text-gray-800 dark:text-gray-100">
-            Select Payment Method 💳:
-          </label>
-          <div className="flex space-x-4">
-            <button
-              onClick={() => setPaymentMethod("COD")}
-              className={`p-3 w-1/2 rounded-xl font-semibold transition transform hover:scale-105
-                ${
-                  paymentMethod === "COD"
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-200 dark:bg-gray-500"
-                }
-              `}
-            >
-              Cash on Delivery
-            </button>
-            <button
-              onClick={() => setPaymentMethod("Razorpay")}
-              className={`p-3 w-1/2 rounded-xl font-semibold transition transform hover:scale-105
-                ${
-                  paymentMethod === "Razorpay"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 dark:bg-gray-500"
-                }
-              `}
-            >
-              Pay with Razorpay
-            </button>
-          </div>
-        </div>
-
-        {/* Checkout Button */}
-        <button
-          onClick={handleCheckout}
-          disabled={!selectedAddress}
-          className={`w-full py-3 mt-2 rounded-xl font-bold text-lg transition 
-            ${
-              selectedAddress
-                ? "bg-green-500 hover:bg-green-600 text-white"
-                : "bg-gray-300 cursor-not-allowed text-gray-600"
-            }
-          `}
-        >
-          {paymentMethod === "Razorpay"
-            ? "Proceed to Pay 💳"
-            : "Place Order 🎉"}
-        </button>
+        {/* Coupon Selection */}
+        <CheckoutCoupons
+          cartTotalPrice={cartTotalPrice}
+          setDiscount={setDiscount}
+          activeCoupons={activeCoupons}
+          selectedCoupon={selectedCoupon}
+          setSelectedCoupon={setSelectedCoupon}
+        />
       </div>
     </div>
   );

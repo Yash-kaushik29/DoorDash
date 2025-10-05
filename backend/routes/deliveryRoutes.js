@@ -163,11 +163,11 @@ router.get("/orders", async (req, res) => {
   try {
     const [orders, totalOrders] = await Promise.all([
       Order.find(filter)
-        .select("id amount paymentStatus deliveryStatus createdAt items")
+        .select("id totalAmount paymentStatus deliveryStatus createdAt items")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit))
-        .lean(), // Optimize performance
+        .lean(), 
       Order.countDocuments(filter),
     ]);
 

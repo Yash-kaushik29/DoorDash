@@ -267,6 +267,15 @@ const OrderDetails = () => {
               </p>
             )}
 
+            {order?.discount > 0 && (
+              <p className="font-semibold">
+                Coupon Discount:{" "}
+                <span className="text-green-500 ml-2">
+                  -{formatPrice(order?.discount)}
+                </span>
+              </p>
+            )}
+
             <div className="h-[1px] bg-black dark:bg-white my-2"></div>
 
             <p className="font-semibold text-lg">
