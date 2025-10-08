@@ -46,7 +46,7 @@ export default function Signup() {
       if (response.data.success) {
         toast.success("OTP sent! 🎉");
         setStep("otp");
-        setResendCooldown(60); // 60 sec cooldown for resend
+        setResendCooldown(90); // 60 sec cooldown for resend
       } else {
         toast.error(response.data.message || "Failed to send OTP ❌");
       }
@@ -209,8 +209,10 @@ export default function Signup() {
 
                 <Turnstile
                   siteKey={process.env.REACT_APP_CF_SITE_KEY}
-                  onVerify={() => setCaptchaDone(true)}
-                  theme="dark"
+                  onVerifyToken={(token) => {
+                    console.log("Captcha token:", token);
+                    setCaptchaDone(true);
+                  }}
                 />
 
                 <motion.button

@@ -5,14 +5,22 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 
 export default function Login() {
-  const { user, setUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
   const [formData, setFormData] = useState({ phone: "", otp: "" });
   const [otpSent, setOtpSent] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [canResend, setCanResend] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
-  const OTP_COOLDOWN = 120; // 2 minutes
+  const OTP_COOLDOWN = 90;
   const navigate = useNavigate();
 
+  // Validate phone number format (Indian 10-digit)
+  const isValidPhone = (phone) => /^[6-9]\d{9}$/.test(phone);
+
+  // Validate OTP (numeric, 4–8 digits typical)
+  const isValidOtp = (otp) => /^\d{4,8}$/.test(otp);
+
+  // Load remaining cooldown from localStorage
   useEffect(() => {
     const storedExpire = localStorage.getItem("otpExpireTime");
     if (storedExpire) {
@@ -27,24 +35,20 @@ export default function Login() {
     }
   }, []);
 
+  // Countdown for resend button
   useEffect(() => {
-    if (timeLeft <= 0) {
-      setCanResend(true);
-      return;
-    }
-
+    if (timeLeft <= 0) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          localStorage.removeItem("otpExpireTime");
           setCanResend(true);
+          localStorage.removeItem("otpExpireTime");
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, [timeLeft]);
 
@@ -54,56 +58,74 @@ export default function Login() {
   };
 
   const sendOtp = async () => {
-    if (!formData.phone) return toast.warn("Enter your phone number first");
+    const { phone } = formData;
+    if (!phone) return toast.warn("Please enter your phone number.");
+    if (!isValidPhone(phone))
+      return toast.error("Enter a valid 10-digit mobile number.");
 
-    setOtpSent(true);
-    setCanResend(false);
-    setTimeLeft(OTP_COOLDOWN);
+    setLoading(true);
+    try {
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/send-login-otp`,
+        { formData }
+      );
 
-    // try {
-    //   const res = await axios.post(
-    //     `${process.env.REACT_APP_API_URL}/api/auth/send-login-otp`,
-    //     { phone: formData.phone }
-    //   );
-
-    //   if (res.data.success) {
-    //     toast.success("OTP sent successfully");
-    //     setOtpSent(true);
-    //     setCanResend(false);
-    //     setTimeLeft(OTP_COOLDOWN);
-
-    //     // Store OTP expiration timestamp
-    //     const otpExpireTime = Date.now() + OTP_COOLDOWN * 1000;
-    //     localStorage.setItem("otpExpireTime", otpExpireTime);
-    //   } else {
-    //     toast.error(res.data.message);
-    //   }
-    // } catch (err) {
-    //   toast.error("Failed to send OTP");
-    // }
+      if (res.data.success) {
+        toast.success("OTP sent successfully 📩");
+        setOtpSent(true);
+        setCanResend(false);
+        setTimeLeft(OTP_COOLDOWN);
+        const expireTime = Date.now() + OTP_COOLDOWN * 1000;
+        localStorage.setItem("otpExpireTime", expireTime);
+      } else {
+        toast.error(res.data.message || "Failed to send OTP");
+      }
+    } catch (err) {
+      const errMsg =
+        err.response?.data?.message || "Server error. Try again later.";
+      toast.error(errMsg);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // ✅ Login using OTP
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.phone || !formData.otp) return toast.warn("Fill all fields");
+    const { phone, otp } = formData;
 
+    if (!isValidPhone(phone)) return toast.error("Enter a valid phone number.");
+    if (!isValidOtp(otp)) return toast.error("Enter a valid OTP.");
+
+    setLoading(true);
     try {
       const res = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/auth/user-login`,
-        { phone: formData.phone, otp: formData.otp },
+        { phone, otp },
         { withCredentials: true }
       );
 
       if (res.data.success) {
         toast.success("Login Successful! 🎉");
-        localStorage.setItem("GullyFoodsUserToken", res.data.token);
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + 14);
+        const tokenData = {
+          token: res.data.token,
+          expiry: expiry.getTime(),
+        };
+        localStorage.setItem("GullyFoodsUserToken", JSON.stringify(tokenData));
         setUser(res.data.user);
         navigate("/");
       } else {
-        toast.error(res.data.message);
+        toast.error(res.data.message || "Invalid OTP. Try again.");
       }
     } catch (err) {
-      toast.error("Login failed");
+      const errMsg =
+        err.response?.data?.message ||
+        "Login failed. Please check your network and try again.";
+      toast.error(errMsg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -120,8 +142,8 @@ export default function Login() {
         </div>
 
         <div
-          className={`flex justify-center items-center flex-1 -mt-20 ${
-            otpSent ? "-mt-2" : "-mt-24"
+          className={`flex justify-center items-center flex-1 ${
+            otpSent ? "-mt-2" : "-mt-20"
           }`}
         >
           <div className="w-full max-w-md bg-white p-6 shadow-2xl rounded-3xl border-t-4 border-green-500">
@@ -135,10 +157,12 @@ export default function Login() {
                   Phone
                 </label>
                 <input
-                  type="text"
+                  type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
+                  maxLength="10"
+                  pattern="[0-9]{10}"
                   required
                   className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-700"
                   placeholder="Enter your mobile number"
@@ -155,6 +179,7 @@ export default function Login() {
                     name="otp"
                     value={formData.otp}
                     onChange={handleChange}
+                    maxLength="8"
                     required
                     className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-700"
                     placeholder="Enter OTP"
@@ -166,17 +191,27 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={sendOtp}
-                  className="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition"
+                  disabled={loading}
+                  className={`w-full p-3 rounded-xl text-white transition ${
+                    loading
+                      ? "bg-green-400 cursor-not-allowed"
+                      : "bg-green-600 hover:bg-green-700"
+                  }`}
                 >
-                  Send OTP
+                  {loading ? "Sending OTP..." : "Send OTP"}
                 </button>
               ) : (
                 <div className="flex flex-col gap-2">
                   <button
                     type="submit"
-                    className="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition"
+                    disabled={loading}
+                    className={`w-full p-3 rounded-xl text-white transition ${
+                      loading
+                        ? "bg-green-400 cursor-not-allowed"
+                        : "bg-green-600 hover:bg-green-700"
+                    }`}
                   >
-                    Login
+                    {loading ? "Verifying..." : "Login"}
                   </button>
 
                   <div className="text-center text-sm text-gray-600">
@@ -184,6 +219,7 @@ export default function Login() {
                       <span>Resend OTP in {timeLeft}s ⏱️</span>
                     ) : (
                       <button
+                        type="button"
                         onClick={sendOtp}
                         className="text-green-700 font-semibold underline"
                       >
@@ -204,7 +240,6 @@ export default function Login() {
               </Link>
             </div>
 
-            {/* T&C and Privacy Policy Links */}
             <div className="text-center mt-4 text-sm text-gray-500">
               By logging in, you agree to our{" "}
               <Link to="/terms" className="text-green-700 underline">

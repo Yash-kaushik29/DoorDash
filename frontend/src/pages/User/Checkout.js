@@ -271,7 +271,7 @@ const Checkout = () => {
             selectedAddress={selectedAddress}
             handleSelectAddress={handleSelectAddress}
             navigate={navigate}
-            userId={user._id}
+            user={user}
           />
         )}
 
