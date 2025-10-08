@@ -195,7 +195,7 @@ const OrderDetails = () => {
                         <p className="font-medium text-gray-800 dark:text-gray-200">
                           {item?.product?.name}
                         </p>
-                        <span className="bg-yellow-200 dark:bg-yellow-600 px-2 py-1 rounded text-sm">
+                        <span className="bg-yellow-200 dark:bg-yellow-600 px-2 py-1 rounded text-sm w-fit">
                           {item?.product?.shopName}
                         </span>
                         <p className="flex items-center gap-1">

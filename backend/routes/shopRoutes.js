@@ -321,20 +321,12 @@ router.get("/getShopAndProducts/:shopId", async (req, res) => {
   }
 });
 
-router.get("/seller-profile", async (req, res) => {
-  const { sellerToken } = req.cookies;
-
-  if (!sellerToken) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized: No token provided" });
-  }
-
+router.get("/seller-profile", authenticateSeller, async (req, res) => {
   try {
-    const decoded = jwt.verify(sellerToken, process.env.JWT_SECRET_KEY);
+    const seller = req.seller;
 
-    const existingSeller = await Seller.findById(decoded.sellerID)
-      .select("username email salesHistory shop")
+    const existingSeller = await Seller.findById(seller._id)
+      .select("username phone salesHistory shop")
       .populate({
         path: "shop",
         select: "name category productCategories address isOpen images",
@@ -356,20 +348,12 @@ router.get("/seller-profile", async (req, res) => {
   }
 });
 
-router.put("/update-status", async (req, res) => {
-  const { sellerToken } = req.cookies;
-  const { isOpen } = req.body;
-
-  if (!sellerToken) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized: No token provided" });
-  }
-
+router.put("/update-status", authenticateSeller, async (req, res) => {
   try {
-    const decoded = jwt.verify(sellerToken, process.env.JWT_SECRET_KEY);
+    const { isOpen } = req.body;
 
-    const existingSeller = await Seller.findById(decoded.sellerID).populate(
+    const seller = req.seller;
+    const existingSeller = await Seller.findById(seller._id).populate(
       "shop"
     );
 
@@ -380,6 +364,7 @@ router.put("/update-status", async (req, res) => {
     }
 
     existingSeller.shop.isOpen = isOpen;
+    existingSeller.shop.isManuallyClosed = !isOpen;
     await existingSeller.shop.save();
 
     res.status(200).json({
@@ -451,6 +436,28 @@ router.get("/get-restaurants", async (req, res) => {
     res.status(200).json({ success: true, restaurants });
   } catch (error) {
     console.error("Server Error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+router.get("/sales-history", authenticateSeller, async (req, res) => {
+  try {
+    const currSeller = req.seller;
+
+    const seller = await Seller.findById(currSeller._id)
+      .populate({
+        path: "salesHistory.order",
+        select: "_id id" 
+      })
+      .lean();
+
+    if (!seller) {
+      return res.status(404).json({ success: false, message: "Seller not found" });
+    }
+
+    res.json({ success: true, salesHistory: seller.salesHistory });
+  } catch (error) {
+    console.error("Error fetching sales history:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });

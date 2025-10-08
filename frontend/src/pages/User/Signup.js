@@ -1,92 +1,136 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { toast } from "react-toastify";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 export default function Signup() {
-  const { user, setUser } = useContext(UserContext);
-  const [formData, setFormData] = useState({
-    username: "",
-    phone: "",
-  });
+  const { setUser } = useContext(UserContext);
+  const [formData, setFormData] = useState({ username: "", phone: "" });
   const [step, setStep] = useState("form");
+  const [loading, setLoading] = useState(false);
+  const [otpInputs, setOtpInputs] = useState(["", "", "", ""]);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [captchaDone, setCaptchaDone] = useState(false);
   const navigate = useNavigate();
+  const otpRefs = useRef([]);
 
+  const TOKEN_EXPIRY_DAYS = 14;
+
+  // ------------------- Form Handlers -------------------
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const verifyOtp = async (e) => {
-    e.preventDefault();
-
-    const otpInputs = e.target.querySelectorAll("input[type='text']");
-    const otp = Array.from(otpInputs)
-      .map((input) => input.value)
-      .join("");
-
-    if (otp.length < 4) {
-      toast.error("Please enter the complete 4-digit OTP");
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/user-signup`,
-        { formData, otp },
-        { withCredentials: true }
-      );
-
-      if (response.data.success) {
-        toast.success("Signup Successful! 🎉");
-        localStorage.setItem("GullyFoodsUserToken", response.data.token);
-        setUser(response.data.user);
-        setTimeout(() => {
-          navigate("/");
-        }, 2000);
-      } else {
-        toast.error(response.data.message + " ❌");
+    if (name === "phone") {
+      // allow only numbers, max 10 digits
+      if (/^\d*$/.test(value) && value.length <= 10) {
+        setFormData((prev) => ({ ...prev, [name]: value }));
       }
-    } catch (error) {
-      console.error(error);
-      toast.error(
-        error.response?.data?.message || "Signup Failed. Please try again. ❌"
-      );
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.username || !formData.phone) return;
 
     try {
+      setLoading(true);
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/auth/send-otp`,
-        { formData },
-        { withCredentials: true }
+        { formData }
       );
 
       if (response.data.success) {
-        toast.success("Otp sent! 🎉");
+        toast.success("OTP sent! 🎉");
         setStep("otp");
+        setResendCooldown(60); // 60 sec cooldown for resend
       } else {
-        toast.error(response.data.message + " ❌");
+        toast.error(response.data.message || "Failed to send OTP ❌");
       }
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Signup Failed. Please try again. ❌"
-      );
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Signup Failed ❌");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // ------------------- OTP Handlers -------------------
+  useEffect(() => {
+    if (otpRefs.current[0]) otpRefs.current[0].focus();
+  }, [step]);
+
+  useEffect(() => {
+    let interval;
+    if (resendCooldown > 0) {
+      interval = setInterval(() => setResendCooldown((prev) => prev - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
+
+  const handleOtpChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+    const newOtp = [...otpInputs];
+    newOtp[index] = value;
+    setOtpInputs(newOtp);
+
+    if (value.length === 1 && index < 3) otpRefs.current[index + 1].focus();
+    if (value.length === 0 && index > 0) otpRefs.current[index - 1].focus();
+  };
+
+  const verifyOtp = async (e) => {
+    e.preventDefault();
+    const otp = otpInputs.join("");
+    if (otp.length < 4) {
+      toast.error("Enter the complete 4-digit OTP");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/user-signup`,
+        { formData, otp }
+      );
+
+      if (response.data.success) {
+        toast.success("Signup Successful! 🎉");
+
+        // store token with expiry timestamp
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + TOKEN_EXPIRY_DAYS);
+        const tokenData = {
+          token: response.data.token,
+          expiry: expiry.getTime(),
+        };
+        localStorage.setItem("GullyFoodsUserToken", JSON.stringify(tokenData));
+
+        setUser(response.data.user);
+        setTimeout(() => navigate("/"), 2000);
+      } else {
+        toast.error(response.data.message || "OTP verification failed ❌");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "OTP verification failed ❌");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = () => {
+    if (resendCooldown > 0) return;
+    handleSubmit(new Event("submit")); // resend OTP
   };
 
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
       {step === "form" ? (
-        <div className="flex flex-col min-h-screen bg-white">
-          {/* Logo at top */}
+        <div className="flex flex-col min-h-screen bg-white dark:bg-gray-800">
+          {/* Logo */}
           <div className="mx-auto my-6">
             <img
               src="/AppLogo.jpg"
@@ -101,7 +145,7 @@ export default function Signup() {
               initial={{ opacity: 0, y: -50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="w-full max-w-md bg-white p-6 shadow-2xl rounded-3xl border-t-4 border-green-500"
+              className="w-full max-w-md bg-white dark:bg-gray-900 p-6 shadow-2xl rounded-3xl border-t-4 border-green-500"
             >
               <h2 className="text-2xl text-center text-green-700 font-bold mb-6">
                 Sign Up
@@ -132,19 +176,20 @@ export default function Signup() {
                     value={formData.phone}
                     onChange={handleChange}
                     required
+                    maxLength={10}
                     className="w-full border border-green-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-700"
                     placeholder="Enter your mobile number"
                   />
                 </div>
 
-                {/* T&C & Privacy */}
+                {/* T&C */}
                 <div className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
                     required
                     className="accent-green-600"
                   />
-                  <span className="text-gray-600 dark:text-gray-700">
+                  <span className="text-gray-600 dark:text-gray-300">
                     I agree to the{" "}
                     <Link
                       to="/terms"
@@ -162,17 +207,24 @@ export default function Signup() {
                   </span>
                 </div>
 
+                <Turnstile
+                  siteKey={process.env.REACT_APP_CF_SITE_KEY}
+                  onVerify={() => setCaptchaDone(true)}
+                  theme="dark"
+                />
+
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   type="submit"
-                  className="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition"
+                  disabled={loading || !captchaDone}
+                  className="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition disabled:opacity-50"
                 >
-                  Sign Up
+                  {loading ? "Sending OTP..." : "Sign Up"}
                 </motion.button>
               </form>
 
-              <div className="text-center mt-4 text-gray-800">
+              <div className="text-center mt-4 text-gray-800 dark:text-gray-300">
                 Already have an account?{" "}
                 <Link
                   to="/login"
@@ -185,57 +237,56 @@ export default function Signup() {
           </div>
         </div>
       ) : (
-        <div className="z-10 max-w-md mx-auto my-[10vh] text-center bg-white px-4 sm:px-8 py-10 rounded-xl shadow">
+        <div className="z-10 max-w-md mx-auto my-[10vh] text-center bg-white dark:bg-gray-900 px-4 sm:px-8 py-10 rounded-xl shadow">
           <header className="mb-8">
             <h1 className="text-2xl font-bold mb-1">Phone Verification</h1>
-            <p className="text-[15px] text-slate-500">
-              Enter the code sent to *******
-              {formData.phone.slice(-3)}.
+            <p className="text-[15px] text-slate-500 dark:text-slate-400">
+              Enter the code sent to ******{formData.phone.slice(-3)}.
             </p>
           </header>
-          <form id="otp-form" onSubmit={verifyOtp}>
+
+          <form id="otp-form" onSubmit={verifyOtp} className="space-y-4">
             <div className="flex items-center justify-center gap-3">
-              {[0, 1, 2, 3].map((i) => (
+              {otpInputs.map((val, index) => (
                 <input
-                  key={i}
+                  key={index}
+                  ref={(el) => (otpRefs.current[index] = el)}
                   type="text"
-                  maxLength="1"
-                  className="w-14 h-14 text-center text-2xl font-extrabold text-slate-900 bg-slate-100 border border-transparent hover:border-slate-200 appearance-none rounded p-4 outline-none focus:bg-white focus:border-green-400 focus:ring-2 focus:ring-indigo-100"
-                  pattern="[a-zA-Z0-9]*"
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value.length === 1 && e.target.nextSibling) {
-                      e.target.nextSibling.focus();
-                    }
-                  }}
+                  value={val}
+                  maxLength={1}
+                  className="w-14 h-14 text-center text-2xl font-extrabold text-slate-900 bg-slate-100 dark:bg-gray-800 border border-transparent hover:border-slate-200 appearance-none rounded p-4 outline-none focus:bg-white focus:border-green-400 focus:ring-2 focus:ring-indigo-100"
+                  onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => {
                     if (
                       e.key === "Backspace" &&
-                      e.target.value === "" &&
-                      e.target.previousSibling
+                      otpInputs[index] === "" &&
+                      index > 0
                     ) {
-                      e.target.previousSibling.focus();
+                      otpRefs.current[index - 1].focus();
                     }
                   }}
                 />
               ))}
             </div>
-            <div className="max-w-[260px] mx-auto mt-4">
-              <button
-                type="submit"
-                className="w-full inline-flex justify-center whitespace-nowrap rounded-lg bg-green-500 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm shadow-indigo-950/10 hover:bg-green-600 focus:outline-none focus:ring focus:ring-indigo-300 focus-visible:outline-none focus-visible:ring focus-visible:ring-indigo-300 transition-colors duration-150"
-              >
-                Verify Account
-              </button>
-            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full inline-flex justify-center whitespace-nowrap rounded-lg bg-green-500 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-green-600 disabled:opacity-50 transition-colors"
+            >
+              {loading ? "Verifying..." : "Verify Account"}
+            </button>
           </form>
+
           <div className="text-sm text-slate-500 mt-4">
             Didn't receive code?{" "}
             <span
-              onClick={handleSubmit}
-              className="font-medium text-green-500 hover:text-green-600 cursor-pointer"
+              onClick={handleResendOtp}
+              className={`font-medium text-green-500 hover:text-green-600 cursor-pointer ${
+                resendCooldown > 0 ? "cursor-not-allowed opacity-50" : ""
+              }`}
             >
-              Resend
+              {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend"}
             </span>
           </div>
         </div>

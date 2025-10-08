@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const SellerSchema = new mongoose.Schema(
   {
     username: { type: String, required: true },
-    email: { type: String, unique: true },
     phone: { type: String, unique: true, required: true },
     password: { type: String, required: true },
     products: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
@@ -29,8 +28,9 @@ const SellerSchema = new mongoose.Schema(
     ],
     salesHistory: [
       {
-        date: { type: Date, default: Date.now },
+        order: { type: mongoose.Schema.Types.ObjectId, ref: "Order" },
         amount: { type: Number, default: 0 },
+        date: { type: Date, default: Date.now },
       },
     ],
   },

@@ -16,7 +16,8 @@ const SearchQuery = () => {
   const [hasMore, setHasMore] = useState(true);
   const { user, setUser } = useContext(UserContext);
 
-  const token = localStorage.getItem("GullyFoodsUserToken");
+  const tokenData = JSON.parse(localStorage.getItem("GullyFoodsUserToken"));
+  const token = tokenData?.token;
 
   useEffect(() => {
     // Reset products and pagination when query changes

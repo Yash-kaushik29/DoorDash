@@ -61,7 +61,6 @@ router.post("/login", async (req, res) => {
       { expiresIn: "15d" }
     );
     res
-      .cookie("token", token)
       .json({ success: true, message: "Login successful", token });
   } catch (error) {
     console.log(error);
@@ -73,6 +72,7 @@ router.post("/login", async (req, res) => {
 router.get("/orders/:deliveryBoyId", async (req, res) => {
   try {
     const { deliveryBoyId } = req.params;
+    console.log("HI", deliveryBoyId)
 
     const deliveryBoy = await DeliveryBoy.findById(deliveryBoyId);
 
@@ -333,7 +333,7 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
       await Seller.findByIdAndUpdate(sellerId, {
         $push: {
           salesHistory: {
-            orderId,
+            order,
             amount: sellerEarnings,
             date: new Date(),
           },
@@ -353,7 +353,7 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
       });
 
       if (order.paymentMethod === "COD") {
-        const totalCOD = order.amount + order.deliveryCharge + order.convenienceFees + order.taxes; 
+        const totalCOD = order.amount + order.deliveryCharge + order.convenienceFees + order.taxes + order.serviceCharge - order.discount; 
         deliveryBoy.outstandingPayments.push({
           orderId,
           amount: totalCOD,

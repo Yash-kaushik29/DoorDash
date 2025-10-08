@@ -10,64 +10,151 @@ var request = require("request");
 
 const router = express();
 
-const generateNumericOtp = (length = 4) => {
-  let otp = "";
-  for (let i = 0; i < length; i++) {
-    otp += Math.floor(Math.random() * 10);
-  }
-  return otp;
-};
-
-router.post("/send-otp", (req, res) => {
+router.post("/send-otp", async (req, res) => {
   const { phone } = req.body.formData;
 
   if (!phone) {
     return res.status(400).json({
       success: false,
-      message: "Phone number required",
+      message: "Phone number is required",
     });
   }
 
-  var options = {
-    method: "POST",
-    url: `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=${process.env.MESSAGECENTRAL_CUSTOMER_ID}&flowType=SMS&mobileNumber=${phone}`,
-    headers: {
-      authToken: process.env.MESSAGECENTRAL_AUTH_TOKEN,
-    },
-  };
-
-  request(options, (error, response) => {
-    if (error) {
-      console.error("MessageCentral error:", error);
-      return res.status(500).json({
+  try {
+    const existingUser = await User.findOne({ phone });
+    if (existingUser) {
+      return res.status(400).json({
         success: false,
-        message: "Failed to send OTP via MessageCentral 🚨",
+        message: "Phone is already in use",
       });
     }
 
-    let result;
-    try {
-      result = JSON.parse(response.body);
-    } catch (e) {
+    await Otp.deleteOne({ phone, otpFor: "signup"});
+
+    // Call MessageCentral API
+    const sendOtpUrl = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=${process.env.MESSAGECENTRAL_CUSTOMER_ID}&flowType=SMS&mobileNumber=${phone}`;
+
+    const response = await axios.post(
+      sendOtpUrl,
+      {},
+      {
+        headers: { authToken: process.env.MESSAGECENTRAL_AUTH_TOKEN },
+      }
+    );
+
+    const result = response.data;
+
+    if (result.message !== "SUCCESS") {
       return res.status(500).json({
         success: false,
-        message: "Invalid response from MessageCentral ❌",
+        message: result.message || "Failed to send OTP",
       });
     }
 
-    if (result.message === "SUCCESS") {
-      return res.json({
-        success: true,
-        message: "OTP sent successfully 🎉",
-        requestId: result.requestId, 
-      });
-    } else {
-      return res.status(500).json({
+    // Save OTP verificationId in DB
+    const otp = new Otp({
+      phone,
+      otpFor: "signup",
+      verificationId: result.data.verificationId,
+    });
+    await otp.save();
+
+    res.json({
+      success: true,
+      message: "OTP sent successfully",
+      requestId: result.requestId,
+    });
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while sending OTP",
+    });
+  }
+});
+
+// VERIFY OTP AND SIGNUP
+router.post("/user-signup", async (req, res) => {
+  const { username, phone } = req.body.formData;
+  const { otp } = req.body;
+
+  if (!username || !phone || !otp) {
+    return res.status(400).json({
+      success: false,
+      message: "Username, phone, and OTP are required",
+    });
+  }
+
+  try {
+    const existingUser = await User.findOne({ phone });
+    if (existingUser) {
+      return res.status(400).json({
         success: false,
-        message: result.message || "Failed to send OTP via MessageCentral ❌",
+        message: "Phone is already in use",
       });
     }
-  });
+
+    const existingOtp = await Otp.findOne({ phone, otpFor: "signup" });
+
+    if (!existingOtp) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP expired or not found",
+      });
+    }
+
+    // Verify OTP via MessageCentral
+    const verifyOtpUrl = `https://cpaas.messagecentral.com/verification/v3/validateOtp?countryCode=91&mobileNumber=${phone}&verificationId=${existingOtp.verificationId}&customerId=${process.env.MESSAGECENTRAL_CUSTOMER_ID}&code=${otp}`;
+
+    const response = await axios.get(verifyOtpUrl, {
+      headers: { authToken: process.env.MESSAGECENTRAL_AUTH_TOKEN },
+    });
+
+    const result = response.data;
+
+    if (result.message !== "SUCCESS") {
+      return res.status(400).json({
+        success: false,
+        message: "OTP does not match",
+      });
+    }
+
+    // Create new user
+    const newUser = new User({ username, phone });
+    await newUser.save();
+
+    const token = jwt.sign(
+      {
+        userID: newUser._id,
+        username: newUser.username,
+        phone: newUser.phone || "",
+      },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "15d" }
+    );
+
+    // Delete OTP after successful signup
+    await Otp.deleteOne({ _id: existingOtp._id });
+
+    res.json({
+      success: true,
+      message: "Registered successfully!",
+      token,
+      user: {
+        username: newUser.username,
+        _id: newUser._id,
+        foodCart: newUser.foodCart,
+        groceryCart: newUser.groceryCart,
+        phone: newUser.phone,
+      },
+    });
+  } catch (error) {
+    console.error("Error during signup:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error during signup",
+    });
+  }
 });
 
 router.post("/send-login-otp", async (req, res) => {
@@ -118,54 +205,6 @@ router.post("/send-login-otp", async (req, res) => {
   } catch (error) {
     console.error("Mail error:", error);
     res.status(500).json({ success: false, message: "Failed to send OTP" });
-  }
-});
-
-router.post("/user-signup", async (req, res) => {
-  const { username, phone } = req.body.formData;
-  const { otp } = req.body;
-
-  try {
-    const existingUser = await User.findOne({ phone: phone });
-    if (existingUser) {
-      res.send({ success: false, message: "Phone is already in use!" });
-    } else {
-      const existingOtp = await Otp.findOne({ phone, otpFor: "signup" });
-
-      if (existingOtp && otp === existingOtp) {
-        const newUser = new User({ username, phone });
-        await newUser.save();
-
-        var token = jwt.sign(
-          {
-            userID: newUser._id,
-            username: newUser.username,
-            phone: newUser.phone || "",
-          },
-          process.env.JWT_SECRET_KEY,
-          { expiresIn: "15d" }
-        );
-
-        await Otp.deleteOne({ _id: existingOtp._id });
-
-        res.send({
-          success: true,
-          message: "Registered Successfully!",
-          token,
-          user: {
-            username: newUser.username,
-            _id: newUser._id,
-            foodCart: newUser.foodCart,
-            groceryCart: newUser.groceryCart,
-            phone: newUser.phone,
-          },
-        });
-      } else {
-        res.send({ success: false, message: "OTP does not match!" });
-      }
-    }
-  } catch (error) {
-    console.log(error);
   }
 });
 

@@ -10,7 +10,7 @@ const DeliveryBoyDetails = () => {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().slice(0, 10)
-  ); 
+  );
   const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchDeliveryBoy = async () => {
@@ -18,6 +18,7 @@ const DeliveryBoyDetails = () => {
       const res = await axios.get(
         `${process.env.REACT_APP_API_URL}/api/admin/deliveryBoy/${deliveryBoyId}`
       );
+      console.log(res.data)
       setDeliveryBoy(res.data.deliveryBoy);
     } catch (error) {
       console.error(error);
@@ -27,7 +28,9 @@ const DeliveryBoyDetails = () => {
   };
 
   useEffect(() => {
-    fetchDeliveryBoy();
+    if (deliveryBoyId) {
+      fetchDeliveryBoy();
+    }
   }, [deliveryBoyId]);
 
   const handleClearOutstanding = async () => {
@@ -188,8 +191,9 @@ const DeliveryBoyDetails = () => {
                       }`}
                     >
                       <td className="p-2 text-yellow-700 dark:text-yellow-400">
-                        #{p.orderId.id}
+                        #{p.orderId ? p.orderId.id : "N/A"}
                       </td>
+
                       <td className="p-2 text-gray-800 dark:text-gray-200">
                         ₹{p.amount}
                       </td>

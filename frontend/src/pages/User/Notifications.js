@@ -11,7 +11,8 @@ const Notifications = () => {
   const { user } = useContext(UserContext);
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const token = localStorage.getItem("GullyFoodsUserToken");
+  const tokenData = JSON.parse(localStorage.getItem("GullyFoodsUserToken"));
+  const token = tokenData?.token;
 
   useEffect(() => {
     const fetchNotifications = async () => {

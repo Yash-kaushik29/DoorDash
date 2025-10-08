@@ -30,31 +30,31 @@ const SellerDashboard = () => {
     return () => document.removeEventListener("click", unlockAudio);
   }, []);
 
-  useEffect(() => {
-    if (!token) return;
+  // useEffect(() => {
+  //   if (!token) return;
 
-    const pollNotifications = async () => {
-      try {
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/notification/unread-order-notifications`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (data.success && data.count > 0) {
-          audio.play();
-          toast.info(`📦 ${data.count} new orders`);
-        }
-      } catch (err) {
-        console.error("Polling error:", err);
-      }
-    };
+  //   const pollNotifications = async () => {
+  //     try {
+  //       const { data } = await axios.get(
+  //         `${process.env.REACT_APP_API_URL}/api/notification/unread-order-notifications`,
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
+  //       if (data.success && data.count > 0) {
+  //         audio.play();
+  //         toast.info(`📦 ${data.count} new orders`);
+  //       }
+  //     } catch (err) {
+  //       console.error("Polling error:", err);
+  //     }
+  //   };
 
-    const interval = setInterval(pollNotifications, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [token]);
+  //   const interval = setInterval(pollNotifications, 5 * 60 * 1000);
+  //   return () => clearInterval(interval);
+  // }, [token]);
 
   const fetchSeller = async () => {
     setLoading(true);
@@ -168,11 +168,19 @@ const SellerDashboard = () => {
 
       {/* Stats Section */}
       <div className="max-w-5xl mx-auto p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="stat-card bg-white dark:bg-gray-800 text-green-500">
+        <div className="stat-card bg-white dark:bg-gray-800 text-green-500 p-4 rounded-lg shadow-md">
           <h2 className="text-lg font-semibold text-gray-700 dark:text-white">
             Total Sales
           </h2>
           <p className="text-2xl font-bold">₹{seller.todaySalesTotal}</p>
+
+          {/* Link Button */}
+          <Link
+            to="/seller/sales-history"
+            className="mt-4 inline-block underline text-green-500 px-4 py-2 rounded-lg shadow-md transition"
+          >
+            View Sales History
+          </Link>
         </div>
         <div className="stat-card bg-white dark:bg-gray-800 text-yellow-500">
           <h2 className="text-lg font-semibold text-gray-700 dark:text-white">

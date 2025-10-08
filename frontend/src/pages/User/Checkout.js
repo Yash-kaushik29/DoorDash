@@ -36,11 +36,14 @@ const Checkout = () => {
   const [discount, setDiscount] = useState(0);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
-  const token = localStorage.getItem("GullyFoodsUserToken");
+  const tokenData = JSON.parse(localStorage.getItem("GullyFoodsUserToken"));
+  const token = tokenData?.token;
   const isFoodOrder = cartKey === "foodCart";
 
   const taxes = isFoodOrder ? (cartTotalPrice * 5) / 100 : 0;
-  const convenienceFees = isFoodOrder ? (sellers.length - 1) * 15 : 0;
+  const [convenienceFees, setConvenienceFees] = useState(
+    isFoodOrder ? (sellers.length - 1) * 15 : 0
+  );
 
   if (cartItems.length === 0) navigate("/cart");
 
@@ -98,31 +101,14 @@ const Checkout = () => {
   };
 
   const getFoodDeliveryCharge = (distance) => {
-    if (distance <= 2) return 20;
-    if (distance <= 4) return 25;
-    if (distance <= 8) return 45;
-    if (distance <= 20) return 70;
+    if (distance <= 3) return 25;
+    if (distance <= 4) return 30;
+    if (distance <= 5) return 40;
+    if (distance <= 6) return 45;
+    if (distance <= 8) return 60;
+    if (distance <= 10) return 70;
+    if (distance <= 12) return 80;
     return distance * 10;
-  };
-
-  const getGroceryDeliveryCharge = (distance, numItems) => {
-    let base =
-      distance <= 2
-        ? 20
-        : distance <= 4
-        ? 25
-        : distance <= 8
-        ? 45
-        : distance * 10;
-    let extra =
-      numItems >= 5 && numItems <= 10
-        ? 5
-        : numItems >= 11 && numItems <= 15
-        ? 10
-        : numItems > 15
-        ? 15
-        : 0;
-    return base + extra;
   };
 
   const getGroceryServiceCharge = (cartPrice) => {
@@ -134,6 +120,7 @@ const Checkout = () => {
 
   const handleSelectAddress = (addr) => {
     setSelectedAddress(addr);
+
     const distance = calculateDistance(
       28.83811395386716,
       78.24223013771964,
@@ -141,9 +128,14 @@ const Checkout = () => {
       addr.long
     );
 
-    if (isFoodOrder) setDeliveryCharge(getFoodDeliveryCharge(distance));
-    else
-      setDeliveryCharge(getGroceryDeliveryCharge(distance, cartItems.length));
+    const delivery = getFoodDeliveryCharge(distance);
+    setDeliveryCharge(delivery);
+
+    if (isFoodOrder && sellers.length > 1) {
+      const perShopFee = Math.max(15, delivery * 0.3);
+      const totalConvenienceFees = perShopFee * (sellers.length - 1);
+      setConvenienceFees(Math.round(totalConvenienceFees));
+    }
   };
 
   const handleCheckout = async () => {
@@ -275,12 +267,12 @@ const Checkout = () => {
         {/* Address Selection */}
         {user && (
           <CheckoutAddress
-          userAddresses={userAddresses}
-          selectedAddress={selectedAddress}
-          handleSelectAddress={handleSelectAddress}
-          navigate={navigate}
-          userId={user._id}
-        />
+            userAddresses={userAddresses}
+            selectedAddress={selectedAddress}
+            handleSelectAddress={handleSelectAddress}
+            navigate={navigate}
+            userId={user._id}
+          />
         )}
 
         {/* Order Summary */}

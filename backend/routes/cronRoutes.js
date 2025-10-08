@@ -4,6 +4,13 @@ const DeliveryBoy = require("../models/DeliveryBoy");
 const Order = require("../models/Order");
 const Seller = require("../models/Seller");
 const User = require("../models/User");
+const Shop = require('../models/Shop');
+
+const timeToMinutes = (time) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
 
 cron.schedule("0 1 * * *", async () => {
   try {
@@ -89,19 +96,30 @@ cron.schedule("0 3 * * *", async () => {
   }
 });
 
-cron.schedule("0 4 * * *", async() => {
-    try {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 7); // 7 days back
+// cron.schedule("1,31 * * * *", async () => {
+//   try {
+//     const now = new Date();
+//     const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-    // Remove notifications older than 7 days
-    const result = await User.updateMany(
-      {},
-      { $pull: { notifications: { createdAt: { $lt: cutoffDate } } } }
-    );
+//     const shops = await Shop.find();
 
-    console.log(`✅ Removed old notifications from ${result.modifiedCount} users.`);
-  } catch (error) {
-    console.error("❌ Error removing old notifications:", error);
-  }
-})
+//     for (let shop of shops) {
+//       // Skip manually closed shops
+//       if (shop.isManuallyClosed) continue;
+
+//       const openMinutes = timeToMinutes(shop.openingTime);
+//       const closeMinutes = timeToMinutes(shop.closingTime);
+
+//       const shouldBeOpen = currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+
+//       if (shop.isOpen !== shouldBeOpen) {
+//         shop.isOpen = shouldBeOpen;
+//         await shop.save();
+//       }
+//     }
+
+//     console.log("Shops status updated at", now.toLocaleTimeString());
+//   } catch (error) {
+//     console.error("Error updating shop status:", error);
+//   }
+// });

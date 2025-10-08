@@ -14,7 +14,8 @@ const CartPage = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("GullyFoodsUserToken");
+  const tokenData = JSON.parse(localStorage.getItem("GullyFoodsUserToken"));
+  const token = tokenData?.token;
 
   // Fetch carts
   useEffect(() => {

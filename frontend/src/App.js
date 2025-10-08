@@ -53,6 +53,7 @@ import GroceryProducts from "./pages/User/GroceryProducts";
 import Terms from "./Terms";
 import Policy from "./Policy";
 import InstallGuide from "./pages/User/InstallGuide";
+import SalesHistory from "./pages/Seller/SalesHistory";
 
 const App = () => {
   return (
@@ -99,6 +100,7 @@ const App = () => {
         <Route path="/seller/my-orders" element={<Orders />} />
         <Route path="/seller/profile" element={<SellerProfile />} />
         <Route path="/seller/edit-profile" element={<EditProfile />} />
+        <Route path="/seller/sales-history" element={<SalesHistory />} />
       </Routes>
 
       <Routes>

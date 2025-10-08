@@ -32,6 +32,10 @@ const ShopSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  isManuallyClosed: {
+    type: Boolean,
+    default: false,
+  },
   openingTime: {
     type: String,
     default: "10:00", 

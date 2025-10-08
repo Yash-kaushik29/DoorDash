@@ -19,23 +19,23 @@ const CheckoutSummary = ({
 
       <div className="flex justify-between">
         <span>Cart Total:</span>
-        <span className="text-green-500 font-semibold">₹{cartTotalPrice}</span>
+        <span className="text-green-500 font-semibold">₹{cartTotalPrice.toFixed(2)}</span>
       </div>
 
       {isFoodOrder ? (
         <>
           <div className="flex justify-between">
             <span>Delivery Fee 🚚:</span>
-            <span className="text-green-500 font-semibold">₹{deliveryCharge}</span>
+            <span className="text-green-500 font-semibold">₹{deliveryCharge.toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
             <span>GST (5%) 💰:</span>
-            <span className="text-green-500 font-semibold">₹{taxes}</span>
+            <span className="text-green-500 font-semibold">₹{taxes.toFixed(2)}</span>
           </div>
           {convenienceFees > 0 && (
             <div className="flex justify-between">
               <span>Multi-store Fee ⚡:</span>
-              <span className="text-green-500 font-semibold">₹{convenienceFees}</span>
+              <span className="text-green-500 font-semibold">₹{convenienceFees.toFixed(2)}</span>
             </div>
           )}
         </>
@@ -44,12 +44,12 @@ const CheckoutSummary = ({
           <div className="flex justify-between">
             <span>Service Charge 📝:</span>
             <span className="text-green-500 font-semibold">
-              {getGroceryServiceCharge(cartTotalPrice)}
+              {getGroceryServiceCharge(cartTotalPrice).toFixed(2)}
             </span>
           </div>
           <div className="flex justify-between">
             <span>Delivery Fee 🚚:</span>
-            <span className="text-green-500 font-semibold">{deliveryCharge}</span>
+            <span className="text-green-500 font-semibold">{deliveryCharge.toFixed(2)}</span>
           </div>
         </>
       )}

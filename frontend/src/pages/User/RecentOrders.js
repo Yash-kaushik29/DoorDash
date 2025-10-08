@@ -64,7 +64,8 @@ const RecentOrders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const token = localStorage.getItem("GullyFoodsUserToken");
+  const tokenData = JSON.parse(localStorage.getItem("GullyFoodsUserToken"));
+  const token = tokenData?.token;
 
   useEffect(() => {
     let isMounted = true;

@@ -9,9 +9,9 @@ const DeliveryBoyLogin = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('GullyFoodsDeliveryToken');
 
-  if(token) {
-    navigate('/delivery')
-  }
+  // if(token) {
+  //   navigate('/delivery')
+  // }
 
   const handleLogin = async () => {
     setError("");

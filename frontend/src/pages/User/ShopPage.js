@@ -15,11 +15,36 @@ const ShopPage = () => {
   const [loading, setLoading] = useState(true);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const token = localStorage.getItem("GullyFoodsUserToken");
+  const tokenData = JSON.parse(localStorage.getItem("GullyFoodsUserToken"));
+  const token = tokenData?.token;
 
   const handleButtonClick = (category) => {
     setSelectedCategory((prev) => (prev === category ? "" : category));
+  };
+
+  const handleChange = (e) => {
+    setSelectedCategory("");
+    setSearchTerm(e.target.value);
+  };
+
+  const filterProducts = () => {
+    let filtered = products;
+
+    if (selectedCategory) {
+      filtered = filtered.filter((p) =>
+        p.categories.includes(selectedCategory)
+      );
+    }
+
+    if (searchTerm.trim()) {
+      filtered = filtered.filter((p) =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredProducts(filtered);
   };
 
   useEffect(() => {
@@ -42,106 +67,100 @@ const ShopPage = () => {
   }, [shopId]);
 
   useEffect(() => {
-    if (!selectedCategory) {
-      setFilteredProducts(products);
-    } else {
-      const filtered = products.filter((product) =>
-        product.categories.includes(selectedCategory)
-      );
-      setFilteredProducts(filtered);
-    }
-  }, [selectedCategory, products]);
+    filterProducts();
+  }, [selectedCategory, searchTerm, products]);
 
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
       <Navbar />
-      <div className="max-w-6xl mx-auto p-4 mb-16 lg:mb-0">
-        {/* Shop Image */}
+
+      <div className="max-w-7xl mx-auto p-4 mb-16 lg:mb-0 space-y-6">
+        {/* Shop Banner */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-64 space-y-4">
-            <MdStorefront className="text-6xl text-green-500 animate-bounce" />
-            <p className="text-lg font-medium text-gray-600 dark:text-gray-300 animate-pulse">
-              Hold your cravings! We are getting it... 🛒
+          <div className="flex flex-col items-center justify-center h-64 space-y-4 animate-pulse">
+            <MdStorefront className="text-6xl text-green-500" />
+            <p className="text-lg font-medium text-gray-500 dark:text-gray-300">
+              Loading shop details...
             </p>
           </div>
         ) : (
-          <div
-            className={`w-full h-48 bg-gray-200 rounded-md mb-4 overflow-hidden relative ${
-              shop?.isOpen === false ? "opacity-50" : ""
-            }`}
-          >
+          <div className="relative w-full h-64 rounded-xl overflow-hidden shadow-lg">
             <img
-              src={shop?.images?.[0] || "https://via.placeholder.com/300"}
-              alt={shop?.name || "Shop Image"}
-              className="w-full h-full object-cover"
+              src={shop?.images?.[0] || "https://via.placeholder.com/600"}
+              alt={shop?.name}
+              className="w-full h-full object-cover brightness-90 dark:brightness-75 transition"
             />
-            {shop?.isOpen === false && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-lg font-bold">
-                Shop is Closed Right Now
-              </div>
-            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-4">
+              <h1 className="text-3xl font-bold text-white">{shop?.name}</h1>
+            </div>
           </div>
         )}
 
-        {/* Shop Details */}
-        {!loading && (
-          <>
-            <h1 className="text-2xl font-bold">{shop?.name}</h1>
-            <p className="text-gray-600">{shop?.description}</p>
+        {/* Categories */}
+        {!loading && shop?.productCategories?.length > 0 && shop.isOpen && (
+          <div className="sticky top-0 lg:top-[60px] bg-gray-100 dark:bg-gray-900 z-10 p-2 rounded-xl shadow-sm overflow-x-auto whitespace-nowrap flex gap-3">
+            {shop.productCategories.map((category) => (
+              <button
+                key={category}
+                onClick={() => handleButtonClick(category)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  selectedCategory === category
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-200 dark:bg-gray-800 dark:text-white"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        )}
 
-            {/* Show Categories & Products Only If Shop is Open */}
-            {shop?.isOpen ? (
-              <>
-                {/* Category Filter */}
-                <div className="relative w-full mt-6">
-                  <div className="overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-3 p-2">
-                    {shop?.productCategories?.map((category) => (
-                      <button
-                        key={category}
-                        onClick={() => handleButtonClick(category)}
-                        className={`${
-                          selectedCategory === category
-                            ? "bg-green-500 text-white"
-                            : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white"
-                        } px-4 py-2 rounded-lg text-sm font-medium transition-all`}
-                      >
-                        {category}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+        {/* 🔍 Search Bar */}
+        {!loading && shop?.isOpen && (
+          <div className="sticky top-[51px] lg:top-[66px] z-10 bg-gray-100 dark:bg-gray-900 p-2 rounded-xl shadow-sm">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={handleChange}
+              placeholder="🔍 Search products..."
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+            />
+          </div>
+        )}
 
-                <div className="h-[1px] bg-gray-900 dark:bg-white"></div>
+        {/* Products Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {loading ? (
+            Array.from({ length: 8 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="h-48 bg-gray-300 dark:bg-gray-700 animate-pulse rounded-lg"
+              />
+            ))
+          ) : filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
+              <ProductCard
+                key={product._id}
+                product={product}
+                user={user}
+                setUser={setUser}
+                token={token}
+              />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-16 text-gray-500 dark:text-gray-400">
+              <MdStorefront className="text-5xl mx-auto mb-4" />
+              <p>No products available in this category.</p>
+            </div>
+          )}
+        </div>
 
-                {/* Products List */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-                  {filteredProducts.length > 0 ? (
-                    filteredProducts.map((product) => (
-                      <ProductCard
-                        key={product._id}
-                        product={product}
-                        user={user}
-                        setUser={setUser}
-                        token={token}
-                      />
-                    ))
-                  ) : (
-                    <div className="flex flex-col items-center justify-center col-span-full py-8">
-                      <MdStorefront className="text-4xl text-gray-400 mb-2" />
-                      <p className="text-gray-500">
-                        No products found in this category.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </>
-            ) : (
-              <p className="text-red-500 text-lg font-semibold mt-4">
-                This shop is currently closed. Please check back later.
-              </p>
-            )}
-          </>
+        {/* Closed Shop Message */}
+        {!loading && !shop?.isOpen && (
+          <p className="text-center text-red-500 font-semibold py-8">
+            This shop is currently closed. Please check back later.
+          </p>
         )}
       </div>
     </>

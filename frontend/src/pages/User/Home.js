@@ -13,12 +13,12 @@ import { Link } from "react-router-dom";
 import InstallPrompt from "../../components/InstallPrompt";
 import { motion } from "framer-motion";
 
-
 const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
   const [shops, setShops] = useState([]);
   const [products, setProducts] = useState([]);
-  const token = localStorage.getItem("GullyFoodsUserToken");
+  const tokenData = JSON.parse(localStorage.getItem("GullyFoodsUserToken"));
+  const token = tokenData?.token;
 
   const fetchPopularShops = async () => {
     try {
@@ -119,7 +119,9 @@ const Home = () => {
 
       {/* Categories Section */}
       <section className="py-8 container mx-auto px-4">
-        <h2 className="text-3xl font-bold mb-6 text-center">Browse Categories</h2>
+        <h2 className="text-3xl font-bold mb-6 text-center">
+          Browse Categories
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[
             { name: "Groceries", img: "/groceries.jpg", icon: <GiFruitBowl /> },
@@ -131,7 +133,11 @@ const Home = () => {
               to={`/products/${cat.name.toLowerCase()}`}
               className="relative rounded-2xl overflow-hidden shadow-lg hover:scale-105 transform transition duration-300"
             >
-              <img src={cat.img} alt={cat.name} className="w-full h-48 object-cover" />
+              <img
+                src={cat.img}
+                alt={cat.name}
+                className="w-full h-48 object-cover"
+              />
               <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
                 <div className="text-white text-xl font-bold flex items-center gap-2">
                   {cat.icon} {cat.name}
@@ -143,17 +149,17 @@ const Home = () => {
       </section>
 
       {/* Popular Shops */}
-       <section className="py-8 container mx-auto px-4">
-      <h2 className="text-3xl font-bold mb-4">Popular Shops</h2>
-      <div
-        className="
+      <section className="py-8 container mx-auto px-4">
+        <h2 className="text-3xl font-bold mb-4">Popular Shops</h2>
+        <div
+          className="
           flex gap-4 overflow-x-auto scrollbar-hide pt-2 pb-4
           snap-x snap-mandatory
         "
-      >
-        {memoizedShops}
-      </div>
-    </section>
+        >
+          {memoizedShops}
+        </div>
+      </section>
 
       {/* Featured Products */}
       <section className="py-8 container mx-auto px-4">

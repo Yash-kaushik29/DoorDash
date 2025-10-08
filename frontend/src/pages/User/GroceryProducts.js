@@ -12,7 +12,8 @@ const GroceryProducts = () => {
   const [products, setProducts] = useState([]);
   const { user, setUser } = useContext(UserContext);
   const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem("GullyFoodsUserToken");
+  const tokenData = JSON.parse(localStorage.getItem("GullyFoodsUserToken"));
+  const token = tokenData?.token;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -68,7 +69,7 @@ const GroceryProducts = () => {
                 {items.map((product) => (
                   <motion.div
                     key={product._id}
-                    className="w-[160px] h-[280px] flex-shrink-0"
+                    className="w-[160px] flex-shrink-0"
                     whileTap={{ scale: 0.95 }}
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 300 }}

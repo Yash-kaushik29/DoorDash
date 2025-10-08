@@ -572,6 +572,8 @@ router.get("/deliveryBoy/:deliveryBoyId", async (req, res) => {
       .populate("outstandingPayments.orderId")
       .lean();
 
+    console.log(deliveryBoy)  
+
     if (deliveryBoy?.outstandingPayments) {
       deliveryBoy.outstandingPayments.sort(
         (a, b) => new Date(b.collectedAt) - new Date(a.collectedAt)

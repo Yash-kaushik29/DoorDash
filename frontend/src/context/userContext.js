@@ -10,25 +10,39 @@ export function UserContextProvider({ children }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = localStorage.getItem("GullyFoodsUserToken");
-        if (!token) {
+        const tokenData = localStorage.getItem("GullyFoodsUserToken");
+        if (!tokenData) {
           setUser(null);
           setReady(true);
           return;
         }
 
+        const parsedToken = JSON.parse(tokenData);
+        const now = new Date().getTime();
+
+        // Check token expiry
+        if (!parsedToken.token || !parsedToken.expiry || now > parsedToken.expiry) {
+          localStorage.removeItem("GullyFoodsUserToken");
+          setUser(null);
+          setReady(true);
+          return;
+        }
+
+        // Valid token, fetch user
         const response = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/auth/getUser`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${parsedToken.token}` } }
         );
 
         if (response.data.success) {
           setUser(response.data.user);
         } else {
+          localStorage.removeItem("GullyFoodsUserToken");
           setUser(null);
         }
       } catch (error) {
         console.error("Error fetching user:", error);
+        localStorage.removeItem("GullyFoodsUserToken");
         setUser(null);
       } finally {
         setReady(true);
