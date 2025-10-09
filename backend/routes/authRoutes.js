@@ -254,6 +254,7 @@ router.post("/user-login", async (req, res) => {
     const maxAge = 15 * 24 * 60 * 60 * 1000;
         
         const isProduction = process.env.NODE_ENV === 'production';
+        const domainName = isProduction ? 'gullyfoods.app' : 'localhost';
         
         const cookieOptions = {
             expires: new Date(Date.now() + maxAge),
@@ -261,6 +262,7 @@ router.post("/user-login", async (req, res) => {
             secure: isProduction,
             sameSite: 'Lax',
             path: '/',
+            domain: domainName,
         };
 
        
