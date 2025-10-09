@@ -64,8 +64,9 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/send-login-otp`,
-        { formData }
+        `/api/auth/send-login-otp`,
+        { formData }, 
+        {withCredentials: true},
       );
 
       if (res.data.success) {
@@ -97,7 +98,7 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/user-login`,
+        `/api/auth/user-login`,
         { phone, otp },
         { withCredentials: true }
       );

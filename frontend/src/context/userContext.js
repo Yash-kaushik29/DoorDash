@@ -3,9 +3,6 @@ import React, { createContext, useEffect, useState } from "react";
 
 export const UserContext = createContext();
 
-// CRITICAL: Configure Axios to automatically send and receive cookies with all requests.
-axios.defaults.withCredentials = true;
-
 export function UserContextProvider({ children }) {
     const [user, setUser] = useState(null);
     const [ready, setReady] = useState(false);
@@ -13,9 +10,9 @@ export function UserContextProvider({ children }) {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                // Attempt to fetch user. The cookie is automatically attached.
                 const response = await axios.get(
-                    `${process.env.REACT_APP_API_URL}/api/auth/getUser`
+                    `/api/auth/getUser`,
+                    {withCredentials: true},
                 );
 
                 console.log(response)
