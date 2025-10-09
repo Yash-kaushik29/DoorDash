@@ -251,6 +251,21 @@ router.post("/user-login", async (req, res) => {
       { expiresIn: "15d" }
     );
 
+    const maxAge = 15 * 24 * 60 * 60 * 1000;
+        
+        const isProduction = process.env.NODE_ENV === 'production';
+        
+        const cookieOptions = {
+            expires: new Date(Date.now() + maxAge),
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'Lax',
+            path: '/',
+        };
+
+       
+        res.cookie('authToken', token, cookieOptions);
+
     res.json({
       success: true,
       message: "Logged In Successfully!",
@@ -334,46 +349,47 @@ router.post("/seller-login", async (req, res) => {
 });
 
 router.get("/getUser", async (req, res) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Please login first!" });
-    }
+    try {
+        const token = req.cookies.authToken; 
 
-    const token = authHeader.split(" ")[1];
+        if (!token) {
+            return res
+                .status(401)
+                .json({ success: false, message: "Please login first! (Token missing from cookie)" });
+        }
 
-    jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decoded) => {
-      if (err) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Invalid or expired token!" });
-      }
+        jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decoded) => {
+            if (err) {
+                res.clearCookie('authToken'); 
+                return res
+                    .status(401)
+                    .json({ success: false, message: "Invalid or expired session! Please log in again." });
+            }
 
-      const currUser = await User.findById(decoded.userID);
-      if (!currUser) {
-        return res.status(401).json({
-          success: false,
-          message: "User not found! Please login again.",
+            const currUser = await User.findById(decoded.userID);
+            if (!currUser) {
+                res.clearCookie('authToken'); 
+                return res.status(401).json({
+                    success: false,
+                    message: "User not found! Please login again.",
+                });
+            }
+
+            res.json({
+                success: true,
+                user: {
+                    _id: currUser._id,
+                    username: currUser.username,
+                    foodCart: currUser.foodCart,
+                    groceryCart: currUser.groceryCart,
+                    phone: currUser.phone,
+                },
+            });
         });
-      }
-
-      res.json({
-        success: true,
-        user: {
-          _id: currUser._id,
-          username: currUser.username,
-          foodCart: currUser.foodCart,
-          groceryCart: currUser.groceryCart,
-          phone: currUser.phone,
-        },
-      });
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Internal server error!" });
-  }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal server error!" });
+    }
 });
 
 router.get("/getSellerDetails", authenticateSeller, async (req, res) => {

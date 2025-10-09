@@ -14,10 +14,8 @@ export default function Login() {
   const OTP_COOLDOWN = 90;
   const navigate = useNavigate();
 
-  // Validate phone number format (Indian 10-digit)
   const isValidPhone = (phone) => /^[6-9]\d{9}$/.test(phone);
 
-  // Validate OTP (numeric, 4–8 digits typical)
   const isValidOtp = (otp) => /^\d{4,8}$/.test(otp);
 
   // Load remaining cooldown from localStorage
@@ -89,7 +87,6 @@ export default function Login() {
     }
   };
 
-  // ✅ Login using OTP
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { phone, otp } = formData;
