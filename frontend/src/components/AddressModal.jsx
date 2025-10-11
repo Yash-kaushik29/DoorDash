@@ -1,6 +1,7 @@
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
+import api from "../utils/axiosInstance";
 
 const lightThemeStyles = [];
 
@@ -109,9 +110,9 @@ const AddAddressModal = ({ userId, onClose, closeModal }) => {
   };
 
   const handleSave = async () => {
-    const response = await axios.post(
-      `${process.env.REACT_APP_API_URL}/api/user-profile/saveAddress`,
-      { userId, address: { ...addressData } },
+    const response = await api.post(
+      `/api/user-profile/saveAddress`,
+      { address: { ...addressData } },
       { withCredentials: true }
     );
     if (response.data.success) {

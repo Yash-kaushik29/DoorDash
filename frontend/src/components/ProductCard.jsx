@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { FaRegCircleDot } from "react-icons/fa6";
+import api from "../utils/axiosInstance";
 
 const DietIcon = ({ type }) => {
   switch (type) {
@@ -23,7 +24,6 @@ const ProductCard = ({
   user,
   setUser,
   variant = "food",
-  token
 }) => {
   const [loading, setLoading] = useState(false);
 
@@ -49,11 +49,11 @@ const ProductCard = ({
 
     setLoading(true);
     try {
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/cart/addToCart`,
+      const { data } = await api.post(
+        `/api/cart/addToCart`,
         { productId: product._id, cartKey },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
         }
       );
       if (!data.success) throw new Error(data.message);
@@ -79,10 +79,10 @@ const ProductCard = ({
     }));
 
     try {
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/cart/incrementQty`,
+      const { data } = await api.post(
+        `/api/cart/incrementQty`,
         { productId, cartKey },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true }
       );
       if (!data.success) throw new Error(data.message);
     } catch {
@@ -106,10 +106,10 @@ const ProductCard = ({
     }));
 
     try {
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/cart/decrementQty`,
+      const { data } = await api.post(
+        `/api/cart/decrementQty`,
         { productId, cartKey },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true }
       );
       if (!data.success) throw new Error(data.message);
     } catch {
@@ -129,10 +129,10 @@ const ProductCard = ({
 
     setLoading(true);
     try {
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/cart/removeFromCart`,
+      const { data } = await api.post(
+        `/api/cart/removeFromCart`,
         { productId, cartKey },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true }
       );
       if (!data.success) throw new Error(data.message);
       toast.success("Product removed from cart!");

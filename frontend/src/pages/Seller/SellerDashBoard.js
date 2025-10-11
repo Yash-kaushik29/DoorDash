@@ -5,6 +5,7 @@ import axios from "axios";
 import SellerDashboardSkeleton from "../../skeletons/SellerDashboardSkeleton ";
 import notificationSound from "../../sound/notificationSound.mp3";
 import { ToastContainer, toast } from "react-toastify";
+import api from "../../utils/axiosInstance";
 
 const audio = new Audio(notificationSound);
 
@@ -35,8 +36,8 @@ const SellerDashboard = () => {
 
   //   const pollNotifications = async () => {
   //     try {
-  //       const { data } = await axios.get(
-  //         `${process.env.REACT_APP_API_URL}/api/notification/unread-order-notifications`,
+  //       const { data } = await api.get(
+  //         `/api/notification/unread-order-notifications`,
   //         {
   //           headers: {
   //             Authorization: `Bearer ${token}`,
@@ -59,8 +60,8 @@ const SellerDashboard = () => {
   const fetchSeller = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/auth/getSellerDetails`,
+      const { data } = await api.get(
+        `/api/auth/getSellerDetails`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import AdminHeader from '../../components/AdminHeader';
 import { Link } from 'react-router-dom';
+import api from '../../utils/axiosInstance';
 
 const UserDetails = () => {
   const [userId, setUserId] = useState('');
@@ -22,7 +23,7 @@ const UserDetails = () => {
     setUser(null);
 
     try {
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/user/${userId}`);
+      const res = await api.get(`/api/admin/user/${userId}`);
       setUser(res.data);
     } catch (err) {
       console.error('Error fetching user details:', err);

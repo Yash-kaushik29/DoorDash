@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import AdminHeader from "../../components/AdminHeader";
 import { Link } from "react-router-dom";
+import api from "../../utils/axiosInstance";
 
 const SellerList = () => {
   const [sellers, setSellers] = useState([]);
@@ -12,7 +13,7 @@ const SellerList = () => {
   useEffect(() => {
     const fetchSellers = async () => {
       try {
-        const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/sellers`);
+        const res = await api.get(`/api/admin/sellers`);
         setSellers(res.data);
         setFilteredSellers(res.data);
       } catch (err) {

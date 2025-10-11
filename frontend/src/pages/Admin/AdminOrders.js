@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import axios from "axios";
 import AdminHeader from "../../components/AdminHeader";
 import { useNavigate } from "react-router-dom";
+import api from "../../utils/axiosInstance";
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -18,8 +19,8 @@ const AdminOrders = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/admin/getOrdersByMonth?page=${pageNum}&limit=10&filter=${statusFilter}`,
+      const response = await api.get(
+        `/api/admin/getOrdersByMonth?page=${pageNum}&limit=10&filter=${statusFilter}`,
         { withCredentials: true }
       );
       if (response.data.success) {

@@ -13,6 +13,7 @@ import ReviewSection from "../../components/ReviewSection";
 import { ToastContainer, toast } from "react-toastify";
 import { IoIosCart } from "react-icons/io";
 import DownloadInvoiceButton from "../../components/DownloadInvoiceButton";
+import api from "../../utils/axiosInstance";
 
 const OrderDetails = () => {
   const { orderId } = useParams();
@@ -24,8 +25,8 @@ const OrderDetails = () => {
   useEffect(() => {
     const fetchOrderDetails = async () => {
       try {
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/order/getOrderDetails/${orderId}`,
+        const { data } = await api.get(
+          `/api/order/getOrderDetails/${orderId}`,
           { withCredentials: true }
         );
         if (data.success) {

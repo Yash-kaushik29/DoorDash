@@ -3,6 +3,7 @@ import { UserContext } from "../../context/userContext";
 import Navbar from "../../components/Navbar";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import api from "../../utils/axiosInstance";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -18,14 +19,12 @@ const Notifications = () => {
     const fetchNotifications = async () => {
       setIsLoading(true);
       try {
-        if (!token) return;
+        if (!user) return;
 
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/notification/getNotifications`,
+        const { data } = await api.get(
+          `/api/notification/getNotifications`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            withCredentials: true,
           }
         );
 
@@ -52,11 +51,11 @@ const Notifications = () => {
   }, [filter, notifications]);
 
   const showNotification = async (notif) => {
-    const { data } = await axios.post(
-      `${process.env.REACT_APP_API_URL}/api/notification/readNotification`,
+    const { data } = await api.post(
+      `/api/notification/readNotification`,
       { notificationId: notif._id },
       {
-        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true
       }
     );
 

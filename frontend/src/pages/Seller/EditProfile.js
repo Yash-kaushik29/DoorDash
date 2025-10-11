@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SellerHeader from "../../components/SellerHeader";
+import api from "../../utils/axiosInstance";
 
 const EditProfile = () => {
   const [sellerId, setSellerId] = useState("");
@@ -18,8 +19,8 @@ const EditProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/shop/seller-profile`,
+        const { data } = await api.get(
+          `/api/shop/seller-profile`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setSellerId(data.seller._id);
@@ -38,8 +39,8 @@ const EditProfile = () => {
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/shop/update-profile`,
+      await api.put(
+        `/api/shop/update-profile`,
         { username, phone },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -58,8 +59,8 @@ const EditProfile = () => {
       return;
     }
     try {
-      const { data } = await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/user-profile/change-seller-password/${sellerId}`,
+      const { data } = await api.put(
+        `/api/user-profile/change-seller-password/${sellerId}`,
         { currentPassword, newPassword },
         { headers: { Authorization: `Bearer ${token}` } }
       );

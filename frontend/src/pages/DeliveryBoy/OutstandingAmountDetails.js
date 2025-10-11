@@ -4,6 +4,7 @@ import { CheckCircle, XCircle } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import DeliveryBoyHeader from "../../components/DeliveryBoyHeader";
+import api from "../../utils/axiosInstance";
 
 const OutstandingAmountDetails = () => {
   const [outstandingPayments, setOutstandingPayments] = useState([]);
@@ -22,8 +23,8 @@ const OutstandingAmountDetails = () => {
 
       const fetchOutstanding = async () => {
         try {
-          const res = await axios.get(
-            `${process.env.REACT_APP_API_URL}/api/delivery/outstandingAmounts/${deliveryBoyId}`
+          const res = await api.get(
+            `/api/delivery/outstandingAmounts/${deliveryBoyId}`
           );
           setOutstandingPayments(res.data.outstandingPayments);
         } catch (err) {

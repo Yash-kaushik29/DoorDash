@@ -9,6 +9,7 @@ import CheckoutPayment from "../../components/CheckoutPayment"; // Payment & Pla
 import CheckoutCoupons from "../../components/CheckoutCoupons"; // Coupons UI
 import CheckoutSummary from "../../components/CheckoutSummary"; // Order summary & total
 import CheckoutAddress from "../../components/CheckoutAddress ";
+import api from "../../utils/axiosInstance";
 
 const Checkout = () => {
   const location = useLocation();
@@ -36,8 +37,6 @@ const Checkout = () => {
   const [discount, setDiscount] = useState(0);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
-  const tokenData = JSON.parse(localStorage.getItem("GullyFoodsUserToken"));
-  const token = tokenData?.token;
   const isFoodOrder = cartKey === "foodCart";
 
   const taxes = isFoodOrder ? (cartTotalPrice * 5) / 100 : 0;
@@ -50,11 +49,11 @@ const Checkout = () => {
   // Fetch active coupons
   useEffect(() => {
     const fetchActiveCoupons = async () => {
-      if (!token) return;
+      if (ready && !user) return;
       try {
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/user-profile/active-coupons`,
-          { headers: { Authorization: `Bearer ${token}` } }
+        const { data } = await api.get(
+          `/api/user-profile/active-coupons`,
+          { withCredentials: true }
         );
 
         if (data.success) setActiveCoupons(data.activeCoupons);
@@ -66,7 +65,7 @@ const Checkout = () => {
     };
 
     fetchActiveCoupons();
-  }, [token]);
+  }, [user]);
 
   // Fetch addresses
   useEffect(() => {
@@ -76,8 +75,8 @@ const Checkout = () => {
 
   const fetchAddresses = async () => {
     try {
-      const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/user-profile/getAddresses`,
+      const res = await api.get(
+        `/api/user-profile/getAddresses`,
         { params: { userId: user._id } }
       );
       if (res.data.success) setUserAddresses(res.data.addresses);
@@ -166,10 +165,10 @@ const Checkout = () => {
 
     try {
       if (paymentMethod === "COD") {
-        const { data } = await axios.post(
-          `${process.env.REACT_APP_API_URL}/api/order/create-order`,
+        const { data } = await api.post(
+          `/api/order/create-order`,
           orderPayload,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { withCredentials: true }
         );
         if (data.success) {
           toast.success("🎉 Order Placed Successfully!");
@@ -187,8 +186,8 @@ const Checkout = () => {
 
   const handlePayment = async (orderPayload) => {
     try {
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/payment/createOrder`,
+      const { data } = await api.post(
+        `/api/payment/createOrder`,
         { orderId: 1, cart: cartItems, deliveryCharge },
         { withCredentials: true }
       );
@@ -211,10 +210,10 @@ const Checkout = () => {
           );
 
           if (verifyRes.data.success) {
-            const { data } = await axios.post(
-              `${process.env.REACT_APP_API_URL}/api/order/create-order`,
+            const { data } = await api.post(
+              `/api/order/create-order`,
               orderPayload,
-              { headers: { Authorization: `Bearer ${token}` } }
+              { withCredentials: true }
             );
             if (data.success) {
               toast.success("🎉 Order Placed Successfully!");

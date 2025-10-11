@@ -50,8 +50,9 @@ router.put("/updateDetails/:userId", async (req, res) => {
   }
 });
 
-router.post("/saveAddress", async (req, res) => {
-  const { userId, address } = req.body;
+router.post("/saveAddress", authenticateUser, async (req, res) => {
+  const { address } = req.body;
+  const userId = req.user._id;
 
   try {
     const existingUser = await User.findOne({ _id: userId });
@@ -337,10 +338,10 @@ router.post("/assign-coupons", async (req, res) => {
 
 router.get("/active-coupons", authenticateUser, async (req, res) => {
   try {
-    const existingUser = req.user;
+    const userId = req.user._id;
 
     // Populate coupon details
-    const user = await User.findById(existingUser._id).populate("activeCoupons.coupon");
+    const user = await User.findById(userId).populate("activeCoupons.coupon");
     if (!user)
       return res.status(404).json({ success: false, message: "User not found" });
 

@@ -4,7 +4,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
-import { Turnstile } from "@marsidev/react-turnstile";
+import api from "../../utils/axiosInstance";
 
 export default function Signup() {
   const { setUser } = useContext(UserContext);
@@ -13,7 +13,6 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [otpInputs, setOtpInputs] = useState(["", "", "", ""]);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [captchaDone, setCaptchaDone] = useState(false);
   const navigate = useNavigate();
   const otpRefs = useRef([]);
 
@@ -36,17 +35,18 @@ export default function Signup() {
     e.preventDefault();
     if (!formData.username || !formData.phone) return;
 
+    if(formData.phone.length !== 10) {
+      toast.error("Please enter a 10 digit phone number ❌");
+      return ;
+    }
+
     try {
       setLoading(true);
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/send-otp`,
-        { formData }
-      );
-
+      const response = await api.post(`/api/auth/send-otp`, { formData });
       if (response.data.success) {
         toast.success("OTP sent! 🎉");
         setStep("otp");
-        setResendCooldown(90); // 60 sec cooldown for resend
+        setResendCooldown(90);
       } else {
         toast.error(response.data.message || "Failed to send OTP ❌");
       }
@@ -57,7 +57,6 @@ export default function Signup() {
     }
   };
 
-  // ------------------- OTP Handlers -------------------
   useEffect(() => {
     if (otpRefs.current[0]) otpRefs.current[0].focus();
   }, [step]);
@@ -90,22 +89,13 @@ export default function Signup() {
 
     try {
       setLoading(true);
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/user-signup`,
-        { formData, otp }
-      );
+      const response = await api.post(`/api/auth/user-signup`, {
+        formData,
+        otp,
+      });
 
       if (response.data.success) {
         toast.success("Signup Successful! 🎉");
-
-        // store token with expiry timestamp
-        const expiry = new Date();
-        expiry.setDate(expiry.getDate() + TOKEN_EXPIRY_DAYS);
-        const tokenData = {
-          token: response.data.token,
-          expiry: expiry.getTime(),
-        };
-        localStorage.setItem("GullyFoodsUserToken", JSON.stringify(tokenData));
 
         setUser(response.data.user);
         setTimeout(() => navigate("/"), 2000);
@@ -129,7 +119,7 @@ export default function Signup() {
     <>
       <ToastContainer position="top-right" autoClose={3000} />
       {step === "form" ? (
-        <div className="flex flex-col min-h-screen bg-white dark:bg-gray-800">
+        <div className="flex flex-col min-h-screen bg-white">
           {/* Logo */}
           <div className="mx-auto my-6">
             <img
@@ -145,8 +135,12 @@ export default function Signup() {
               initial={{ opacity: 0, y: -50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="w-full max-w-md bg-white dark:bg-gray-900 p-6 shadow-2xl rounded-3xl border-t-4 border-green-500"
+              className="w-full max-w-md bg-white p-6 shadow-2xl rounded-3xl border-t-4 border-green-500"
             >
+              <h1 className="text-green-600 font-semibold text-center pb-2">
+                New here? Grab 3 spicy discounts 🔥 <br />
+                the moment you join!
+              </h1>
               <h2 className="text-2xl text-center text-green-700 font-bold mb-6">
                 Sign Up
               </h2>
@@ -189,7 +183,7 @@ export default function Signup() {
                     required
                     className="accent-green-600"
                   />
-                  <span className="text-gray-600 dark:text-gray-300">
+                  <span className="text-gray-600">
                     I agree to the{" "}
                     <Link
                       to="/terms"
@@ -207,26 +201,18 @@ export default function Signup() {
                   </span>
                 </div>
 
-                <Turnstile
-                  siteKey={process.env.REACT_APP_CF_SITE_KEY}
-                  onVerifyToken={(token) => {
-                    console.log("Captcha token:", token);
-                    setCaptchaDone(true);
-                  }}
-                />
-
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   type="submit"
-                  disabled={loading || !captchaDone}
+                  disabled={loading}
                   className="w-full bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition disabled:opacity-50"
                 >
                   {loading ? "Sending OTP..." : "Sign Up"}
                 </motion.button>
               </form>
 
-              <div className="text-center mt-4 text-gray-800 dark:text-gray-300">
+              <div className="text-center mt-4 text-gray-800">
                 Already have an account?{" "}
                 <Link
                   to="/login"
@@ -239,10 +225,10 @@ export default function Signup() {
           </div>
         </div>
       ) : (
-        <div className="z-10 max-w-md mx-auto my-[10vh] text-center bg-white dark:bg-gray-900 px-4 sm:px-8 py-10 rounded-xl shadow">
+        <div className="z-10 max-w-md mx-auto my-[10vh] text-center bg-white px-4 sm:px-8 py-10 rounded-xl shadow">
           <header className="mb-8">
             <h1 className="text-2xl font-bold mb-1">Phone Verification</h1>
-            <p className="text-[15px] text-slate-500 dark:text-slate-400">
+            <p className="text-[15px] text-slate-500">
               Enter the code sent to ******{formData.phone.slice(-3)}.
             </p>
           </header>
@@ -256,7 +242,7 @@ export default function Signup() {
                   type="text"
                   value={val}
                   maxLength={1}
-                  className="w-14 h-14 text-center text-2xl font-extrabold text-slate-900 bg-slate-100 dark:bg-gray-800 border border-transparent hover:border-slate-200 appearance-none rounded p-4 outline-none focus:bg-white focus:border-green-400 focus:ring-2 focus:ring-indigo-100"
+                  className="w-14 h-14 text-center text-2xl font-extrabold text-slate-900 bg-slate-100 border border-transparent hover:border-slate-200 appearance-none rounded p-4 outline-none focus:bg-white focus:border-green-400 focus:ring-2 focus:ring-indigo-100"
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => {
                     if (

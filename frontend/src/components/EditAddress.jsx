@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useContext, useState } from "react";
 import { UserContext } from "../context/userContext";
 import { toast } from "react-toastify";
+import api from "../utils/axiosInstance";
 
 const EditAddress = ({ address, closeModal, updateAddress }) => {
   const [formData, setFormData] = useState({
@@ -22,8 +23,8 @@ const EditAddress = ({ address, closeModal, updateAddress }) => {
     e.preventDefault();
 
     try {
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/user-profile/editAddress`,
+      const { data } = await api.post(
+        `/api/user-profile/editAddress`,
         {
           userId: user._id,
           addressId: address._id,

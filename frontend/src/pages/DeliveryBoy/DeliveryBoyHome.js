@@ -6,6 +6,7 @@ import { jwtDecode } from "jwt-decode";
 import { Link, useNavigate } from "react-router-dom";
 import notificationSound from "../../sound/notificationSound.mp3";
 import { ToastContainer, toast } from "react-toastify";
+import api from "../../utils/axiosInstance";
 
 const DeliveryBoyHome = () => {
   const [deliveryBoyStats, setDeliveryBoyStats] = useState({
@@ -53,8 +54,8 @@ const DeliveryBoyHome = () => {
 
       const fetchOrderStats = async () => {
         try {
-          const response = await axios.get(
-            `${process.env.REACT_APP_API_URL}/api/delivery/orders/${deliveryBoyId}`
+          const response = await api.get(
+            `/api/delivery/orders/${deliveryBoyId}`
           );
 
           if (response.data.pendingOrders > 0) {

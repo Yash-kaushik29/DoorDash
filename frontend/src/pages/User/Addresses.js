@@ -7,6 +7,7 @@ import AddressCard from "../../components/AddressCard";
 import { IoIosArrowDropdown } from "react-icons/io";
 import AddAddressModal from "../../components/AddressModal";
 import { FaHome } from "react-icons/fa";
+import api from "../../utils/axiosInstance";
 
 const Addresses = () => {
   const { userId } = useParams();
@@ -25,8 +26,8 @@ const Addresses = () => {
   const fetchAddresses = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/user-profile/getAddresses`,
+      const response = await api.get(
+        `/api/user-profile/getAddresses`,
         {
           params: { userId },
         }
@@ -58,8 +59,8 @@ const Addresses = () => {
 
   const deleteAddress = async (addressId) => {
     try {
-      const { data } = await axios.delete(
-        `${process.env.REACT_APP_API_URL}/api/user-profile/deleteAddress`,
+      const { data } = await api.delete(
+        `/api/user-profile/deleteAddress`,
         {
           params: { userId, addressId },
           withCredentials: true,
@@ -79,8 +80,8 @@ const Addresses = () => {
 
   const setAsDefault = async (addressId) => {
     try {
-      const { data } = await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/user-profile/setAsDefault`,
+      const { data } = await api.put(
+        `/api/user-profile/setAsDefault`,
         {
           userId,
           addressId,

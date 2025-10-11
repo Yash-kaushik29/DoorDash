@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import { Link } from "react-router-dom";
 import { MdOutlineArrowOutward, MdAccessTimeFilled } from "react-icons/md";
+import api from "../../utils/axiosInstance";
 
 const OrderCard = ({ order }) => {
   const formatDate = (dateString) =>
@@ -42,7 +43,7 @@ const OrderCard = ({ order }) => {
       </h2>
       <p className="mb-2">
         Total Amount:{" "}
-        <span className="text-green-600 font-bold">₹{order.amount}</span>
+        <span className="text-green-600 font-bold">₹{order.totalAmount}</span>
       </p>
       <p className="mb-2">
         Delivery Status:{" "}
@@ -64,19 +65,16 @@ const RecentOrders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const tokenData = JSON.parse(localStorage.getItem("GullyFoodsUserToken"));
-  const token = tokenData?.token;
-
   useEffect(() => {
     let isMounted = true;
     const fetchOrders = async (page = 1) => {
       try {
         setLoading(true);
 
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/order/getUserOrders?page=${page}&limit=5`,
+        const { data } = await api.get(
+          `/api/order/getUserOrders?page=${page}&limit=5`,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
           }
         );
 

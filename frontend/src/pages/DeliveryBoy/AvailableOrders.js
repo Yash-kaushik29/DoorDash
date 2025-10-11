@@ -5,6 +5,7 @@ import { FaSearch } from "react-icons/fa";
 import DeliveryBoyHeader from "../../components/DeliveryBoyHeader";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import api from "../../utils/axiosInstance";
 
 const AvailableOrders = ({ deliveryBoyId }) => {
   const [loading, setLoading] = useState(true);
@@ -22,8 +23,8 @@ const AvailableOrders = ({ deliveryBoyId }) => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/delivery/get-available-orders`
+      const res = await api.get(
+        `/api/delivery/get-available-orders`
       );
       if (res.data.success) {
         setOrders(res.data.orders);
@@ -40,14 +41,18 @@ const AvailableOrders = ({ deliveryBoyId }) => {
     const deliveryBoyId = decoded.id;
 
     try {
-      const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/delivery/orders/${orderId}/accept`,
+      const res = await api.post(
+        `/api/delivery/orders/${orderId}/accept`,
         { deliveryBoyId }
       );
 
       if (res.data.success) {
         toast.success("Order accepted successfully!");
         fetchOrders();
+
+        setTimeout(() => {
+          navigate('/delivery/orders/pending');
+        }, 2000)
       } else {
         toast.error(res.data.message);
       }

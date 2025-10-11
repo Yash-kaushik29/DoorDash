@@ -5,6 +5,7 @@ import ProductListCard from "../../components/ProductListCard";
 import ProductListCardSkeleton from "../../skeletons/ProductListCardSkeleton";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import api from "../../utils/axiosInstance";
 
 const ProductsList = () => {
   const [products, setProducts] = useState([]);
@@ -14,8 +15,8 @@ const ProductsList = () => {
 
   const toggleStock = async (productId) => {
     try {
-      const { data } = await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/shop/update-stock`,
+      const { data } = await api.put(
+        `/api/shop/update-stock`,
         { productId },
         { withCredentials: true }
       );
@@ -40,8 +41,8 @@ const ProductsList = () => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/shop/get-products`,
+        const { data } = await api.get(
+          `/api/shop/get-products`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem(

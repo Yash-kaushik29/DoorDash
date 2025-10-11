@@ -1,5 +1,5 @@
-import axios from "axios";
 import React, { createContext, useEffect, useState } from "react";
+import api from "../utils/axiosInstance";
 
 export const UserContext = createContext();
 
@@ -10,12 +10,10 @@ export function UserContextProvider({ children }) {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const response = await axios.get(
+                const response = await api.get(
                     `/api/auth/getUser`,
                     {withCredentials: true},
                 );
-
-                console.log(response)
 
                 if (response.data.success) {
                     setUser(response.data.user);
@@ -23,7 +21,6 @@ export function UserContextProvider({ children }) {
                     setUser(null);
                 }
             } catch (error) {
-                // If 401 Unauthorized, the session has expired or is invalid.
                 setUser(null);
             } finally {
                 setReady(true);
@@ -32,8 +29,7 @@ export function UserContextProvider({ children }) {
 
         if (!user) {
             fetchUser();
-        }
-        
+        }  
     }, []);
 
     return (

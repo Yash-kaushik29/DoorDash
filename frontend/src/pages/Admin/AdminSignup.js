@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../../utils/axiosInstance';
 
 const AdminSignup = () => {
   const [name, setName] = useState('');
@@ -17,7 +18,7 @@ const AdminSignup = () => {
     setSuccess('');
 
     try {
-      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/api/admin/signup`, {
+      const { data } = await api.post(`/api/admin/signup`, {
         name,
         email,
         password,

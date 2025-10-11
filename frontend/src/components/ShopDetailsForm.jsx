@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import PhotosUploader from "./PhotosUploader";
 import axios from "axios";
+import api from "../utils/axiosInstance";
 
 const ShopDetailsForm = () => {
   const { shopId } = useParams();
@@ -31,8 +32,8 @@ const ShopDetailsForm = () => {
 
   const fetchShopDetails = async () => {
     try {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/shop/getShop/${shopId}`,
+      const { data } = await api.get(
+        `/api/shop/getShop/${shopId}`,
         { withCredentials: true }
       );
 
@@ -74,8 +75,8 @@ const ShopDetailsForm = () => {
   const editShop = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/shop/edit-shop`,
+      const { data } = await api.put(
+        `/api/shop/edit-shop`,
         { shop, shopId, images },
         { withCredentials: true }
       );
@@ -97,8 +98,8 @@ const ShopDetailsForm = () => {
   const addShop = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/shop/add-shop`,
+      const { data } = await api.post(
+        `/api/shop/add-shop`,
         { shop, images },
         {
           headers: {

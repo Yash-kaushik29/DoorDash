@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import SellerHeader from "../../components/SellerHeader";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import api from "../../utils/axiosInstance";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -21,8 +22,8 @@ const Orders = () => {
       setLoading(true);
       setError("");
       try {
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/order/getAllOrders?page=${currentPage}&limit=${ordersPerPage}`,
+        const { data } = await api.get(
+          `/api/order/getAllOrders?page=${currentPage}&limit=${ordersPerPage}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

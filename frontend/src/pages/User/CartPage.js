@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { IoAddCircle, IoRemoveCircle } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
+import api from "../../utils/axiosInstance";
 
 const CartPage = () => {
   const { user, setUser } = useContext(UserContext);
@@ -14,17 +15,13 @@ const CartPage = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const tokenData = JSON.parse(localStorage.getItem("GullyFoodsUserToken"));
-  const token = tokenData?.token;
-
   // Fetch carts
   useEffect(() => {
     const fetchCarts = async () => {
       try {
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/cart/getCart`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const { data } = await api.get("/api/cart/getCart", {
+          withCredentials: true,
+        });
 
         setFoodCartItems(data.foodCart || []);
         setGroceryCartItems(data.groceryCart || []);
@@ -33,6 +30,7 @@ const CartPage = () => {
           productId: item.product?._id,
           quantity: item.quantity,
         }));
+
         const normalizedGroceryCart = (data.groceryCart || []).map((item) => ({
           productId: item.product?._id,
           quantity: item.quantity,
@@ -93,10 +91,10 @@ const CartPage = () => {
     try {
       const endpoint =
         type === "inc" ? "/api/cart/incrementQty" : "/api/cart/decrementQty";
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}${endpoint}`,
+      const { data } = await api.post(
+        `${endpoint}`,
         { productId, cartKey },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {withCredentials: true}
       );
 
       if (!data.success) throw new Error("Update failed");
@@ -129,10 +127,10 @@ const CartPage = () => {
     }));
 
     try {
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/cart/removeFromCart`,
+      const { data } = await api.post(
+        `/api/cart/removeFromCart`,
         { productId, cartKey },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true }
       );
 
       if (!data.success) throw new Error("Remove failed");

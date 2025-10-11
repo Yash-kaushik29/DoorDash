@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import AdminHeader from "../../components/AdminHeader";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
+import api from "../../utils/axiosInstance";
 
 const SingleOrder = () => {
   const { orderId: paramOrderId } = useParams();
@@ -16,8 +17,8 @@ const SingleOrder = () => {
   // Fetch Order Details
   const fetchOrderDetails = async (id) => {
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/admin/getOrderById/${id}`,
+      const response = await api.get(
+        `/api/admin/getOrderById/${id}`,
         { withCredentials: true }
       );
       if (response.data.success) {
@@ -33,8 +34,8 @@ const SingleOrder = () => {
   // Fetch Delivery Boys
   const fetchDeliveryBoys = async () => {
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/admin/getAllDeliveryBoys`,
+      const response = await api.get(
+        `/api/admin/getAllDeliveryBoys`,
         { withCredentials: true }
       );
       if (response.data.success) {
@@ -65,8 +66,8 @@ const SingleOrder = () => {
   const handleAssignDeliveryBoy = async () => {
     if (selectedDeliveryBoy) {
       try {
-        const response = await axios.post(
-          `${process.env.REACT_APP_API_URL}/api/admin/assignDeliveryBoy`,
+        const response = await api.post(
+          `/api/admin/assignDeliveryBoy`,
           { orderId, deliveryBoyId: selectedDeliveryBoy },
           { withCredentials: true }
         );
@@ -86,8 +87,8 @@ const SingleOrder = () => {
 
   const handleCancelOrder = async () => {
     try {
-      const response = await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/admin/cancelOrder`,
+      const response = await api.put(
+        `/api/admin/cancelOrder`,
         { orderId: order._id },
         { withCredentials: true }
       );

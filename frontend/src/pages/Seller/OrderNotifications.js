@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import SellerHeader from "../../components/SellerHeader";
+import api from "../../utils/axiosInstance";
 
 const OrderNotifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -16,8 +17,8 @@ const OrderNotifications = () => {
       setLoading(true);
       setError("");
       try {
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/notification/getSellerNotifications`,
+        const { data } = await api.get(
+          `/api/notification/getSellerNotifications`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -55,7 +56,7 @@ const OrderNotifications = () => {
   const markAsRead = async (notifId) => {
     try {
       await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/notification/read/${notifId}`,
+        `/api/notification/read/${notifId}`,
         {},
         {
           headers: {

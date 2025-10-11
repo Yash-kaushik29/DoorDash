@@ -3,11 +3,30 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Seller = require("../models/Seller");
 const Otp = require("../models/Otp");
+const Coupon = require('../models/Coupons');
 const bcrypt = require("bcrypt");
 const axios = require("axios");
 const authenticateSeller = require("../middleware/sellerAuthMiddleware");
+const authenticateUser = require("../middleware/authMiddleware");
 
 const router = express();
+
+const assignRandomCoupons = async () => {
+  const allCoupons = await Coupon.find({
+    name: { $in: ["WELCOME5", "FLAT20", "BIG5", "GROCERY20", "CARNIVAL30"] }
+  });
+
+  if (allCoupons.length === 0) return [];
+
+  const shuffled = allCoupons.sort(() => 0.5 - Math.random());
+
+  const selectedCoupons = shuffled.slice(0, 3);
+
+  return selectedCoupons.map((c) => ({
+    coupon: c._id,
+    count: 1,
+  }));
+};
 
 router.post("/send-otp", async (req, res) => {
   const { phone } = req.body.formData;
@@ -118,8 +137,10 @@ router.post("/user-signup", async (req, res) => {
       });
     }
 
+    const activeCoupons = await assignRandomCoupons();
+
     // Create new user
-    const newUser = new User({ username, phone });
+    const newUser = new User({ username, phone, activeCoupons });
     await newUser.save();
 
     const token = jwt.sign(
@@ -134,6 +155,22 @@ router.post("/user-signup", async (req, res) => {
 
     // Delete OTP after successful signup
     await Otp.deleteOne({ _id: existingOtp._id });
+
+    const maxAge = 15 * 24 * 60 * 60 * 1000;
+
+    const isProduction = process.env.NODE_ENV === "production";
+    const domainName = isProduction ? "gullyfoods.app" : "localhost";
+
+    const cookieOptions = {
+      expires: new Date(Date.now() + maxAge),
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "Lax",
+      path: "/",
+      domain: domainName,
+    };
+
+    res.cookie("authToken", token, cookieOptions);
 
     res.json({
       success: true,
@@ -160,13 +197,17 @@ router.post("/send-login-otp", async (req, res) => {
   const { phone } = req.body.formData;
 
   if (!phone) {
-    return res.status(400).json({ success: false, message: "Phone number is required" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Phone number is required" });
   }
 
   try {
     const existingUser = await User.findOne({ phone });
     if (!existingUser) {
-      return res.status(400).json({ success: false, message: "User does not exist" });
+      return res
+        .status(400)
+        .json({ success: false, message: "User does not exist" });
     }
 
     // Remove any previous login OTPs
@@ -174,9 +215,13 @@ router.post("/send-login-otp", async (req, res) => {
 
     const sendOtpUrl = `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=${process.env.MESSAGECENTRAL_CUSTOMER_ID}&flowType=SMS&mobileNumber=${phone}`;
 
-    const response = await axios.post(sendOtpUrl, {}, {
-      headers: { authToken: process.env.MESSAGECENTRAL_AUTH_TOKEN },
-    });
+    const response = await axios.post(
+      sendOtpUrl,
+      {},
+      {
+        headers: { authToken: process.env.MESSAGECENTRAL_AUTH_TOKEN },
+      }
+    );
 
     const result = response.data;
 
@@ -199,7 +244,6 @@ router.post("/send-login-otp", async (req, res) => {
       message: "OTP sent successfully",
       requestId: result.requestId,
     });
-
   } catch (error) {
     console.error("Error sending OTP:", error);
     res.status(500).json({
@@ -214,19 +258,25 @@ router.post("/user-login", async (req, res) => {
   const { phone, otp } = req.body;
 
   if (!phone || !otp) {
-    return res.status(400).json({ success: false, message: "Phone and OTP are required" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Phone and OTP are required" });
   }
 
   try {
     const existingUser = await User.findOne({ phone });
 
     if (!existingUser) {
-      return res.status(400).json({ success: false, message: "User does not exist!" });
+      return res
+        .status(400)
+        .json({ success: false, message: "User does not exist!" });
     }
 
     const existingOtp = await Otp.findOne({ phone, otpFor: "login" });
     if (!existingOtp) {
-      return res.status(400).json({ success: false, message: "OTP expired or not found" });
+      return res
+        .status(400)
+        .json({ success: false, message: "OTP expired or not found" });
     }
 
     const verifyOtpUrl = `https://cpaas.messagecentral.com/verification/v3/validateOtp?countryCode=91&mobileNumber=${phone}&verificationId=${existingOtp.verificationId}&customerId=${process.env.MESSAGECENTRAL_CUSTOMER_ID}&code=${otp}`;
@@ -238,7 +288,9 @@ router.post("/user-login", async (req, res) => {
     const result = response.data;
 
     if (result.message !== "SUCCESS") {
-      return res.status(400).json({ success: false, message: "OTP does not match" });
+      return res
+        .status(400)
+        .json({ success: false, message: "OTP does not match" });
     }
 
     // Successful login, delete OTP
@@ -246,27 +298,30 @@ router.post("/user-login", async (req, res) => {
 
     // Generate JWT
     const token = jwt.sign(
-      { userID: existingUser._id, username: existingUser.username, phone: existingUser.phone },
+      {
+        userID: existingUser._id,
+        username: existingUser.username,
+        phone: existingUser.phone,
+      },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "15d" }
     );
 
     const maxAge = 15 * 24 * 60 * 60 * 1000;
-        
-        const isProduction = process.env.NODE_ENV === 'production';
-        const domainName = isProduction ? 'gullyfoods.app' : 'localhost';
-        
-        const cookieOptions = {
-            expires: new Date(Date.now() + maxAge),
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: 'Lax',
-            path: '/',
-            domain: domainName,
-        };
 
-       
-        res.cookie('authToken', token, cookieOptions);
+    const isProduction = process.env.NODE_ENV === "production";
+    const domainName = isProduction ? "gullyfoods.app" : "localhost";
+
+    const cookieOptions = {
+      expires: new Date(Date.now() + maxAge),
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "Lax",
+      path: "/",
+      domain: domainName,
+    };
+
+    res.cookie("authToken", token, cookieOptions);
 
     res.json({
       success: true,
@@ -282,7 +337,13 @@ router.post("/user-login", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: "Server error while logging in", error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Server error while logging in",
+        error: error.message,
+      });
   }
 });
 
@@ -350,49 +411,36 @@ router.post("/seller-login", async (req, res) => {
   }
 });
 
-router.get("/getUser", async (req, res) => {
-    try {
-        const token = req.cookies.authToken; 
+router.get("/getUser", authenticateUser, (req, res) => {
+  const { _id, username, foodCart, groceryCart, phone } = req.user;
 
-        if (!token) {
-            return res
-                .status(401)
-                .json({ success: false, message: "Please login first! (Token missing from cookie)" });
-        }
-
-        jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decoded) => {
-            if (err) {
-                res.clearCookie('authToken'); 
-                return res
-                    .status(401)
-                    .json({ success: false, message: "Invalid or expired session! Please log in again." });
-            }
-
-            const currUser = await User.findById(decoded.userID);
-            if (!currUser) {
-                res.clearCookie('authToken'); 
-                return res.status(401).json({
-                    success: false,
-                    message: "User not found! Please login again.",
-                });
-            }
-
-            res.json({
-                success: true,
-                user: {
-                    _id: currUser._id,
-                    username: currUser.username,
-                    foodCart: currUser.foodCart,
-                    groceryCart: currUser.groceryCart,
-                    phone: currUser.phone,
-                },
-            });
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Internal server error!" });
-    }
+  res.json({
+    success: true,
+    user: { _id, username, foodCart, groceryCart, phone },
+  });
 });
+
+router.post("/logout", (req, res) => {
+  try {
+    res.clearCookie("authToken", {
+      httpOnly: true,
+      sameSite: "lax", 
+      secure: process.env.NODE_ENV === "production", 
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
 
 router.get("/getSellerDetails", authenticateSeller, async (req, res) => {
   try {

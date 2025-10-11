@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import SellerHeader from "../../components/SellerHeader";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
+import api from "../../utils/axiosInstance";
 
 const SellerOrder = () => {
   const { orderId } = useParams();
@@ -35,8 +36,8 @@ const SellerOrder = () => {
     const fetchOrder = async () => {
       setLoading(true);
       try {
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/order/getOrder/${orderId}`,
+        const { data } = await api.get(
+          `/api/order/getOrder/${orderId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -56,8 +57,8 @@ const SellerOrder = () => {
   const confirmOrder = async () => {
     setIsSubmitting(true);
     try {
-      const { data } = await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/order/confirm-order/${orderId}`,
+      const { data } = await api.put(
+        `/api/order/confirm-order/${orderId}`,
         { selectedProducts },
         {
           headers: {

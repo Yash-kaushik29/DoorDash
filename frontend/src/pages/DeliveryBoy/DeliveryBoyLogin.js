@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../../utils/axiosInstance";
 
 const DeliveryBoyLogin = () => {
   const [phone, setPhone] = useState("");
@@ -16,7 +17,7 @@ const DeliveryBoyLogin = () => {
   const handleLogin = async () => {
     setError("");
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/delivery/login`, {
+      const res = await api.post(`/api/delivery/login`, {
         phone,
         password,
       });

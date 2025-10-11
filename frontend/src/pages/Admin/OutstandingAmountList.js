@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { Phone, User, Wallet } from "lucide-react";
 import AdminHeader from "../../components/AdminHeader";
+import api from "../../utils/axiosInstance";
 
 const OutstandingAmountList = () => {
   const [deliveryBoys, setDeliveryBoys] = useState([]);
@@ -12,8 +13,8 @@ const OutstandingAmountList = () => {
   useEffect(() => {
     const fetchOutstanding = async () => {
       try {
-        const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/admin/outstanding/list`
+        const res = await api.get(
+          `/api/admin/outstanding/list`
         );
         setDeliveryBoys(res.data.deliveryBoys);
       } catch (error) {

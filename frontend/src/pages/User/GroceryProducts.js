@@ -6,6 +6,7 @@ import { UserContext } from "../../context/userContext";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
+import api from "../../utils/axiosInstance";
 
 const GroceryProducts = () => {
   const { category } = useParams();
@@ -19,10 +20,8 @@ const GroceryProducts = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(
-          `${
-            process.env.REACT_APP_API_URL
-          }/api/grocery?category=${encodeURIComponent(category)}`
+        const res = await api.get(
+          `/api/grocery?category=${encodeURIComponent(category)}`
         );
         setProducts(res.data.products || []);
       } catch (error) {

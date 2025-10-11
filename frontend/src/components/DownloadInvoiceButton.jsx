@@ -1,10 +1,11 @@
 import { FiDownload } from "react-icons/fi"; 
 import Tippy from "@tippyjs/react"; 
 import "tippy.js/dist/tippy.css";
+import API_BASE_URL from "../config/api";
 
 function DownloadInvoiceButton({ orderId }) {
   const handleDownload = () => {
-    window.open(`${process.env.REACT_APP_API_URL}/api/order/download-invoice/${orderId}`, "_blank");
+    window.open(`${API_BASE_URL}/api/order/download-invoice/${orderId}`, "_blank");
   };
 
   return (

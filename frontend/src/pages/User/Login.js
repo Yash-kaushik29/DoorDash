@@ -3,9 +3,10 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
+import api from "../../utils/axiosInstance";
 
 export default function Login() {
-  const { setUser } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
   const [formData, setFormData] = useState({ phone: "", otp: "" });
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -13,6 +14,10 @@ export default function Login() {
   const [timeLeft, setTimeLeft] = useState(0);
   const OTP_COOLDOWN = 90;
   const navigate = useNavigate();
+
+  if(user) {
+    navigate("/");
+  }
 
   const isValidPhone = (phone) => /^[6-9]\d{9}$/.test(phone);
 
@@ -61,31 +66,33 @@ export default function Login() {
     if (!isValidPhone(phone))
       return toast.error("Enter a valid 10-digit mobile number.");
 
-    setLoading(true);
-    try {
-      const res = await axios.post(
-        `/api/auth/send-login-otp`,
-        { formData }, 
-        {withCredentials: true},
-      );
+    setOtpSent(true);
 
-      if (res.data.success) {
-        toast.success("OTP sent successfully 📩");
-        setOtpSent(true);
-        setCanResend(false);
-        setTimeLeft(OTP_COOLDOWN);
-        const expireTime = Date.now() + OTP_COOLDOWN * 1000;
-        localStorage.setItem("otpExpireTime", expireTime);
-      } else {
-        toast.error(res.data.message || "Failed to send OTP");
-      }
-    } catch (err) {
-      const errMsg =
-        err.response?.data?.message || "Server error. Try again later.";
-      toast.error(errMsg);
-    } finally {
-      setLoading(false);
-    }
+    // setLoading(true);
+    // try {
+    //   const res = await api.post(
+    //     `/api/auth/send-login-otp`,
+    //     { formData }, 
+    //     {withCredentials: true},
+    //   );
+
+    //   if (res.data.success) {
+    //     toast.success("OTP sent successfully 📩");
+    //     setOtpSent(true);
+    //     setCanResend(false);
+    //     setTimeLeft(OTP_COOLDOWN);
+    //     const expireTime = Date.now() + OTP_COOLDOWN * 1000;
+    //     localStorage.setItem("otpExpireTime", expireTime);
+    //   } else {
+    //     toast.error(res.data.message || "Failed to send OTP");
+    //   }
+    // } catch (err) {
+    //   const errMsg =
+    //     err.response?.data?.message || "Server error. Try again later.";
+    //   toast.error(errMsg);
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   const handleSubmit = async (e) => {
@@ -97,7 +104,7 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const res = await axios.post(
+      const res = await api.post(
         `/api/auth/user-login`,
         { phone, otp },
         { withCredentials: true }
@@ -105,15 +112,10 @@ export default function Login() {
 
       if (res.data.success) {
         toast.success("Login Successful! 🎉");
-        const expiry = new Date();
-        expiry.setDate(expiry.getDate() + 14);
-        const tokenData = {
-          token: res.data.token,
-          expiry: expiry.getTime(),
-        };
-        localStorage.setItem("GullyFoodsUserToken", JSON.stringify(tokenData));
         setUser(res.data.user);
-        navigate("/");
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
       } else {
         toast.error(res.data.message || "Invalid OTP. Try again.");
       }

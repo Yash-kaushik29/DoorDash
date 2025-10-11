@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import DeliveryBoyHeader from "../../components/DeliveryBoyHeader";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import api from "../../utils/axiosInstance";
 
 const DeliveryBoyOrders = () => {
   const { status } = useParams();
@@ -21,8 +22,8 @@ const DeliveryBoyOrders = () => {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/delivery/orders`,
+      const res = await api.get(
+        `/api/delivery/orders`,
         {
           params: {
             page: currentPage,

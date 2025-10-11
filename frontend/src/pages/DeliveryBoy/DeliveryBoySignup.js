@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import api from '../../utils/axiosInstance';
 
 const DeliveryBoySignup = () => {
   const [username, setUsername] = useState('');
@@ -13,7 +14,7 @@ const DeliveryBoySignup = () => {
     setError('');
     setSuccess('');
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/delivery/signup`, {
+      const res = await api.post(`/api/delivery/signup`, {
         username,
         phone,
         password,

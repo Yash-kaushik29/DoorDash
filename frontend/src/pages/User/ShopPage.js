@@ -6,6 +6,7 @@ import Navbar from "../../components/Navbar";
 import { UserContext } from "../../context/userContext";
 import { ToastContainer } from "react-toastify";
 import { MdStorefront } from "react-icons/md";
+import api from "../../utils/axiosInstance";
 
 const ShopPage = () => {
   const { shopId } = useParams();
@@ -16,9 +17,6 @@ const ShopPage = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-
-  const tokenData = JSON.parse(localStorage.getItem("GullyFoodsUserToken"));
-  const token = tokenData?.token;
 
   const handleButtonClick = (category) => {
     setSelectedCategory((prev) => (prev === category ? "" : category));
@@ -50,8 +48,8 @@ const ShopPage = () => {
   useEffect(() => {
     const fetchShopDetails = async () => {
       try {
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/shop/getShopAndProducts/${shopId}`
+        const { data } = await api.get(
+          `/api/shop/getShopAndProducts/${shopId}`
         );
         setShop(data.shop);
         setProducts(data.products);
@@ -145,7 +143,6 @@ const ShopPage = () => {
                 product={product}
                 user={user}
                 setUser={setUser}
-                token={token}
               />
             ))
           ) : (

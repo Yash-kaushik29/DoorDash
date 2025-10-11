@@ -3,6 +3,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import { User, Phone, Wallet } from "lucide-react";
 import AdminHeader from "../../components/AdminHeader";
+import api from "../../utils/axiosInstance";
 
 const DeliveryBoyDetails = () => {
   const { deliveryBoyId } = useParams();
@@ -15,8 +16,8 @@ const DeliveryBoyDetails = () => {
 
   const fetchDeliveryBoy = async () => {
     try {
-      const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/admin/deliveryBoy/${deliveryBoyId}`
+      const res = await api.get(
+        `/api/admin/deliveryBoy/${deliveryBoyId}`
       );
       console.log(res.data)
       setDeliveryBoy(res.data.deliveryBoy);
@@ -35,8 +36,8 @@ const DeliveryBoyDetails = () => {
 
   const handleClearOutstanding = async () => {
     try {
-      await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/admin/deliveryBoy/clearOutstanding/${deliveryBoyId}`
+      await api.put(
+        `/api/admin/deliveryBoy/clearOutstanding/${deliveryBoyId}`
       );
       alert(
         "Outstanding amount cleared and all unsettled orders marked as settled!"

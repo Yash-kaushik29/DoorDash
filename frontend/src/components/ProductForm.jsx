@@ -4,6 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PhotosUploader from "./PhotosUploader";
 import { useNavigate, useParams } from "react-router-dom";
+import api from "../utils/axiosInstance";
 
 const ProductForm = () => {
   const { productId } = useParams();
@@ -27,8 +28,8 @@ const ProductForm = () => {
   const fetchProductDetails = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/shop/getProduct/${productId}`,
+      const { data } = await api.get(
+        `/api/shop/getProduct/${productId}`,
         { withCredentials: true }
       );
 
@@ -83,10 +84,10 @@ const ProductForm = () => {
     try {
       setLoading(true);
       const apiUrl = productId
-        ? `${process.env.REACT_APP_API_URL}/api/shop/edit-product`
-        : `${process.env.REACT_APP_API_URL}/api/shop/add-product`;
+        ? `/api/shop/edit-product`
+        : `/api/shop/add-product`;
 
-      const { data } = await axios({
+      const { data } = await api({
         method: productId ? "put" : "post",
         url: apiUrl,
         data: { product, productId, images },

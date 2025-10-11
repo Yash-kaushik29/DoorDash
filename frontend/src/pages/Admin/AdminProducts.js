@@ -3,6 +3,7 @@ import axios from 'axios';
 import AdminHeader from '../../components/AdminHeader';
 import { Link } from 'react-router-dom';
 import debounce from 'lodash.debounce';  // Add debounce for API calls
+import api from '../../utils/axiosInstance';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -17,7 +18,7 @@ const AdminProducts = () => {
     setError('');
 
     try {
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/products?search=${search}&page=${page}`);
+      const res = await api.get(`/api/admin/products?search=${search}&page=${page}`);
       if (res.data.success) {
         setProducts(res.data.products);
         setTotalPages(res.data.totalPages);

@@ -12,18 +12,17 @@ import ProductCard from "../../components/ProductCard";
 import { Link } from "react-router-dom";
 import InstallPrompt from "../../components/InstallPrompt";
 import { motion } from "framer-motion";
+import api from "../../utils/axiosInstance";
 
 const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
   const [shops, setShops] = useState([]);
   const [products, setProducts] = useState([]);
-  const tokenData = JSON.parse(localStorage.getItem("GullyFoodsUserToken"));
-  const token = tokenData?.token;
 
   const fetchPopularShops = async () => {
     try {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/home/get-popular-shops`,
+      const { data } = await api.get(
+        `/api/home/get-popular-shops`,
         { withCredentials: true }
       );
       if (data.success) setShops(data.shops);
@@ -36,8 +35,8 @@ const Home = () => {
 
   const fetchPopularProducts = async () => {
     try {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/home/get-popular-products`,
+      const { data } = await api.get(
+        `/api/home/get-popular-products`,
         { withCredentials: true }
       );
       if (data.success) setProducts(data.products);
@@ -87,7 +86,6 @@ const Home = () => {
         bestSeller={true}
         user={user}
         setUser={setUser}
-        token={token}
       />
     ));
   }, [products, user, setUser]);

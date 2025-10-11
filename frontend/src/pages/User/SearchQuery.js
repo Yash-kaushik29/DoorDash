@@ -7,6 +7,7 @@ import Navbar from "../../components/Navbar";
 import SearchPageSkeleton from "../../skeletons/SearchPageSkeleton";
 import { UserContext } from "../../context/userContext";
 import { ToastContainer } from "react-toastify";
+import api from "../../utils/axiosInstance";
 
 const SearchQuery = () => {
   const { query } = useParams();
@@ -15,9 +16,6 @@ const SearchQuery = () => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const { user, setUser } = useContext(UserContext);
-
-  const tokenData = JSON.parse(localStorage.getItem("GullyFoodsUserToken"));
-  const token = tokenData?.token;
 
   useEffect(() => {
     // Reset products and pagination when query changes
@@ -32,10 +30,8 @@ const SearchQuery = () => {
 
       setLoading(true);
       try {
-        const { data } = await axios.get(
-          `${
-            process.env.REACT_APP_API_URL
-          }/api/common/search/${encodeURIComponent(query)}?page=${page}`
+        const { data } = await api.get(
+          `/api/common/search/${encodeURIComponent(query)}?page=${page}`
         );
 
         setProducts((prev) => (page === 1 ? data : [...prev, ...data]));
@@ -85,7 +81,6 @@ const SearchQuery = () => {
                 user={user}
                 setUser={setUser}
                 variant={product.shopType === "Grocery" ? "grocery" : "food"}
-                token={token}
               />
             ))}
           </div>

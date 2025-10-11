@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { MdOutlineDelete } from "react-icons/md";
 import { IoStar, IoStarOutline } from "react-icons/io5";
 import Image from "./Image";
+import api from "../utils/axiosInstance";
 
 const PhotosUploader = ({ images, setImages, upload = true }) => {
   const [imageURL, setImageURL] = useState("");
@@ -27,8 +28,8 @@ const PhotosUploader = ({ images, setImages, upload = true }) => {
     }
 
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/upload`,
+      const response = await api.post(
+        `/upload`,
         filedata,
         {
           headers: { "Content-Type": "multipart/form-data" },

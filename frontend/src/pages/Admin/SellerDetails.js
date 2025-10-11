@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import AdminHeader from "../../components/AdminHeader";
 import { useParams } from "react-router-dom";
+import api from "../../utils/axiosInstance";
 
 const SellerDetails = () => {
   const { sellerId } = useParams();
@@ -17,14 +18,14 @@ const SellerDetails = () => {
     const fetchDetails = async () => {
       try {
         // 1. Seller info
-        const sellerRes = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/admin/seller/${sellerId}`
+        const sellerRes = await api.get(
+          `/api/admin/seller/${sellerId}`
         );
         setSeller(sellerRes.data);
 
         // 2. Products
         const productsRes = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/admin/seller/${sellerId}/products`
+          `/api/admin/seller/${sellerId}/products`
         );
         setProducts(productsRes.data);
         setFilteredProducts(productsRes.data);

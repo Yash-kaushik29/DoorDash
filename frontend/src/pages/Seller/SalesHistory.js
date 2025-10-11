@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {Link} from 'react-router-dom';
 import SellerHeader from '../../components/SellerHeader';
+import api from "../../utils/axiosInstance";
 
 const SalesHistory = () => {
   const [filter, setFilter] = useState("today");
@@ -13,8 +14,8 @@ const SalesHistory = () => {
   const fetchSalesHistory = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/shop/sales-history`,
+      const { data } = await api.get(
+        `/api/shop/sales-history`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

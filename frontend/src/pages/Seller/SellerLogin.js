@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../../utils/axiosInstance";
 
 export default function SellerLogin() {
   const [formData, setFormData] = useState({
@@ -30,8 +31,8 @@ export default function SellerLogin() {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/seller-login`,
+      const response = await api.post(
+        `/api/auth/seller-login`,
         formData,
         { withCredentials: true }
       );

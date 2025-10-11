@@ -10,9 +10,9 @@ const QRCode = require("qrcode");
 const authenticateUser = require("../middleware/authMiddleware");
 const authenticateSeller = require("../middleware/sellerAuthMiddleware");
 
-router.post("/create-order", async (req, res) => {
+router.post("/create-order", authenticateUser,  async (req, res) => {
+  const userId = req.user._id;
   const {
-    userId,
     cartItems,
     paymentMethod,
     taxes = 0,
@@ -159,7 +159,6 @@ router.get("/getOrderDetails/:id", async (req, res) => {
 router.post("/submit-review", async (req, res) => {
   try {
     const { orderId, ratings, reviewText } = req.body;
-    console.log(ratings);
 
     if (!orderId || !ratings) {
       return res.status(400).json({
@@ -542,7 +541,7 @@ router.get("/getUserOrders", authenticateUser, async (req, res) => {
         path: "items.product",
         select: "id name price",
       })
-      .select("id items amount deliveryStatus createdAt")
+      .select("id items totalAmount deliveryStatus createdAt")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);

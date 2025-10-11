@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { motion } from "framer-motion";
 import Navbar from "../../components/Navbar";
+import api from "../../utils/axiosInstance";
 
 const Restaurants = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -19,8 +20,8 @@ const Restaurants = () => {
     const fetchRestaurants = async () => {
       try {
         setLoading(true);
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/shop/get-restaurants`
+        const { data } = await api.get(
+          `/api/shop/get-restaurants`
         );
 
         if (data.success) {

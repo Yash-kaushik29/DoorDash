@@ -5,6 +5,7 @@ import { FaMoneyBillWave, FaPhoneAlt, FaMapMarkerAlt, FaUser } from "react-icons
 import { IoFastFoodSharp } from "react-icons/io5";
 import { MdDeliveryDining } from "react-icons/md";
 import DeliveryBoyHeader from "../../components/DeliveryBoyHeader";
+import api from "../../utils/axiosInstance";
 
 const DeliveryBoyOrder = () => {
   const { orderId } = useParams();
@@ -21,8 +22,8 @@ const DeliveryBoyOrder = () => {
   useEffect(() => {
     const fetchOrderDetails = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/delivery/order/${orderId}`,
+        const response = await api.get(
+          `/api/delivery/order/${orderId}`,
           { withCredentials: true }
         );
         setOrder(response.data);
@@ -38,8 +39,8 @@ const DeliveryBoyOrder = () => {
 
   const markAsOutForDelivery = async (productId) => {
     try {
-      await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/delivery/order/confirm-pickup`,
+      await api.put(
+        `/api/delivery/order/confirm-pickup`,
         { orderId, productId },
         { withCredentials: true }
       );
@@ -52,8 +53,8 @@ const DeliveryBoyOrder = () => {
 
   const confirmDelivery = async () => {
     try {
-      await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/delivery/order/confirm-delivery/${orderId}`,
+      await api.put(
+        `/api/delivery/order/confirm-delivery/${orderId}`,
         {},
         { withCredentials: true }
       );

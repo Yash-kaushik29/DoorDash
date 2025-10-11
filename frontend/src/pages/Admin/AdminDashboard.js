@@ -12,6 +12,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../../utils/axiosInstance";
 
 const AdminDashboard = () => {
   const [overview, setOverview] = useState(null);
@@ -23,7 +24,7 @@ const AdminDashboard = () => {
     setLoading(true);
     setError("");
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/dashboard-overview`, {
+      const response = await api.get(`/api/admin/dashboard-overview`, {
         withCredentials: true,
       });
 

@@ -4,6 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SellerHeader from "../../components/SellerHeader";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../../utils/axiosInstance";
 
 const SellerProfile = () => {
   const [seller, setSeller] = useState(null);
@@ -25,8 +26,8 @@ const SellerProfile = () => {
           return;
         }
 
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/shop/seller-profile`,
+        const { data } = await api.get(
+          `/api/shop/seller-profile`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -57,8 +58,8 @@ const SellerProfile = () => {
   const handleToggleShopStatus = async () => {
     try {
       const updatedStatus = !seller?.shop?.isOpen;
-      await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/shop/update-status`,
+      await api.put(
+        `/api/shop/update-status`,
         { isOpen: updatedStatus },
         {
           headers: {

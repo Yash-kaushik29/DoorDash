@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
+import api from '../utils/axiosInstance';
 
 const AdminHeader = () => {
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -16,7 +17,7 @@ const AdminHeader = () => {
 
       const handleLogout = async () => {
         try {
-          await axios.post(`${process.env.REACT_APP_API_URL}/api/admin/logout`, {}, { withCredentials: true });
+          await api.post(`/api/admin/logout`, {}, { withCredentials: true });
           navigate('/admin/login');
         } catch (error) {
           console.error('Logout failed:', error);

@@ -16,10 +16,10 @@ import {
   MdSettings,
   MdShoppingCart,
 } from "react-icons/md";
+import api from "../../utils/axiosInstance";
 
 const UserProfile = () => {
   const { user, setUser, ready } = useContext(UserContext);
-  const [username, setUsername] = useState(user?.name);
   const navigate = useNavigate();
 
   if (ready && !user) {
@@ -27,14 +27,25 @@ const UserProfile = () => {
   }
 
   const handleLogout = async () => {
-    localStorage.removeItem("GullyFoodsUserToken");
-    setUser(null);
-    toast.success("Logged out successfully!");
+    try {
+      const { data } = await api.post(
+        "/api/auth/logout",
+        {},
+        { withCredentials: true }
+      );
 
-    setTimeout(() => {
-      setUser(null);
-      navigate("/");
-    }, 1000);
+      if (data.success) {
+        setUser(null);
+        toast.success("Logged out successfully!");
+
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
+      }
+    } catch (err) {
+      console.error("Logout failed:", err);
+      toast.error("Failed to log out!");
+    }
   };
 
   return (
@@ -54,10 +65,10 @@ const UserProfile = () => {
               <div className="relative bg-gradient-to-r from-green-400 to-green-600 p-6 text-center text-white">
                 {/* Avatar (Fallback to initials) */}
                 <div className="w-20 h-20 mx-auto rounded-full bg-white text-green-600 flex items-center justify-center text-3xl font-bold shadow-md">
-                  {user.name?.charAt(0) || "U"}
+                  {user.username?.charAt(0) || "U"}
                 </div>
                 <h1 className="mt-3 text-2xl font-bold">
-                  {user.name || "User"}
+                  {user.username || "User"}
                 </h1>
                 <p className="text-sm">{user.phone}</p>
 

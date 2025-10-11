@@ -72,7 +72,6 @@ router.post("/login", async (req, res) => {
 router.get("/orders/:deliveryBoyId", async (req, res) => {
   try {
     const { deliveryBoyId } = req.params;
-    console.log("HI", deliveryBoyId)
 
     const deliveryBoy = await DeliveryBoy.findById(deliveryBoyId);
 

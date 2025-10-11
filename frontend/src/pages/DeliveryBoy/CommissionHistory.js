@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import DeliveryBoyHeader from "../../components/DeliveryBoyHeader";
+import api from "../../utils/axiosInstance";
 
 const CommissionHistory = () => {
   const navigate = useNavigate();
@@ -21,8 +22,8 @@ const CommissionHistory = () => {
 
     const fetchHistory = async () => {
       try {
-        const res = await fetch(
-          `${process.env.REACT_APP_API_URL}/api/delivery/${deliveryBoyId}/commissionHistory`
+        const res = await api.get(
+          `/api/delivery/${deliveryBoyId}/commissionHistory`
         );
         const data = await res.json();
         setHistory(data.commissionHistory || []);
