@@ -68,31 +68,31 @@ export default function Login() {
 
     setOtpSent(true);
 
-    // setLoading(true);
-    // try {
-    //   const res = await api.post(
-    //     `/api/auth/send-login-otp`,
-    //     { formData }, 
-    //     {withCredentials: true},
-    //   );
+    setLoading(true);
+    try {
+      const res = await api.post(
+        `/api/auth/send-login-otp`,
+        { formData }, 
+        {withCredentials: true},
+      );
 
-    //   if (res.data.success) {
-    //     toast.success("OTP sent successfully 📩");
-    //     setOtpSent(true);
-    //     setCanResend(false);
-    //     setTimeLeft(OTP_COOLDOWN);
-    //     const expireTime = Date.now() + OTP_COOLDOWN * 1000;
-    //     localStorage.setItem("otpExpireTime", expireTime);
-    //   } else {
-    //     toast.error(res.data.message || "Failed to send OTP");
-    //   }
-    // } catch (err) {
-    //   const errMsg =
-    //     err.response?.data?.message || "Server error. Try again later.";
-    //   toast.error(errMsg);
-    // } finally {
-    //   setLoading(false);
-    // }
+      if (res.data.success) {
+        toast.success("OTP sent successfully 📩");
+        setOtpSent(true);
+        setCanResend(false);
+        setTimeLeft(OTP_COOLDOWN);
+        const expireTime = Date.now() + OTP_COOLDOWN * 1000;
+        localStorage.setItem("otpExpireTime", expireTime);
+      } else {
+        toast.error(res.data.message || "Failed to send OTP");
+      }
+    } catch (err) {
+      const errMsg =
+        err.response?.data?.message || "Server error. Try again later.";
+      toast.error(errMsg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
