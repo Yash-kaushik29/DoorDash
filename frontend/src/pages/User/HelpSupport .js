@@ -60,11 +60,11 @@ const HelpSupport = () => {
             <div className="space-y-4">
               <div className="bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center">
                 <MdEmail className="text-2xl text-green-500 mr-4" />
-                <span>doordash@gmail.com</span>
+                <span>gullyfoods.app@gmail.com</span>
               </div>
               <div className="bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center">
                 <MdPhone className="text-2xl text-green-500 mr-4" />
-                <span>+91 9876543210</span>
+                <span>+91-9876543210</span>
               </div>
               <div className="bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center">
                 <FaWhatsapp className="text-2xl text-green-500 mr-4" />
