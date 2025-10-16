@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SellerHeader from "../../components/SellerHeader";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../utils/axiosInstance";
+import { SellerContext } from "../../context/sellerContext";
 
 const SellerProfile = () => {
+  const {sellerId, ready} = useContext(SellerContext);
   const [seller, setSeller] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
-  const token = localStorage.getItem("GullyFoodsSellerToken");
 
   useEffect(() => {
     const fetchSellerProfile = async () => {
@@ -20,7 +20,7 @@ const SellerProfile = () => {
       setError("");
 
       try {
-        if (!token) {
+        if (ready && !sellerId) {
           setError("No token found. Please login.");
           setTimeout(() => navigate("/seller"), 2000);
           return;
@@ -29,14 +29,11 @@ const SellerProfile = () => {
         const { data } = await api.get(
           `/api/shop/seller-profile`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            withCredentials: true
           }
         );
 
         if (data.success) {
-          console.log(data.seller);
           setSeller(data.seller);
         } else {
           setError(data.message || "Failed to load seller profile");
@@ -62,9 +59,7 @@ const SellerProfile = () => {
         `/api/shop/update-status`,
         { isOpen: updatedStatus },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         }
       );
       setSeller((prev) => ({

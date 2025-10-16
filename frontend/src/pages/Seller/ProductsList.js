@@ -44,11 +44,7 @@ const ProductsList = () => {
         const { data } = await api.get(
           `/api/shop/get-products`,
           {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem(
-                "GullyFoodsSellerToken"
-              )}`,
-            },
+            withCredentials: true
           }
         );
 

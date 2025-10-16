@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../utils/axiosInstance";
+import { SellerContext } from "../../context/sellerContext";
 
 export default function SellerLogin() {
+  const {sellerId, ready} = useContext(SellerContext);
   const [formData, setFormData] = useState({
     phone: "",
     password: "",
@@ -14,11 +16,10 @@ export default function SellerLogin() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const seller = localStorage.getItem('doordash-seller');
-    if(seller) {
+    if(ready && sellerId) {
         navigate('/seller')
     }
-  })
+  }, [sellerId]);
 
   // Handle Input Change
   const handleChange = (e) => {
@@ -40,7 +41,6 @@ export default function SellerLogin() {
       if (response.data.success) {
         toast.success("Login Successful! 🎉");
         setTimeout(() => {
-          localStorage.setItem('GullyFoodsSellerToken', response.data.token);
           navigate("/seller");
         }, 2000);
       } else {

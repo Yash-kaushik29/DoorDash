@@ -10,9 +10,6 @@ const Orders = () => {
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const token = localStorage.getItem("GullyFoodsSellerToken");
-
   const [currentPage, setCurrentPage] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
   const ordersPerPage = 10;
@@ -25,10 +22,8 @@ const Orders = () => {
         const { data } = await api.get(
           `/api/order/getAllOrders?page=${currentPage}&limit=${ordersPerPage}`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+            withCredentials: true
+          },
         );
 
         if (data.success) {

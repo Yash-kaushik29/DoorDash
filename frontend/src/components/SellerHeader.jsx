@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaSun, FaMoon } from "react-icons/fa";
 import { RiAccountCircleLine } from "react-icons/ri";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
 import { GiNoodles } from "react-icons/gi";
+import { SellerContext } from "../context/sellerContext";
 
-const SellerHeader = ({ sellerId }) => {
+const SellerHeader = () => {
+  const {sellerId, ready } = useContext(SellerContext);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const token = localStorage.getItem("GullyFoodsSellerToken");
 
   useEffect(() => {
     const storedTheme = localStorage.getItem("GullyFoodsTheme");
@@ -62,7 +63,7 @@ const SellerHeader = ({ sellerId }) => {
           <button onClick={toggleTheme} className="p-1 transition hover:scale-110">
             {isDarkMode ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-gray-600" />}
           </button>
-          {token ? (
+          {ready && sellerId ? (
             <Link to="/seller/profile">
               <RiAccountCircleLine className="cursor-pointer text-gray-700 dark:text-white text-2xl" />
             </Link>
@@ -78,7 +79,7 @@ const SellerHeader = ({ sellerId }) => {
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center gap-2">
-          {token ? (
+          {ready && sellerId ? (
             <Link to="/seller/profile">
               <RiAccountCircleLine className="text-gray-700 dark:text-white text-3xl" />
             </Link>

@@ -10,7 +10,6 @@ const OrderNotifications = () => {
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const token = localStorage.getItem("GullyFoodsSellerToken");
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -20,9 +19,7 @@ const OrderNotifications = () => {
         const { data } = await api.get(
           `/api/notification/getSellerNotifications`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            withCredentials: true
           }
         );
 
@@ -57,12 +54,7 @@ const OrderNotifications = () => {
     try {
       await axios.put(
         `/api/notification/read/${notifId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        {withCredentials: true},
       );
     } catch (error) {
       console.error("Error marking notification as read:", error);

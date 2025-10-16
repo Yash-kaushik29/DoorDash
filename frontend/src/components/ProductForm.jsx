@@ -91,9 +91,7 @@ const ProductForm = () => {
         method: productId ? "put" : "post",
         url: apiUrl,
         data: { product, productId, images },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        withCredentials: true
       });
 
       if (data.success) {

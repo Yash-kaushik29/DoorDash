@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Seller = require("../models/Seller");
 const Otp = require("../models/Otp");
-const Coupon = require('../models/Coupons');
+const Coupon = require("../models/Coupons");
 const bcrypt = require("bcrypt");
 const axios = require("axios");
 const authenticateSeller = require("../middleware/sellerAuthMiddleware");
@@ -13,7 +13,7 @@ const router = express();
 
 const assignRandomCoupons = async () => {
   const allCoupons = await Coupon.find({
-    name: { $in: ["WELCOME5", "FLAT20", "BIG5", "GROCERY20", "CARNIVAL30"] }
+    name: { $in: ["WELCOME5", "FLAT20", "BIG5", "GROCERY20", "CARNIVAL30"] },
   });
 
   if (allCoupons.length === 0) return [];
@@ -337,13 +337,11 @@ router.post("/user-login", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error while logging in",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error while logging in",
+      error: error.message,
+    });
   }
 });
 
@@ -364,6 +362,29 @@ router.post("/seller-signup", async (req, res) => {
         password: hashedPassword,
       });
       await newSeller.save();
+
+      const token = jwt.sign(
+        {
+          sellerID: newSeller._id,
+        },
+        process.env.JWT_SECRET_KEY,
+        { expiresIn: "15d" }
+      );
+      const maxAge = 15 * 24 * 60 * 60 * 1000;
+
+      const isProduction = process.env.NODE_ENV === "production";
+      const domainName = isProduction ? "gullyfoods.app" : "localhost";
+
+      const cookieOptions = {
+        expires: new Date(Date.now() + maxAge),
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: "Lax",
+        path: "/",
+        domain: domainName,
+      };
+
+      res.cookie("gullyfoods_seller_session", token, cookieOptions);
 
       res.send({ success: true, message: "Registered succesfully!" });
     }
@@ -387,20 +408,29 @@ router.post("/seller-login", async (req, res) => {
         var token = jwt.sign(
           {
             sellerID: existingSeller._id,
-            email: existingSeller.email,
-            username: existingSeller.username,
-            phone: existingSeller.phone || "",
           },
           process.env.JWT_SECRET_KEY,
           { expiresIn: "15d" }
         );
+        const maxAge = 15 * 24 * 60 * 60 * 1000;
 
-        console.log(token);
+        const isProduction = process.env.NODE_ENV === "production";
+        const domainName = isProduction ? "gullyfoods.app" : "localhost";
+
+        const cookieOptions = {
+          expires: new Date(Date.now() + maxAge),
+          httpOnly: true,
+          secure: isProduction,
+          sameSite: "Lax",
+          path: "/",
+          domain: domainName,
+        };
+
+        res.cookie("gullyfoods_seller_session", token, cookieOptions);
 
         res.send({
           success: true,
           message: "Logged In Successfully!",
-          token,
         });
       } else {
         res.send({ success: false, message: "Invalid credentails!" });
@@ -424,8 +454,8 @@ router.post("/logout", (req, res) => {
   try {
     res.clearCookie("authToken", {
       httpOnly: true,
-      sameSite: "lax", 
-      secure: process.env.NODE_ENV === "production", 
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
     });
 
     return res.status(200).json({
@@ -440,7 +470,6 @@ router.post("/logout", (req, res) => {
     });
   }
 });
-
 
 router.get("/getSellerDetails", authenticateSeller, async (req, res) => {
   try {
@@ -492,6 +521,15 @@ router.get("/getSellerDetails", authenticateSeller, async (req, res) => {
     console.error("Error in fetching seller details:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
+});
+
+router.get("/getSeller", authenticateSeller, (req, res) => {
+  const sellerId = req.seller._id;
+
+  res.json({
+    success: true,
+    sellerId
+  });
 });
 
 module.exports = router;

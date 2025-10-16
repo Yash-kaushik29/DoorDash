@@ -380,31 +380,11 @@ router.put("/update-status", authenticateSeller, async (req, res) => {
   }
 });
 
-router.put("/update-profile", async (req, res) => {
-  const { sellerToken } = req.cookies;
-  const { username, email } = req.body;
-
-  if (!sellerToken) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized: No token provided" });
-  }
-
+router.put("/update-profile", authenticateSeller, async (req, res) => {
   try {
-    const decoded = jwt.verify(sellerToken, process.env.JWT_SECRET_KEY);
+    const { username, email } = req.body;
+    const existingSeller = req.seller; 
 
-    // Find seller and populate shop
-    const existingSeller = await Seller.findById(decoded.sellerID).populate(
-      "shop"
-    );
-
-    if (!existingSeller) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Seller not found" });
-    }
-
-    // Update Seller Details
     if (username) existingSeller.username = username;
     if (email) existingSeller.email = email;
 

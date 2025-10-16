@@ -34,7 +34,7 @@ export default function SellerSignup() {
       if(response.data.success) {
         toast.success("Signup Successful! 🎉");
         setTimeout(() => {
-          navigate('/seller-login');
+          navigate('/seller');
         }, 2000);
       }
       else {

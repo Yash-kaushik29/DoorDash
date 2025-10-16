@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SellerHeader from "../../components/SellerHeader";
 import axios from "axios";
@@ -6,15 +6,16 @@ import SellerDashboardSkeleton from "../../skeletons/SellerDashboardSkeleton ";
 import notificationSound from "../../sound/notificationSound.mp3";
 import { ToastContainer, toast } from "react-toastify";
 import api from "../../utils/axiosInstance";
+import { SellerContext } from "../../context/sellerContext";
 
 const audio = new Audio(notificationSound);
 
 const SellerDashboard = () => {
+  const {sellerId, ready} = useContext(SellerContext);
   const [seller, setSeller] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const token = localStorage.getItem("GullyFoodsSellerToken");
 
   useEffect(() => {
     const unlockAudio = () => {
@@ -62,11 +63,7 @@ const SellerDashboard = () => {
     try {
       const { data } = await api.get(
         `/api/auth/getSellerDetails`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        {withCredentials: true},
       );
 
       if (data.success) setSeller(data.sellerDetails);
@@ -80,12 +77,11 @@ const SellerDashboard = () => {
   };
 
   useEffect(() => {
-    if (!token) navigate("/seller-login");
+    if (ready && !sellerId) navigate("/seller-login");
     else fetchSeller();
-  }, [token, navigate]);
+  }, [sellerId, navigate]);
 
   const takeToLogin = () => {
-    localStorage.setItem("GullyFoodsSellerToken", "");
     window.location.reload();
   };
 

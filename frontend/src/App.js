@@ -54,6 +54,7 @@ import Terms from "./Terms";
 import Policy from "./Policy";
 import InstallGuide from "./pages/User/InstallGuide";
 import SalesHistory from "./pages/Seller/SalesHistory";
+import { SellerContextProvider } from "./context/sellerContext";
 
 const App = () => {
   return (
@@ -83,7 +84,8 @@ const App = () => {
         </Routes>
       </UserContextProvider>
 
-      <Routes>
+      <SellerContextProvider>
+        <Routes>
         <Route path="/seller" exact element={<SellerDashboard />} />
         <Route path="/seller-signup" element={<SellerSignup />} />
         <Route path="/seller-login" element={<SellerLogin />} />
@@ -102,6 +104,7 @@ const App = () => {
         <Route path="/seller/edit-profile" element={<EditProfile />} />
         <Route path="/seller/sales-history" element={<SalesHistory />} />
       </Routes>
+      </SellerContextProvider>
 
       <Routes>
         <Route path="/admin/login" element={<AdminLogin />} />

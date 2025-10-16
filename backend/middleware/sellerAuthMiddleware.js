@@ -3,16 +3,15 @@ const Seller = require("../models/Seller");
 
 const authenticateSeller = async (req, res, next) => {
   try {
-    // Get token from Authorization header: "Bearer <token>"
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    // Get token from cookies
+    const token = req.cookies?.gullyfoods_seller_session; 
+    if (!token) {
       return res
         .status(401)
         .send({ success: false, message: "Please login first!" });
     }
 
-    const token = authHeader.split(" ")[1];
-
+    // Verify token
     jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decoded) => {
       if (err) {
         return res.status(403).send({
@@ -21,6 +20,7 @@ const authenticateSeller = async (req, res, next) => {
         });
       }
 
+      // Fetch seller from database
       const currSeller = await Seller.findById(decoded.sellerID);
       if (!currSeller) {
         return res
@@ -28,7 +28,7 @@ const authenticateSeller = async (req, res, next) => {
           .send({ success: false, message: "Seller not found!" });
       }
 
-      req.seller = currSeller; 
+      req.seller = currSeller;
       next();
     });
   } catch (error) {
@@ -38,6 +38,5 @@ const authenticateSeller = async (req, res, next) => {
       .send({ success: false, message: "Internal server error!" });
   }
 };
-
 
 module.exports = authenticateSeller;

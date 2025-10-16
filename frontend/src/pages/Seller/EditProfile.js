@@ -1,19 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SellerHeader from "../../components/SellerHeader";
 import api from "../../utils/axiosInstance";
+import { SellerContext } from "../../context/sellerContext";
+import { useNavigate } from "react-router-dom";
 
 const EditProfile = () => {
-  const [sellerId, setSellerId] = useState("");
   const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(true);
+  const {sellerId, ready} = useContext(SellerContext);
+  const navigate = useNavigate()
 
-  const token = localStorage.getItem("GullyFoodsSellerToken");
+  if(ready && !sellerId) {
+    toast.warning("Please login!");
+    setTimeout(() => {
+      navigate('/seller');
+    }, 1000)
+  }
 
   // Fetch seller profile
   useEffect(() => {
@@ -21,9 +29,8 @@ const EditProfile = () => {
       try {
         const { data } = await api.get(
           `/api/shop/seller-profile`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { withCredentials: true },
         );
-        setSellerId(data.seller._id);
         setUsername(data.seller.username);
         setPhone(data.seller.phone);
         setLoading(false);
@@ -42,7 +49,7 @@ const EditProfile = () => {
       await api.put(
         `/api/shop/update-profile`,
         { username, phone },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true },
       );
       toast.success("Profile updated successfully!");
     } catch (error) {
@@ -60,9 +67,9 @@ const EditProfile = () => {
     }
     try {
       const { data } = await api.put(
-        `/api/user-profile/change-seller-password/${sellerId}`,
+        `/api/user-profile/change-seller-password`,
         { currentPassword, newPassword },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true },
       );
       if (data.success) {
         toast.success("Password changed successfully!");

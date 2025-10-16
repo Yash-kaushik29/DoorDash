@@ -14,8 +14,6 @@ const SellerOrder = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("GullyFoodsSellerToken");
-
   const toggleProductSelection = (productId) => {
     setSelectedProducts((prevSelected) =>
       prevSelected.includes(productId)
@@ -39,9 +37,7 @@ const SellerOrder = () => {
         const { data } = await api.get(
           `/api/order/getOrder/${orderId}`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            withCredentials: true
           }
         );
         setOrder(data);
@@ -61,9 +57,7 @@ const SellerOrder = () => {
         `/api/order/confirm-order/${orderId}`,
         { selectedProducts },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         }
       );
 

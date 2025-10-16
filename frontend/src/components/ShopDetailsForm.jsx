@@ -22,8 +22,6 @@ const ShopDetailsForm = () => {
   const [category, setCategory] = useState("");
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("GullyFoodsSellerToken");
-
   useEffect(() => {
     if (shopId) {
       fetchShopDetails();
@@ -102,9 +100,7 @@ const ShopDetailsForm = () => {
         `/api/shop/add-shop`,
         { shop, images },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         }
       );
 

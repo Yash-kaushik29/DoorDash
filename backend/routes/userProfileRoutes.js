@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const Seller = require("../models/Seller");
 const Coupon = require("../models/Coupons");
 const authenticateUser = require("../middleware/authMiddleware");
+const authenticateSeller = require("../middleware/sellerAuthMiddleware");
 
 const router = express.Router();
 
@@ -282,33 +283,43 @@ router.put("/change-password/:userId", async (req, res) => {
   }
 }); 
 
-router.put("/change-seller-password/:sellerId", async (req, res) => {
+router.put("/change-seller-password", authenticateSeller, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
-  const {sellerId} = req.params;
 
   try {
-    const seller = await Seller.findById(sellerId);
+    const seller = req.seller; 
 
     if (!seller) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
+    // Check current password
     const match = await bcrypt.compare(currentPassword, seller.password);
-
     if (!match) {
-      return res.json({ success: false, message: "Current password is incorrect" });
+      return res.json({
+        success: false,
+        message: "Current password is incorrect",
+      });
     }
 
+    // Hash and save new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     seller.password = hashedPassword;
     await seller.save();
 
-    res.status(200).json({ success: true, message: "Password changed successfully" });
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully!",
+    });
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error("Error changing password:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
-}); 
+});
 
 router.post("/assign-coupons", async (req, res) => {
   try {

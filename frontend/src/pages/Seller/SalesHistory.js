@@ -9,17 +9,13 @@ const SalesHistory = () => {
   const [salesData, setSalesData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("GullyFoodsSellerToken");
-
   const fetchSalesHistory = async () => {
     setLoading(true);
     try {
       const { data } = await api.get(
         `/api/shop/sales-history`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         }
       );
       setSalesData(data.salesHistory || []);
