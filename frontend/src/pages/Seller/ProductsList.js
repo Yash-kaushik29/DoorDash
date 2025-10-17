@@ -13,6 +13,24 @@ const ProductsList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // 🧩 Unified error handler
+  const handleError = (err, defaultMessage) => {
+    console.error(err);
+
+    // If API sent custom error message
+    const message =
+      err.response?.data?.message ||
+      (err.code === "ECONNABORTED"
+        ? "Request timed out. Please try again."
+        : err.message?.includes("Network Error")
+        ? "Network error. Please check your connection."
+        : defaultMessage);
+
+    toast.error(message);
+    setError(message);
+  };
+
+  // 🧠 Toggle product stock
   const toggleStock = async (productId) => {
     try {
       const { data } = await api.put(
@@ -32,36 +50,38 @@ const ProductsList = () => {
         toast.error(data.message || "Failed to update stock.");
       }
     } catch (err) {
-      console.error(err);
-      toast.error("Error updating stock status.");
+      handleError(err, "Error updating stock status.");
+    }
+  };
+
+  // 🚀 Fetch products on load
+  const fetchProducts = async (retry = false) => {
+    setLoading(true);
+    try {
+      const { data } = await api.get(`/api/shop/get-products`, {
+        withCredentials: true,
+        timeout: 7000, // ⏱ Prevent hanging
+      });
+
+      if (data.success) {
+        setProducts(data.products);
+        setError("");
+      } else {
+        setError(data.message || "Failed to fetch products.");
+      }
+    } catch (err) {
+      handleError(err, "Error fetching products.");
+
+      // 🔁 Optional retry logic for temporary issues
+      if (!retry && (err.code === "ECONNABORTED" || err.message.includes("Network"))) {
+        setTimeout(() => fetchProducts(true), 3000);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const { data } = await api.get(
-          `/api/shop/get-products`,
-          {
-            withCredentials: true
-          }
-        );
-
-        if (data.success) {
-          setProducts(data.products);
-          setError("");
-        } else {
-          setProducts([]);
-          setError(data.message || "Failed to fetch products.");
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Error fetching products.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchProducts();
   }, []);
 
@@ -90,8 +110,18 @@ const ProductsList = () => {
         {/* Loading Skeleton */}
         {loading && <ProductListCardSkeleton />}
 
-        {/* Error */}
-        {error && <div className="text-red-500 mb-4">{error}</div>}
+        {/* Error Message with Retry Button */}
+        {!loading && error && (
+          <div className="text-red-500 mb-4 flex flex-col items-center">
+            <p>{error}</p>
+            <button
+              onClick={() => fetchProducts()}
+              className="mt-2 px-4 py-2 text-sm rounded-md bg-green-500 text-white hover:bg-green-600"
+            >
+              Retry
+            </button>
+          </div>
+        )}
 
         {/* Product Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -103,7 +133,8 @@ const ProductsList = () => {
                   onToggleStock={toggleStock}
                 />
               ))
-            : !loading && (
+            : !loading &&
+              !error && (
                 <div className="text-center text-gray-500 col-span-full">
                   No products found.
                 </div>

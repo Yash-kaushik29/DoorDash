@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SellerHeader from "../../components/SellerHeader";
@@ -13,64 +12,98 @@ const EditProfile = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(true);
-  const {sellerId, ready} = useContext(SellerContext);
-  const navigate = useNavigate()
+  const [error, setError] = useState("");
+  const { sellerId, ready } = useContext(SellerContext);
+  const navigate = useNavigate();
 
-  if(ready && !sellerId) {
-    toast.warning("Please login!");
-    setTimeout(() => {
-      navigate('/seller');
-    }, 1000)
-  }
+  useEffect(() => {
+    if (ready && !sellerId) {
+      toast.warning("Please login to continue!");
+      setTimeout(() => {
+        navigate("/seller");
+      }, 1000);
+    }
+  }, [ready, sellerId, navigate]);
 
-  // Fetch seller profile
   useEffect(() => {
     const fetchProfile = async () => {
+      setLoading(true);
+      setError("");
       try {
-        const { data } = await api.get(
-          `/api/shop/seller-profile`,
-          { withCredentials: true },
-        );
-        setUsername(data.seller.username);
-        setPhone(data.seller.phone);
+        const { data } = await api.get(`/api/shop/seller-profile`, {
+          withCredentials: true,
+        });
+
+        if (data?.seller) {
+          setUsername(data.seller.username || "");
+          setPhone(data.seller.phone || "");
+        } else {
+          setError("Failed to fetch seller profile. Please try again.");
+        }
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+        if (err.response) {
+          if (err.response.status === 401) {
+            setError("You are not authorized. Please login again.");
+          } else {
+            setError(err.response.data?.message || "Server error occurred.");
+          }
+        } else {
+          setError("Network error. Please check your connection.");
+        }
+      } finally {
         setLoading(false);
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to load profile details.");
       }
     };
-    fetchProfile();
-  }, []);
+
+    if (ready) fetchProfile();
+  }, [ready]);
 
   // Handle Profile Update
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
+
+    if (!username.trim() || !phone.trim()) {
+      toast.error("All fields are required!");
+      return;
+    }
+
     try {
-      await api.put(
+      const { data } = await api.put(
         `/api/shop/update-profile`,
         { username, phone },
-        { withCredentials: true },
+        { withCredentials: true }
       );
-      toast.success("Profile updated successfully!");
+
+      if (data.success) {
+        toast.success("Profile updated successfully!");
+      } else {
+        toast.error(data.message || "Failed to update profile.");
+      }
     } catch (error) {
-      console.error(error);
-      toast.error("Failed to update profile.");
+      console.error("Error updating profile:", error);
+      toast.error(
+        error.response?.data?.message || "Server error. Try again later."
+      );
     }
   };
 
   // Handle Password Change
   const handlePasswordChange = async (e) => {
     e.preventDefault();
+
     if (newPassword.length < 4) {
       toast.error("Password should be at least 4 characters long.");
       return;
     }
+
     try {
       const { data } = await api.put(
         `/api/user-profile/change-seller-password`,
         { currentPassword, newPassword },
-        { withCredentials: true },
+        { withCredentials: true }
       );
+
       if (data.success) {
         toast.success("Password changed successfully!");
         setCurrentPassword("");
@@ -79,12 +112,37 @@ const EditProfile = () => {
         toast.error(data.message || "Failed to change password.");
       }
     } catch (error) {
-      console.error(error);
-      toast.error("An error occurred.");
+      console.error("Error changing password:", error);
+      toast.error(
+        error.response?.data?.message || "An unexpected error occurred."
+      );
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-screen bg-gray-100 dark:bg-gray-900">
+        <p className="text-gray-700 dark:text-gray-300 text-lg">
+          Loading profile...
+        </p>
+      </div>
+    );
+
+  if (error)
+    return (
+      <>
+        <SellerHeader />
+        <div className="flex flex-col items-center justify-center min-h-screen text-center bg-gray-100 dark:bg-gray-900">
+          <p className="text-red-600 dark:text-red-400 font-medium">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Retry
+          </button>
+        </div>
+      </>
+    );
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">

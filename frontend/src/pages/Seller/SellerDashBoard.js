@@ -82,7 +82,7 @@ const SellerDashboard = () => {
   }, [sellerId, navigate]);
 
   const takeToLogin = () => {
-    window.location.reload();
+    navigate("/seller-login");
   };
 
   if (loading) return <SellerDashboardSkeleton />;

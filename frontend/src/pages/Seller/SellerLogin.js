@@ -8,7 +8,7 @@ import api from "../../utils/axiosInstance";
 import { SellerContext } from "../../context/sellerContext";
 
 export default function SellerLogin() {
-  const {sellerId, ready} = useContext(SellerContext);
+  const { sellerId, ready } = useContext(SellerContext);
   const [formData, setFormData] = useState({
     phone: "",
     password: "",
@@ -16,8 +16,8 @@ export default function SellerLogin() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if(ready && sellerId) {
-        navigate('/seller')
+    if (ready && sellerId) {
+      navigate("/seller");
     }
   }, [sellerId]);
 
@@ -32,11 +32,9 @@ export default function SellerLogin() {
     e.preventDefault();
 
     try {
-      const response = await api.post(
-        `/api/auth/seller-login`,
-        formData,
-        { withCredentials: true }
-      );
+      const response = await api.post(`/api/auth/seller-login`, formData, {
+        withCredentials: true,
+      });
 
       if (response.data.success) {
         toast.success("Login Successful! 🎉");

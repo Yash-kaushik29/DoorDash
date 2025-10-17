@@ -58,7 +58,7 @@ const GroceryProducts = () => {
           <p className="text-gray-600 dark:text-gray-300">No products found.</p>
         ) : (
           Object.entries(grouped).map(([subcat, items]) => (
-            <div key={subcat} className="mb-8">
+            <div key={subcat} className="mb-4">
               {/* Subcategory Title */}
               <h3 className="text-xl font-semibold mb-3 text-gray-800 dark:text-white">
                 {subcat}

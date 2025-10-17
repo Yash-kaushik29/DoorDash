@@ -10,6 +10,7 @@ const SellerOrder = () => {
   const { orderId } = useParams();
   const [order, setOrder] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -33,42 +34,67 @@ const SellerOrder = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       setLoading(true);
+      setError("");
       try {
-        const { data } = await api.get(
-          `/api/order/getOrder/${orderId}`,
-          {
-            withCredentials: true
-          }
-        );
-        setOrder(data);
+        const { data } = await api.get(`/api/order/getOrder/${orderId}`, {
+          withCredentials: true,
+        });
+
+        if (data && data.orderId) {
+          setOrder(data);
+        } else {
+          setError("Invalid response from server. Please try again.");
+        }
       } catch (error) {
-        console.error("Error fetching orders:", error);
+        console.error("Error fetching order:", error);
+
+        if (error.response) {
+          if (error.response.status === 401) {
+            setError("You are not authorized. Please log in again.");
+          } else if (error.response.status === 404) {
+            setError("Order not found.");
+          } else {
+            setError(error.response.data?.message || "Server error occurred.");
+          }
+        } else if (error.request) {
+          setError("Network error. Please check your connection.");
+        } else {
+          setError("Unexpected error occurred.");
+        }
       } finally {
         setLoading(false);
       }
     };
+
     fetchOrder();
   }, [orderId]);
 
   const confirmOrder = async () => {
+    if (selectedProducts.length === 0) {
+      toast.warn("Please select at least one product to confirm.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const { data } = await api.put(
         `/api/order/confirm-order/${orderId}`,
         { selectedProducts },
-        {
-          withCredentials: true
-        }
+        { withCredentials: true }
       );
 
       if (data.success) {
-        toast.success("Order Confirmed!");
-        setTimeout(() => {
-          navigate("/seller");
-        }, 2000);
+        toast.success("Order confirmed successfully!");
+        setTimeout(() => navigate("/seller"), 2000);
+      } else {
+        toast.error(data.message || "Failed to confirm order.");
       }
     } catch (error) {
-      toast.error("Error confirming order. Please try again.");
+      console.error(error);
+      toast.error(
+        error.response?.data?.message ||
+          "Server error while confirming the order."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -90,8 +116,24 @@ const SellerOrder = () => {
   if (loading)
     return (
       <p className="text-center text-gray-600 dark:text-gray-300">
-        Loading orders...
+        Loading order details...
       </p>
+    );
+
+  if (error)
+    return (
+      <>
+        <SellerHeader />
+        <div className="flex flex-col items-center justify-center p-6">
+          <p className="text-red-600 dark:text-red-400 font-medium">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+          >
+            Retry
+          </button>
+        </div>
+      </>
     );
 
   return (
@@ -118,67 +160,71 @@ const SellerOrder = () => {
               <span className="text-gray-900 dark:text-white">Select All</span>
             </label>
 
-            {order.products.map((product, index) => (
-              <div
-                key={index}
-                className="flex items-center p-4 bg-gradient-to-r from-green-100 to-green-50 dark:from-gray-700 dark:to-gray-800 rounded-lg shadow-md w-full"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedProducts.includes(product._id)}
-                  onChange={() => toggleProductSelection(product._id)}
-                  className="w-4 h-4 mr-3"
-                />
-                <img
-                  src={product.image}
-                  alt={product.productName}
-                  className="w-16 h-16 object-cover rounded-lg border border-gray-300 flex-shrink-0"
-                />
-                <div className="ml-4 flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {product.productName}
-                  </h3>
+            {order.products && order.products.length > 0 ? (
+              order.products.map((product, index) => (
+                <div
+                  key={index}
+                  className="flex items-center p-4 bg-gradient-to-r from-green-100 to-green-50 dark:from-gray-700 dark:to-gray-800 rounded-lg shadow-md w-full"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedProducts.includes(product._id)}
+                    onChange={() => toggleProductSelection(product._id)}
+                    className="w-4 h-4 mr-3"
+                  />
+                  <img
+                    src={product.image}
+                    alt={product.productName}
+                    className="w-16 h-16 object-cover rounded-lg border border-gray-300 flex-shrink-0"
+                  />
+                  <div className="ml-4 flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {product.productName}
+                    </h3>
 
-                  <p className="text-gray-800 dark:text-gray-300">
-                    Qty: {product.quantity}
-                  </p>
+                    <p className="text-gray-800 dark:text-gray-300">
+                      Qty: {product.quantity}
+                    </p>
 
-                  {(() => {
-                    const unitPrice =
-                      order.orderType === "Food"
-                        ? product.basePrice
-                        : product.price;
-                    const totalValue = product.quantity * unitPrice;
+                    {(() => {
+                      const unitPrice =
+                        order.orderType === "Food"
+                          ? product.basePrice
+                          : product.price;
+                      const totalValue = product.quantity * unitPrice;
 
-                    return (
-                      <p className="text-gray-900 dark:text-gray-200 font-medium">
-                        Value: {product.quantity} × ₹{unitPrice} ={" "}
-                        <span className="font-semibold text-green-500">
-                          ₹{totalValue.toFixed(2)}
-                        </span>
-                      </p>
-                    );
-                  })()}
+                      return (
+                        <p className="text-gray-900 dark:text-gray-200 font-medium">
+                          Value: {product.quantity} × ₹{unitPrice} ={" "}
+                          <span className="font-semibold text-green-500">
+                            ₹{totalValue.toFixed(2)}
+                          </span>
+                        </p>
+                      );
+                    })()}
 
-                  <p>
-                    Status:{" "}
-                    <span
-                      className={`mt-1 text-sm font-semibold ${
-                        product.status === "Delivered"
-                          ? "text-green-600 dark:text-green-400"
-                          : product.status === "Cancelled"
-                          ? "text-red-600 dark:text-red-400"
-                          : product.status === "Preparing"
-                          ? "text-yellow-600 dark:text-yellow-400"
-                          : "text-blue-600 dark:text-blue-400"
-                      }`}
-                    >
-                      {product.status}
-                    </span>
-                  </p>
+                    <p>
+                      Status:{" "}
+                      <span
+                        className={`mt-1 text-sm font-semibold ${
+                          product.status === "Delivered"
+                            ? "text-green-600 dark:text-green-400"
+                            : product.status === "Cancelled"
+                            ? "text-red-600 dark:text-red-400"
+                            : product.status === "Preparing"
+                            ? "text-yellow-600 dark:text-yellow-400"
+                            : "text-blue-600 dark:text-blue-400"
+                        }`}
+                      >
+                        {product.status}
+                      </span>
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p>No Products to show</p>
+            )}
           </div>
 
           <div className="flex justify-between items-center mt-6">
@@ -188,14 +234,14 @@ const SellerOrder = () => {
                 ₹{totalAmount()}
               </span>
             </h3>
-            {order.deliveryStatus !== 'Delivered' && (
+            {order.deliveryStatus !== "Delivered" && (
               <button
-              onClick={() => confirmOrder()}
-              className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition shadow-md"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Processing..." : "Confirm Order"}
-            </button>
+                onClick={() => confirmOrder()}
+                className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition shadow-md"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Processing..." : "Confirm Order"}
+              </button>
             )}
           </div>
         </div>
