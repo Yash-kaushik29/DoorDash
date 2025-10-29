@@ -5,9 +5,9 @@ import axios from "axios";
 
 import Navbar from "../../components/Navbar";
 import { UserContext } from "../../context/userContext";
-import CheckoutPayment from "../../components/CheckoutPayment"; // Payment & Place Order button
-import CheckoutCoupons from "../../components/CheckoutCoupons"; // Coupons UI
-import CheckoutSummary from "../../components/CheckoutSummary"; // Order summary & total
+import CheckoutPayment from "../../components/CheckoutPayment";
+import CheckoutCoupons from "../../components/CheckoutCoupons";
+import CheckoutSummary from "../../components/CheckoutSummary"; 
 import CheckoutAddress from "../../components/CheckoutAddress ";
 import api from "../../utils/axiosInstance";
 
@@ -89,7 +89,7 @@ const Checkout = () => {
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (value) => (value * Math.PI) / 180;
-    const R = 6371; // km
+    const R = 6371; 
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a =

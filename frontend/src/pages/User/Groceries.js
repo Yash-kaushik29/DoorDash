@@ -17,7 +17,7 @@ const groceryCategories = [
   { name: "Dry Fruits & Nuts", img: "/groceryImages/dryfruits.png" },
   { name: "Household Items", img: "/groceryImages/household.png" },
   { name: "Personal Care", img: "/groceryImages/essentials.png" },
-  { name: "Ice Creams", img: "/groceryImages/icecream.png" },
+  { name: "Chocolates & Ice Creams", img: "/groceryImages/icecream.png" },
   { name: "Baby Care", img: "/groceryImages/baby.png" },
 ];
 

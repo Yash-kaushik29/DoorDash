@@ -7,6 +7,7 @@ import { UserContext } from "../../context/userContext";
 import { ToastContainer } from "react-toastify";
 import { MdStorefront } from "react-icons/md";
 import api from "../../utils/axiosInstance";
+import ReplacePopUp from "../../components/ReplacePopUp";
 
 const ShopPage = () => {
   const { shopId } = useParams();

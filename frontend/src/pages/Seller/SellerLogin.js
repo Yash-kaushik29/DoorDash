@@ -8,7 +8,7 @@ import api from "../../utils/axiosInstance";
 import { SellerContext } from "../../context/sellerContext";
 
 export default function SellerLogin() {
-  const { sellerId, ready } = useContext(SellerContext);
+  const { sellerId, setSellerId, ready } = useContext(SellerContext);
   const [formData, setFormData] = useState({
     phone: "",
     password: "",
@@ -38,6 +38,7 @@ export default function SellerLogin() {
 
       if (response.data.success) {
         toast.success("Login Successful! 🎉");
+        setSellerId(response.data.sellerId);
         setTimeout(() => {
           navigate("/seller");
         }, 2000);

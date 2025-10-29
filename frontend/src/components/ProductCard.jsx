@@ -3,16 +3,51 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { FaRegCircleDot } from "react-icons/fa6";
 import api from "../utils/axiosInstance";
+import ReplacePopUp from "./ReplacePopUp";
 
-const DietIcon = ({ type }) => {
+const DietIcon = ({ type, size = 16 }) => {
   switch (type) {
     case "Vegetarian":
     case "Veg":
-      return <FaRegCircleDot color="green" size={16} />;
-    case "Egg":
-      return <FaRegCircleDot color="yellow" size={16} />;
+      return (
+        <svg
+          width={size}
+          height={size}
+          viewBox="0 0 100 100"
+          style={{ border: "1px solid green", borderRadius: 3 }}
+        >
+          <rect width="100" height="100" fill="white" />
+          <circle cx="50" cy="50" r="30" fill="green" />
+        </svg>
+      );
+
     case "Non-Vegetarian":
-      return <FaRegCircleDot color="red" size={16} />;
+    case "Non-Veg":
+      return (
+        <svg
+          width={size}
+          height={size}
+          viewBox="0 0 100 100"
+          style={{ border: "1px solid red", borderRadius: 3 }}
+        >
+          <rect width="100" height="100" fill="white" />
+          <polygon points="50,20 80,80 20,80" fill="red" />
+        </svg>
+      );
+
+    case "Egg":
+      return (
+        <svg
+          width={size}
+          height={size}
+          viewBox="0 0 100 100"
+          style={{ border: "1px solid gold", borderRadius: 3 }}
+        >
+          <rect width="100" height="100" fill="white" />
+          <circle cx="50" cy="50" r="30" fill="gold" />
+        </svg>
+      );
+
     default:
       return null;
   }
@@ -26,11 +61,12 @@ const ProductCard = ({
   variant = "food",
 }) => {
   const [loading, setLoading] = useState(false);
+  const [shopName, setShopName] = useState("");
+  const [showReplacePopup, setShowReplacePopup] = useState(false);
+  const [newProduct, setNewProduct] = useState("");
 
-  // pick which cart we’re working on
   const cartKey = variant === "grocery" ? "groceryCart" : "foodCart";
 
-  // current item in this cart
   const cartItem = user?.[cartKey]?.find(
     (i) => i.productId?.toString() === product?._id?.toString()
   );
@@ -38,14 +74,6 @@ const ProductCard = ({
   const addProductToCart = async () => {
     if (loading) return;
     if (!user) return toast.warning("Please login first");
-
-    const prevCart = [...(user?.[cartKey] || [])];
-
-    // optimistic UI
-    setUser((prev) => ({
-      ...prev,
-      [cartKey]: [...prev[cartKey], { productId: product._id, quantity: 1 }],
-    }));
 
     setLoading(true);
     try {
@@ -58,10 +86,18 @@ const ProductCard = ({
       );
       if (!data.success) throw new Error(data.message);
       toast.success("Product added to cart!");
+      setUser((prev) => ({
+        ...prev,
+        [cartKey]: [...prev[cartKey], { productId: product._id, quantity: 1 }],
+      }));
     } catch (err) {
-      // rollback
-      setUser((prev) => ({ ...prev, [cartKey]: prevCart }));
-      toast.error(err.message || "Something went wrong.");
+      if (err.response?.data?.type === "DIFFERENT_SHOP") {
+        setNewProduct(product._id);
+        setShopName(err.response?.data?.shopName || "Other Shop");
+        setShowReplacePopup(true);
+      } else {
+        toast.error(err.response?.data?.message || "Something went wrong.");
+      }
     } finally {
       setLoading(false);
     }
@@ -145,6 +181,42 @@ const ProductCard = ({
     }
   };
 
+  const replaceCart = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.post(
+        "/api/cart/replaceCart",
+        { productId: product._id, cartKey },
+        { withCredentials: true }
+      );
+      if (!data.success) throw new Error(data.message);
+
+      toast.success("Cart updated successfully!");
+      setShowReplacePopup(false);
+      setUser((prev) => ({
+        ...prev,
+        [cartKey]: data.cart,
+      }));
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (showReplacePopup) {
+    return (
+      <ReplacePopUp
+        onCancel={() => setShowReplacePopup(false)}
+        shopName={shopName}
+        currShopName={product.shopName}
+        newProduct={newProduct}
+        replaceCart={replaceCart}
+        loading={loading}
+      />
+    );
+  }
+
   return (
     <div className="relative bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transform transition duration-300 hover:scale-105">
       {/* DISCOUNT BANNER */}
@@ -173,10 +245,22 @@ const ProductCard = ({
       <div className="relative">
         <img
           className="w-full h-32 object-cover rounded-md"
-          src={product.images?.[0] || "https://via.placeholder.com/150"}
+          src={
+            product.images?.[0] ||
+            "https://tse3.mm.bing.net/th/id/OIP.j9lwZI84idgGDQj02DAXCgHaHa?pid=Api&P=0&h=180"
+          }
           alt={product.name}
-          onError={(e) => (e.target.src = "https://via.placeholder.com/150")}
+          onError={(e) =>
+            (e.target.src =
+              "https://tse3.mm.bing.net/th/id/OIP.j9lwZI84idgGDQj02DAXCgHaHa?pid=Api&P=0&h=180")
+          }
         />
+
+        {product.dietType && (
+          <div className="absolute right-2 top-2">
+            <DietIcon type={product.dietType} />
+          </div>
+        )}
 
         {!product.inStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-60 rounded-md">
@@ -219,7 +303,6 @@ const ProductCard = ({
       {/* INFO */}
       <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
         {product.name}
-        {variant === "food" && <DietIcon type={product.dietType} />}
       </h3>
 
       {variant === "food" && (

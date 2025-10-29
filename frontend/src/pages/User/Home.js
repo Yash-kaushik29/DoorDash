@@ -13,18 +13,18 @@ import { Link } from "react-router-dom";
 import InstallPrompt from "../../components/InstallPrompt";
 import { motion } from "framer-motion";
 import api from "../../utils/axiosInstance";
+import ReplacePopUp from "../../components/ReplacePopUp";
 
 const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
   const [shops, setShops] = useState([]);
   const [products, setProducts] = useState([]);
-
+  
   const fetchPopularShops = async () => {
     try {
-      const { data } = await api.get(
-        `/api/home/get-popular-shops`,
-        { withCredentials: true }
-      );
+      const { data } = await api.get(`/api/home/get-popular-shops`, {
+        withCredentials: true,
+      });
       if (data.success) setShops(data.shops);
       else toast.error(data.message);
     } catch (error) {
@@ -35,10 +35,9 @@ const Home = () => {
 
   const fetchPopularProducts = async () => {
     try {
-      const { data } = await api.get(
-        `/api/home/get-popular-products`,
-        { withCredentials: true }
-      );
+      const { data } = await api.get(`/api/home/get-popular-products`, {
+        withCredentials: true,
+      });
       if (data.success) setProducts(data.products);
       else toast.error(data.message);
     } catch (error) {

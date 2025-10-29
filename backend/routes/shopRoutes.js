@@ -4,7 +4,9 @@ const jwt = require("jsonwebtoken");
 const Shop = require("../models/Shop");
 const Seller = require("../models/Seller");
 const Product = require("../models/Product");
-const authenticateSeller = require('../middleware/sellerAuthMiddleware');
+const Order = require("../models/Order");
+const authenticateSeller = require("../middleware/sellerAuthMiddleware");
+const QRCode = require('qrcode');
 
 router.put("/edit-shop", async (req, res) => {
   const { shop, shopId, images } = req.body;
@@ -29,7 +31,7 @@ router.put("/edit-shop", async (req, res) => {
 
 router.post("/add-shop", authenticateSeller, async (req, res) => {
   try {
-    const existingSeller = req.seller; 
+    const existingSeller = req.seller;
 
     if (existingSeller.shop) {
       return res.json({ success: false, message: "Shop already exists!" });
@@ -55,9 +57,7 @@ router.post("/add-shop", authenticateSeller, async (req, res) => {
     });
   } catch (error) {
     console.error("Error adding shop:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
@@ -242,9 +242,7 @@ router.get("/get-products", authenticateSeller, async (req, res) => {
     res.status(200).json({ success: true, products });
   } catch (error) {
     console.error("Error fetching products:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
@@ -326,10 +324,11 @@ router.get("/seller-profile", authenticateSeller, async (req, res) => {
     const seller = req.seller;
 
     const existingSeller = await Seller.findById(seller._id)
-      .select("username phone salesHistory shop")
+      .select("username email phone salesHistory shop qrCode")
       .populate({
         path: "shop",
-        select: "name category productCategories address isOpen images",
+        select:
+          "name category productCategories address isOpen isManuallyClosed images",
       });
 
     if (!existingSeller) {
@@ -338,7 +337,31 @@ router.get("/seller-profile", authenticateSeller, async (req, res) => {
         .json({ success: false, message: "Seller not found" });
     }
 
-    res.status(200).json({ success: true, seller: existingSeller });
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const monthlySales = existingSeller.salesHistory
+      .filter((sale) => {
+        const saleDate = new Date(sale.date);
+        return (
+          saleDate.getMonth() === currentMonth &&
+          saleDate.getFullYear() === currentYear
+        );
+      })
+      .reduce((sum, sale) => sum + sale.amount, 0);
+
+    const activeOrders = await Order.countDocuments({
+      seller: seller._id,
+      status: { $nin: ["Delivered", "Cancelled"] },
+    });
+
+    res.status(200).json({
+      success: true,
+      seller: {
+        ...existingSeller.toObject(),
+        monthlySales,
+        activeOrders,
+      },
+    });
   } catch (error) {
     console.error("Error fetching seller profile:", error);
     res.status(500).json({
@@ -353,9 +376,7 @@ router.put("/update-status", authenticateSeller, async (req, res) => {
     const { isOpen } = req.body;
 
     const seller = req.seller;
-    const existingSeller = await Seller.findById(seller._id).populate(
-      "shop"
-    );
+    const existingSeller = await Seller.findById(seller._id).populate("shop");
 
     if (!existingSeller || !existingSeller.shop) {
       return res
@@ -383,7 +404,7 @@ router.put("/update-status", authenticateSeller, async (req, res) => {
 router.put("/update-profile", authenticateSeller, async (req, res) => {
   try {
     const { username, email } = req.body;
-    const existingSeller = req.seller; 
+    const existingSeller = req.seller;
 
     if (username) existingSeller.username = username;
     if (email) existingSeller.email = email;
@@ -427,18 +448,73 @@ router.get("/sales-history", authenticateSeller, async (req, res) => {
     const seller = await Seller.findById(currSeller._id)
       .populate({
         path: "salesHistory.order",
-        select: "_id id" 
+        select: "_id id",
       })
       .lean();
 
     if (!seller) {
-      return res.status(404).json({ success: false, message: "Seller not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
     }
 
     res.json({ success: true, salesHistory: seller.salesHistory });
   } catch (error) {
     console.error("Error fetching sales history:", error);
     res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+router.post("/generate-qr", authenticateSeller, async (req, res) => {
+  try {
+    const sellerId = req.seller._id;
+
+    const seller = await Seller.findById(sellerId).populate({
+      path: "shop",
+      select: "category",
+    });
+
+    if (!seller) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
+    }
+
+    if (seller.qrCode) {
+      return res.json({
+        success: true,
+        message: "QR code already exists",
+        qrCode: seller.qrCode,
+      });
+    }
+
+    let shopUrl = "";
+
+    if(seller.shop.category === 'Grocery') {
+      shopUrl = `https://gullyfoods.app/products/groceries`;
+    }
+    else {
+      shopUrl = `https://gullyfoods.app/shop/${seller.shop._id}`;
+    }
+
+    const qrCodeDataUrl = await QRCode.toDataURL(shopUrl);
+
+    // Save QR code in DB
+    seller.qrCode = qrCodeDataUrl;
+    await seller.save();
+
+    res.json({
+      success: true,
+      message: "QR code generated successfully",
+      qrCode: qrCodeDataUrl,
+    });
+  } catch (error) {
+    console.error("QR generation error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while generating QR code",
+      error: error.message,
+    });
   }
 });
 

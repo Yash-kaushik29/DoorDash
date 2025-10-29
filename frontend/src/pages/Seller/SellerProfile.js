@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SellerHeader from "../../components/SellerHeader";
@@ -8,10 +7,11 @@ import api from "../../utils/axiosInstance";
 import { SellerContext } from "../../context/sellerContext";
 
 const SellerProfile = () => {
-  const {sellerId, ready} = useContext(SellerContext);
+  const { sellerId, ready } = useContext(SellerContext);
   const [seller, setSeller] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [qrLoading, setQrLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,12 +26,9 @@ const SellerProfile = () => {
           return;
         }
 
-        const { data } = await api.get(
-          `/api/shop/seller-profile`,
-          {
-            withCredentials: true
-          }
-        );
+        const { data } = await api.get(`/api/shop/seller-profile`, {
+          withCredentials: true,
+        });
 
         if (data.success) {
           setSeller(data.seller);
@@ -41,7 +38,6 @@ const SellerProfile = () => {
         }
       } catch (error) {
         console.error("Error fetching seller profile:", error);
-        setError("Failed to load profile. Please try again later.");
         setError("Failed to load seller profile");
         setTimeout(() => navigate("/seller"), 2000);
       } finally {
@@ -58,15 +54,12 @@ const SellerProfile = () => {
       await api.put(
         `/api/shop/update-status`,
         { isOpen: updatedStatus },
-        {
-          withCredentials: true
-        }
+        { withCredentials: true }
       );
       setSeller((prev) => ({
         ...prev,
         shop: { ...prev.shop, isOpen: updatedStatus },
       }));
-
       toast.success(`Shop is now ${updatedStatus ? "Open" : "Closed"}!`);
     } catch (error) {
       console.error("Error updating shop status:", error);
@@ -74,8 +67,39 @@ const SellerProfile = () => {
     }
   };
 
-  const calculateSales = () => {
-    return seller.salesHistory.reduce((sum, sale) => sum + sale.amount, 0);
+  const handleGenerateQr = async () => {
+    try {
+      setQrLoading(true);
+      const res = await api.post(
+        `/api/shop/generate-qr`,
+        {},
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        toast.success("QR Code generated successfully!");
+        setSeller((prev) => ({
+          ...prev,
+          qrCode: res.data.qrCode,
+        }));
+      } else {
+        toast.error(res.data.message || "Failed to generate QR Code.");
+      }
+    } catch (error) {
+      console.error("QR generation error:", error);
+      toast.error("Failed to generate QR Code.");
+    } finally {
+      setQrLoading(false);
+    }
+  };
+
+  const downloadQRCode = (qrCodeData, shopName) => {
+    const link = document.createElement("a");
+    link.href = qrCodeData;
+    link.download = `${shopName || "shop"}-qr.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (loading) return <div className="text-center text-lg">Loading...</div>;
@@ -93,16 +117,13 @@ const SellerProfile = () => {
       <SellerHeader />
 
       <div className="container mx-auto py-8 px-4 space-y-8">
-        {/* Page Heading */}
         <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500 mb-4">
           Seller Dashboard
         </h1>
 
         <div className="flex flex-col md:flex-row gap-6">
-          {/* Left Column: Seller Info */}
           <div className="flex-1 space-y-6">
-            {/* Seller Details Card */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md transition-colors duration-300">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
               <h2 className="text-2xl font-bold mb-4">Seller Info</h2>
               <div className="space-y-2">
                 <p>
@@ -110,12 +131,6 @@ const SellerProfile = () => {
                 </p>
                 <p>
                   <strong>Email:</strong> {seller?.email || "N/A"}
-                </p>
-                <p>
-                  <strong>Total Sales:</strong> ₹{calculateSales()}
-                </p>
-                <p>
-                  <strong>Orders Completed:</strong> {seller?.totalOrders || 0}
                 </p>
               </div>
               <Link
@@ -126,23 +141,19 @@ const SellerProfile = () => {
               </Link>
             </div>
 
-            {/* Analytics Card */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md transition-colors duration-300">
+            {/* Analytics */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
               <h2 className="text-2xl font-bold mb-4">Analytics</h2>
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-purple-100 dark:bg-purple-700 p-4 rounded-lg transition-colors duration-300">
-                  <p className="text-sm text-gray-700 dark:text-gray-200">
-                    Monthly Sales
-                  </p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white">
-                    ₹{seller?.monthlySales || 0}
+                <div className="bg-purple-100 dark:bg-purple-700 p-4 rounded-lg">
+                  <p className="text-sm">Monthly Sales</p>
+                  <p className="text-xl font-bold">
+                    ₹{seller.monthlySales || 0}
                   </p>
                 </div>
-                <div className="bg-green-100 dark:bg-green-700 p-4 rounded-lg transition-colors duration-300">
-                  <p className="text-sm text-gray-700 dark:text-gray-200">
-                    Active Orders
-                  </p>
-                  <p className="text-xl font-bold text-gray-900 dark:text-white">
+                <div className="bg-green-100 dark:bg-green-700 p-4 rounded-lg">
+                  <p className="text-sm">Active Orders</p>
+                  <p className="text-xl font-bold">
                     {seller?.activeOrders || 0}
                   </p>
                 </div>
@@ -150,12 +161,10 @@ const SellerProfile = () => {
             </div>
           </div>
 
-          {/* Right Column: Shop Info */}
           <div className="flex-1 space-y-6">
             {seller?.shop ? (
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md space-y-4 transition-colors duration-300">
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md space-y-4">
                 <h2 className="text-2xl font-bold">Shop Info</h2>
-
                 <p>
                   <strong>Name:</strong> {seller.shop.name || "N/A"}
                 </p>
@@ -198,6 +207,34 @@ const SellerProfile = () => {
                   {seller.shop.isOpen ? "Close Shop" : "Open Shop"}
                 </button>
 
+                {/* ✅ QR Code Section */}
+                <div className="mt-6 border-t border-gray-300 pt-4">
+                  <h3 className="text-xl font-semibold mb-3">Shop QR Code</h3>
+                  {seller.qrCode ? (
+                    <div className="flex flex-col items-center space-y-3">
+                      <img
+                        src={seller.qrCode}
+                        alt="Shop QR"
+                        className="w-40 h-40 object-contain border rounded-lg p-2 shadow-md"
+                      />
+                      <button
+                        onClick={() => downloadQRCode(seller.qrCode, seller.shopName)}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                      >
+                        Download QR
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleGenerateQr}
+                      disabled={qrLoading}
+                      className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                    >
+                      {qrLoading ? "Generating..." : "Generate QR Code"}
+                    </button>
+                  )}
+                </div>
+
                 {/* Shop Images */}
                 <div className="mt-6">
                   <h3 className="text-xl font-semibold mb-3">Shop Images</h3>
@@ -221,7 +258,7 @@ const SellerProfile = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-400 p-4 rounded-lg transition-colors duration-300">
+              <div className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-400 p-4 rounded-lg">
                 No shop details found.
               </div>
             )}

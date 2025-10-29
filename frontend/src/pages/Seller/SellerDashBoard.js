@@ -119,7 +119,7 @@ const SellerDashboard = () => {
       {/* Welcome Section */}
       <div className="max-w-5xl mx-auto p-6 text-center">
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white">
-          Welcome, {seller?.username || "Seller"}!
+          Welcome, <span className="text-green-500" >{seller?.username || "Seller"}!</span>
         </h1>
         <p className="text-gray-600 dark:text-gray-300 mt-2">
           Manage your products and track your sales efficiently.

@@ -155,7 +155,6 @@ const CartPage = () => {
         cartItems,
         totalPrice: getTotalPrice(cartItems),
         cartKey: activeCart,
-        sellers: currentSellers,
       },
     });
   };
@@ -164,9 +163,9 @@ const CartPage = () => {
     activeCart === "foodCart" ? foodCartItems : groceryCartItems;
 
   // Dynamic sellers array
-  const currentSellers = [
-    ...new Set(currentCartItems.map((item) => item.product.seller)),
-  ];
+  // const currentSellers = [
+  //   ...new Set(currentCartItems.map((item) => item.product.seller)),
+  // ];
 
   return (
     <div>
@@ -186,7 +185,7 @@ const CartPage = () => {
             }`}
             onClick={() => setActiveCart("foodCart")}
           >
-            🍔 Food Cart
+            🍔 Food Cart ({user?.foodCart.length})
           </button>
           <button
             className={`px-4 py-2 rounded-lg font-semibold ${
@@ -196,7 +195,7 @@ const CartPage = () => {
             }`}
             onClick={() => setActiveCart("groceryCart")}
           >
-            🛒 Grocery Cart
+            🛒 Grocery Cart ({user?.groceryCart.length})
           </button>
         </div>
 
@@ -283,14 +282,14 @@ const CartPage = () => {
               </p>
             )}
 
-            {currentSellers.length > 1 && (
+            {/* {currentSellers.length > 1 && (
               <div className="mt-4 p-3 bg-gradient-to-r from-yellow-100 to-yellow-50 border-l-4 border-yellow-500 text-yellow-800 rounded-lg text-sm font-medium shadow-sm">
                 ⚡ Your order has items from <b>{currentSellers.length}</b>{" "}
                 shops. Extra{" "}
                 <span className="font-semibold">convenience fee</span> may
                 apply.
               </div>
-            )}
+            )} */}
 
             {/* Total & Checkout */}
             <div className="mt-6 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-inner sticky bottom-0">

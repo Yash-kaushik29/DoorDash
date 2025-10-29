@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const SellerSchema = new mongoose.Schema(
   {
     username: { type: String, required: true },
+    email: {type: String, required: true},
     phone: { type: String, unique: true, required: true },
     password: { type: String, required: true },
     products: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
@@ -33,6 +34,7 @@ const SellerSchema = new mongoose.Schema(
         date: { type: Date, default: Date.now },
       },
     ],
+    qrCode: { type: String },
   },
   { timestamps: true }
 );

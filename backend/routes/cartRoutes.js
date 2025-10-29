@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Product = require('../models/Product')
 const authenticateUser = require("../middleware/authMiddleware");
+const User = require("../models/User");
 
 // Add to Cart
 router.post("/addToCart", authenticateUser, async (req, res) => {
@@ -13,8 +14,41 @@ router.post("/addToCart", authenticateUser, async (req, res) => {
       return res.status(400).send({ success: false, message: "Invalid cart key." });
     }
 
+    const product = await Product.findById(productId).populate("shop");
+    if (!product) {
+      return res.status(404).send({ success: false, message: "Product not found." });
+    }
+
+    const shop = product.shop;
+
+    if (!shop.isOpen) {
+      return res.status(400).send({
+        success: false,
+        message: "This shop is currently closed.",
+      });
+    }
+
+    if (!product.inStock) {
+      return res.status(400).send({
+        success: false,
+        message: "This item is out of stock.",
+      });
+    }
+
+    if (cartKey === "foodCart" && currUser.foodCart.length > 0) {
+      const firstItem = await Product.findById(currUser.foodCart[0].productId).populate("shop");
+      if (firstItem && firstItem.shop._id.toString() !== shop._id.toString()) {
+        return res.status(400).send({
+          success: false,
+          message: `Your cart already contains items from another shop.`,
+          shopName: firstItem.shopName,
+          type: "DIFFERENT_SHOP", 
+        });
+      }
+    }
+
     const existingCartItem = currUser[cartKey].find(
-      (item) => item.productId === productId
+      (item) => item.productId.toString() === productId
     );
 
     if (existingCartItem) {
@@ -24,6 +58,7 @@ router.post("/addToCart", authenticateUser, async (req, res) => {
     }
 
     await currUser.save();
+
     return res.status(200).send({
       success: true,
       message: "Product added to cart!",
@@ -184,6 +219,45 @@ router.get("/getCart", authenticateUser, async (req, res) => {
     return res
       .status(500)
       .send({ success: false, message: "Failed to fetch cart." });
+  }
+});
+
+router.post("/replaceCart", authenticateUser, async (req, res) => {
+  const { productId, cartKey } = req.body; 
+  const userId = req.user._id;
+
+  try {
+    const product = await Product.findById(productId).populate("shop", "shopName isOpen");
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    if (!product.shop?.isOpen) {
+      return res.status(400).json({ success: false, message: "Shop is currently closed." });
+    }
+
+    // Clear existing cart and add this product
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          [cartKey]: [{ productId: product._id, quantity: 1 }],
+        },
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Cart Updated!`,
+      cart: updatedUser[cartKey],
+    });
+  } catch (err) {
+    console.error("Error replacing cart:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong while replacing the cart.",
+    });
   }
 });
 

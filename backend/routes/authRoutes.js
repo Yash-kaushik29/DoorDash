@@ -431,6 +431,7 @@ router.post("/seller-login", async (req, res) => {
         res.send({
           success: true,
           message: "Logged In Successfully!",
+          sellerId: existingSeller._id,
         });
       } else {
         res.send({ success: false, message: "Invalid credentails!" });

@@ -47,7 +47,7 @@ const GroceryProducts = () => {
     <>
       <ToastContainer />
       <Navbar />
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 mb-16">
         <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white capitalize">
           {category}
         </h2>

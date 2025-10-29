@@ -3,7 +3,6 @@ const Seller = require("../models/Seller");
 
 const authenticateSeller = async (req, res, next) => {
   try {
-    // Get token from cookies
     const token = req.cookies?.gullyfoods_seller_session; 
     if (!token) {
       return res
