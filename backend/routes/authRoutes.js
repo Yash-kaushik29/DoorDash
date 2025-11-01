@@ -363,6 +363,9 @@ router.post("/seller-signup", async (req, res) => {
       });
       await newSeller.save();
 
+      const newUser = new User({ username, phone, isSeller: true });
+      await newUser.save();
+
       const token = jwt.sign(
         {
           sellerID: newSeller._id,
@@ -443,11 +446,11 @@ router.post("/seller-login", async (req, res) => {
 });
 
 router.get("/getUser", authenticateUser, (req, res) => {
-  const { _id, username, foodCart, groceryCart, phone } = req.user;
+  const { _id, username, foodCart, groceryCart, phone, isSeller } = req.user;
 
   res.json({
     success: true,
-    user: { _id, username, foodCart, groceryCart, phone },
+    user: { _id, username, foodCart, groceryCart, phone, isSeller },
   });
 });
 
@@ -529,7 +532,7 @@ router.get("/getSeller", authenticateSeller, (req, res) => {
 
   res.json({
     success: true,
-    sellerId
+    sellerId,
   });
 });
 

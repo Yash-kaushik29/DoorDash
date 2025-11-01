@@ -40,9 +40,7 @@ const Checkout = () => {
   const isFoodOrder = cartKey === "foodCart";
 
   const taxes = isFoodOrder ? (cartTotalPrice * 5) / 100 : 0;
-  const [convenienceFees, setConvenienceFees] = useState(
-    isFoodOrder ? (sellers.length - 1) * 15 : 0
-  );
+  const [convenienceFees, setConvenienceFees] = useState(0);
 
   if (cartItems.length === 0) navigate("/cart");
 
@@ -129,12 +127,6 @@ const Checkout = () => {
 
     const delivery = getFoodDeliveryCharge(distance);
     setDeliveryCharge(delivery);
-
-    if (isFoodOrder && sellers.length > 1) {
-      const perShopFee = Math.max(15, delivery * 0.3);
-      const totalConvenienceFees = perShopFee * (sellers.length - 1);
-      setConvenienceFees(Math.round(totalConvenienceFees));
-    }
   };
 
   const handleCheckout = async () => {

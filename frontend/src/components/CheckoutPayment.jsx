@@ -1,4 +1,5 @@
 import React from "react";
+import { toast } from "react-toastify";
 
 const CheckoutPayment = ({
   paymentMethod,
@@ -24,7 +25,8 @@ const CheckoutPayment = ({
           Cash on Delivery
         </button>
         <button
-          onClick={() => setPaymentMethod("Razorpay")}
+          // onClick={() => setPaymentMethod("Razorpay")}
+          onClick={() => toast.warn("Razorpay is facing payment failures. Please proceed with COD.")}
           className={`p-3 w-1/2 rounded-xl font-semibold transition transform hover:scale-105
             ${
               paymentMethod === "Razorpay"

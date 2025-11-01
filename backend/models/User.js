@@ -23,6 +23,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    isSeller: {type: Boolean, default: false},
     addresses: [addressSchema],
     foodCart: [
       {
