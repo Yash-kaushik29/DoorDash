@@ -2,9 +2,8 @@
   "short_name": "GullyFoods",
   "name": "GullyFoods - Order Food & Groceries",
   "start_url": "/",
-  "scope": "/",
-  "display": "fullscreen",
-  "background_color": "#16a34a",
+  "display": "standalone",
+  "background_color": "#ffffff",
   "theme_color": "#16a34a",
   "icons": [
     {
