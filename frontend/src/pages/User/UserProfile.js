@@ -3,9 +3,7 @@ import Navbar from "../../components/Navbar";
 import { IoLogOut } from "react-icons/io5";
 import { UserContext } from "../../context/userContext";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
-import { ToastContainer } from "react-toastify";
 import {
   MdDescription,
   MdHelp,
@@ -13,8 +11,8 @@ import {
   MdLocationOn,
   MdNotifications,
   MdPolicy,
-  MdSettings,
   MdShoppingCart,
+  MdCameraswitch,
 } from "react-icons/md";
 import api from "../../utils/axiosInstance";
 
@@ -67,6 +65,17 @@ const UserProfile = () => {
                 <div className="w-20 h-20 mx-auto rounded-full bg-white text-green-600 flex items-center justify-center text-3xl font-bold shadow-md">
                   {user.username?.charAt(0) || "U"}
                 </div>
+
+                {/* Switch to Seller Profile */}
+                <Link
+                  to={"/seller"}
+                  className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 mt-3 rounded-full text-sm font-medium transition"
+                >
+                  <MdCameraswitch className="text-lg" />
+                  {"Switch to Seller Profile"}
+                </Link>
+
+                {/* Username & Phone */}
                 <h1 className="mt-3 text-2xl font-bold">
                   {user.username || "User"}
                 </h1>

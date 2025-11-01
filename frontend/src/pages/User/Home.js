@@ -13,7 +13,6 @@ import { Link } from "react-router-dom";
 import InstallPrompt from "../../components/InstallPrompt";
 import { motion } from "framer-motion";
 import api from "../../utils/axiosInstance";
-import ReplacePopUp from "../../components/ReplacePopUp";
 
 const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);

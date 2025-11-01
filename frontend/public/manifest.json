@@ -1,20 +1,21 @@
 {
   "short_name": "GullyFoods",
-  "name": "GullyFoods",
+  "name": "GullyFoods - Order Food & Groceries",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "background_color": "#16a34a",
+  "theme_color": "#16a34a",
   "icons": [
     {
-      "src": "icons/gullyfoodsLogo192.png",
+      "src": "/icons/gullyfoodsLogo192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/gullyfoodsLogo512.png",
+      "src": "/icons/gullyfoodsLogo512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff"
+  ]
 }

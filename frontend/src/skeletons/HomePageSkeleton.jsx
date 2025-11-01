@@ -64,7 +64,7 @@ const HomePageSkeleton = () => {
     
           {/* Footer */}
           <footer className="bg-gray-800 text-white py-6 text-center mt-10">
-            <p>&copy; 2025 GullFoods. All rights reserved.</p>
+            <p>&copy; 2025 GullyFoods. All rights reserved.</p>
           </footer>
         </div>
       );
