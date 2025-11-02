@@ -536,10 +536,11 @@ router.get("/getSeller", authenticateSeller, (req, res) => {
   });
 });
 
-router.post("/switch-to-seller", authenticateSeller, async (req, res) => {
+router.post("/switch-to-seller", async (req, res) => {
   try {
-    const seller = req.seller;
-    if(seller) {
+    const sellerToken = req.cookies?.gullyfoods_seller_session;
+
+    if (sellerToken) {
       return res
         .status(200)
         .json({ success: true, message: "Seller Details!" });
