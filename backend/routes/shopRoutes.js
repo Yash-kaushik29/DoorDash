@@ -480,7 +480,7 @@ router.post("/generate-qr", authenticateSeller, async (req, res) => {
         .json({ success: false, message: "Seller not found" });
     }
 
-    if (seller.qrCode) {
+    if (seller?.qrCode) {
       return res.json({
         success: true,
         message: "QR code already exists",

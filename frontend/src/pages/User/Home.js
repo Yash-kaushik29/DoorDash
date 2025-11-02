@@ -18,7 +18,7 @@ const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
   const [shops, setShops] = useState([]);
   const [products, setProducts] = useState([]);
-  
+
   const fetchPopularShops = async () => {
     try {
       const { data } = await api.get(`/api/home/get-popular-shops`, {
@@ -52,11 +52,6 @@ const Home = () => {
 
   // Memoized Shop Cards
   const memoizedShops = useMemo(() => {
-    if (shops.length === 0) {
-      return Array(5)
-        .fill(0)
-        .map((_, i) => <HomePageSkeleton key={i} />);
-    }
     return shops.map((shop, i) => (
       <motion.div
         key={shop._id || i}
@@ -72,11 +67,6 @@ const Home = () => {
 
   // Memoized Product Cards
   const memoizedProducts = useMemo(() => {
-    if (products.length === 0) {
-      return Array(8)
-        .fill(0)
-        .map((_, i) => <HomePageSkeleton key={i} />);
-    }
     return products.map((product, i) => (
       <ProductCard
         key={i}

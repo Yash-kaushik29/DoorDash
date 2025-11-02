@@ -363,8 +363,17 @@ router.post("/seller-signup", async (req, res) => {
       });
       await newSeller.save();
 
-      const newUser = new User({ username, phone, isSeller: true });
-      await newUser.save();
+      const existingUser = await User.findOne({ phone });
+
+      if (!existingUser) {
+        const newUser = new User({ username, phone, isSeller: true });
+        await newUser.save();
+      } else {
+        if (!existingUser.isSeller) {
+          existingUser.isSeller = true;
+          await existingUser.save();
+        }
+      }
 
       const token = jwt.sign(
         {
