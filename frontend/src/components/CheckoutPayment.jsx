@@ -38,7 +38,7 @@ const CheckoutPayment = ({
         </button>
       </div>
 
-      <button
+      {/* <button
         onClick={handleCheckout}
         disabled={!selectedAddress}
         className={`w-full py-3 mt-2 rounded-xl font-bold text-lg transition 
@@ -50,7 +50,8 @@ const CheckoutPayment = ({
         `}
       >
         {paymentMethod === "Razorpay" ? "Proceed to Pay 💳" : "Place Order 🎉"}
-      </button>
+      </button> */}
+      <div className="py-3 mt-2 font-bold" >Order will start from 03 November, 2025. Explore our menu.</div>
     </div>
   );
 };

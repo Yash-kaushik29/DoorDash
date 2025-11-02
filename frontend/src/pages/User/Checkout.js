@@ -7,7 +7,7 @@ import Navbar from "../../components/Navbar";
 import { UserContext } from "../../context/userContext";
 import CheckoutPayment from "../../components/CheckoutPayment";
 import CheckoutCoupons from "../../components/CheckoutCoupons";
-import CheckoutSummary from "../../components/CheckoutSummary"; 
+import CheckoutSummary from "../../components/CheckoutSummary";
 import CheckoutAddress from "../../components/CheckoutAddress ";
 import api from "../../utils/axiosInstance";
 
@@ -49,10 +49,9 @@ const Checkout = () => {
     const fetchActiveCoupons = async () => {
       if (ready && !user) return;
       try {
-        const { data } = await api.get(
-          `/api/user-profile/active-coupons`,
-          { withCredentials: true }
-        );
+        const { data } = await api.get(`/api/user-profile/active-coupons`, {
+          withCredentials: true,
+        });
 
         if (data.success) setActiveCoupons(data.activeCoupons);
         else toast.error(data.message);
@@ -73,10 +72,9 @@ const Checkout = () => {
 
   const fetchAddresses = async () => {
     try {
-      const res = await api.get(
-        `/api/user-profile/getAddresses`,
-        { params: { userId: user._id } }
-      );
+      const res = await api.get(`/api/user-profile/getAddresses`, {
+        params: { userId: user._id },
+      });
       if (res.data.success) setUserAddresses(res.data.addresses);
       else toast.error("Failed to fetch addresses");
     } catch (err) {
@@ -87,7 +85,7 @@ const Checkout = () => {
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const toRad = (value) => (value * Math.PI) / 180;
-    const R = 6371; 
+    const R = 6371;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a =
@@ -173,6 +171,8 @@ const Checkout = () => {
       setIsPlacingOrder(false);
       console.error(error);
       toast.error("Something went wrong while placing the order.");
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
 
@@ -218,6 +218,8 @@ const Checkout = () => {
       razor.open();
     } catch (error) {
       toast.error("❌ Error initiating payment!");
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
 
