@@ -3,7 +3,7 @@ import Navbar from "../../components/Navbar";
 import { IoLogOut } from "react-icons/io5";
 import { UserContext } from "../../context/userContext";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import {
   MdDescription,
   MdHelp,
@@ -18,6 +18,7 @@ import api from "../../utils/axiosInstance";
 
 const UserProfile = () => {
   const { user, setUser, ready } = useContext(UserContext);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   if (ready && !user) {
@@ -46,8 +47,28 @@ const UserProfile = () => {
     }
   };
 
+  const handleRedirect = async () => {
+    setLoading(true);
+    try {
+      const res = await api.post("/api/auth/switch-to-seller", {
+        phone: user.phone,
+      });
+      if (res.data.success) {
+        toast.success("Moving to your shop!");
+        setTimeout(() => {
+          window.location.href = "/seller";
+        }, 800);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to switch");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
+      <ToastContainer />
       <Navbar />
       {ready === false ? (
         <div className="flex justify-center items-center space-x-2 h-[100vh]">
@@ -68,13 +89,21 @@ const UserProfile = () => {
 
                 {/* Switch to Seller Profile */}
                 {user?.isSeller && (
-                  <Link
-                    to={"/seller"}
-                    className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 mt-3 rounded-full text-sm font-medium transition"
-                  >
-                    <MdCameraswitch className="text-lg" />
-                    {"Switch to Seller Profile"}
-                  </Link>
+                  <div>
+                    {loading ? (
+                      <span className="text-white text-sm">
+                        Getting Seller Data...
+                      </span>
+                    ) : (
+                      <button
+                        onClick={handleRedirect}
+                        className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 mt-3 rounded-full text-sm font-medium transition"
+                      >
+                        <MdCameraswitch className="text-lg" />
+                        Switch to Seller Profile
+                      </button>
+                    )}
+                  </div>
                 )}
 
                 {/* Username & Phone */}
