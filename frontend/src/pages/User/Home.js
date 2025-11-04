@@ -5,7 +5,6 @@ import { MdDinnerDining } from "react-icons/md";
 import { GiMedicines, GiNoodles, GiFruitBowl } from "react-icons/gi";
 import { UserContext } from "../../context/userContext";
 import HomePageSkeleton from "../../skeletons/HomePageSkeleton";
-import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import ShopCard from "../../components/ShopCard";
 import ProductCard from "../../components/ProductCard";
@@ -13,11 +12,36 @@ import { Link } from "react-router-dom";
 import InstallPrompt from "../../components/InstallPrompt";
 import { motion } from "framer-motion";
 import api from "../../utils/axiosInstance";
+import { FiRefreshCw } from "react-icons/fi";
 
 const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
+  const [order, setOrder] = useState(null);
   const [shops, setShops] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   const [products, setProducts] = useState([]);
+
+  const fetchActiveOrder = async () => {
+    try {
+      setRefreshing(true);
+      const { data } = await api.get(`/api/order/active`, {
+        withCredentials: true,
+      });
+      if (data.success && data.order) {
+        setOrder(data.order);
+      } else {
+        setOrder(null);
+      }
+    } catch (error) {
+      console.error("Failed to fetch active order", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) fetchActiveOrder();
+  }, [user]);
 
   const fetchPopularShops = async () => {
     try {
@@ -85,6 +109,54 @@ const Home = () => {
       <ToastContainer position="top-right" autoClose={3000} />
       <Navbar />
       <InstallPrompt />
+
+      {order && (
+        <div className="fixed bottom-[72px] lg:bottom-0 left-0 w-full bg-green-600 text-white py-3 px-5 shadow-lg flex justify-between items-center rounded-t-lg z-50">
+          <div>
+            <p className="font-semibold">
+              {order.deliveryStatus === "Processing" && (
+                <>
+                  ⏳ Order #{order.id} is{" "}
+                  {order.orderType === "food"
+                    ? "cooking in the system"
+                    : "getting processed"}{" "}
+                  🔥
+                </>
+              )}
+              {order.deliveryStatus === "Preparing" && (
+                <>
+                  👨‍🍳 Your order #{order.id} is{" "}
+                  {order.orderType === "food"
+                    ? "getting prepared fresh 👀"
+                    : "being packed up nicely 🎁"}
+                </>
+              )}
+              {order.deliveryStatus === "Out For Delivery" && (
+                <>🚴 Your order #{order.id} is zooming to you 💨</>
+              )}
+            </p>
+            <p className="text-xs opacity-90 mt-1">Track it like a pro</p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={fetchActiveOrder}
+              className="bg-white text-green-600 p-2 rounded-full hover:bg-gray-100 transition flex items-center justify-center"
+              title="Refresh status"
+            >
+              <FiRefreshCw
+                className={`text-lg ${refreshing ? "animate-spin" : ""}`}
+              />
+            </button>
+            <Link
+              to={`/order/${order._id}`}
+              className="bg-white text-green-600 px-3 py-1 rounded-lg font-medium hover:bg-gray-100 transition"
+            >
+              View
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Mobile App Name */}
       <div className="flex flex-col items-center pt-4 lg:hidden">

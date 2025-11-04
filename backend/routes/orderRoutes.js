@@ -469,6 +469,8 @@ router.put("/confirm-order/:orderId", authenticateSeller, async (req, res) => {
       }
     });
 
+    order.deliveryStatus = "Preparing";
+
     if (isUpdated) {
       order.amount = Math.max(0, (order.amount || 0) - cancelledAmount);
       await order.save();
@@ -555,6 +557,32 @@ router.get("/getUserOrders", authenticateUser, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+router.get("/active", authenticateUser, async (req, res) => {
+  try {
+    const userId = req.user?._id;
+
+    if (!userId) {
+      return res.status(400).json({ success: false, message: "User ID missing" });
+    }
+
+    // Find the most recent active order
+    const order = await Order.findOne({
+      user: userId,
+      deliveryStatus: { $in: ["Processing", "Preparing", "Out For Delivery"] },
+    })
+      .sort({ createdAt: -1 })
+      .select("id deliveryStatus orderType");
+
+    if (!order)
+      return res.json({ success: true, order: null });
+
+    res.json({ success: true, order });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 

@@ -14,7 +14,7 @@ import api from "../../utils/axiosInstance";
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, ready } = useContext(UserContext);
+  const { user, setUser, ready } = useContext(UserContext);
 
   const {
     cartItems,
@@ -162,6 +162,10 @@ const Checkout = () => {
         );
         if (data.success) {
           toast.success("🎉 Order Placed Successfully!");
+          setUser((prev) => ({
+            ...prev,
+            [cartKey]: data.cart,
+          }));
           setTimeout(() => navigate(`/order/${data.order._id}`), 2000);
         } else toast.error(data.message);
       } else {
@@ -209,6 +213,10 @@ const Checkout = () => {
             );
             if (data.success) {
               toast.success("🎉 Order Placed Successfully!");
+              setUser((prev) => ({
+                ...prev,
+                [cartKey]: data.cart,
+              }));
               setTimeout(() => navigate(`/order/${data.order._id}`), 2000);
             } else toast.error(data.message);
           } else toast.error("❌ Payment Verification Failed!");
