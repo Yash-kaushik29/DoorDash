@@ -2,6 +2,7 @@ import React from "react";
 import Navbar from "../../components/Navbar";
 import { MdEmail, MdPhone, MdHelpOutline } from "react-icons/md";
 import { FaWhatsapp } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const HelpSupport = () => {
   const faqs = [
@@ -58,18 +59,28 @@ const HelpSupport = () => {
               If you need further assistance, reach out to us:
             </p>
             <div className="space-y-4">
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center">
+              <a
+                href="https://mail.google.com/mail/?view=cm&fs=1&to=gullyfoods.app@gmail.com"
+                className="flex items-center bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 hover:bg-green-100 dark:hover:bg-green-600 transition transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
                 <MdEmail className="text-2xl text-green-500 mr-4" />
-                <span>gullyfoods.app@gmail.com</span>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center">
+                <span className="font-medium">gullyfoods.app@gmail.com</span>
+              </a>
+
+              <div className="flex items-center bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4">
                 <MdPhone className="text-2xl text-green-500 mr-4" />
-                <span>+91-9876543210</span>
+                <span className="font-medium">+91-8650065295</span>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 flex items-center">
+
+              <a
+                href="https://wa.me/918650065295"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 hover:bg-green-100 dark:hover:bg-green-600 transition transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
                 <FaWhatsapp className="text-2xl text-green-500 mr-4" />
-                <span>Contact via WhatsApp</span>
-              </div>
+                <span className="font-medium">Contact via WhatsApp</span>
+              </a>
             </div>
           </div>
         </div>
