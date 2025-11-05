@@ -16,8 +16,6 @@ export default function Signup() {
   const navigate = useNavigate();
   const otpRefs = useRef([]);
 
-  const TOKEN_EXPIRY_DAYS = 14;
-
   // ------------------- Form Handlers -------------------
   const handleChange = (e) => {
     const { name, value } = e.target;

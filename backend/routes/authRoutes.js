@@ -182,6 +182,7 @@ router.post("/user-signup", async (req, res) => {
         foodCart: newUser.foodCart,
         groceryCart: newUser.groceryCart,
         phone: newUser.phone,
+        isSeller: newUser.isSeller,
       },
     });
   } catch (error) {
@@ -333,6 +334,7 @@ router.post("/user-login", async (req, res) => {
         foodCart: existingUser.foodCart,
         groceryCart: existingUser.groceryCart,
         phone: existingUser.phone,
+        isSeller: existingUser.isSeller,
       },
     });
   } catch (error) {

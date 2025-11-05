@@ -264,7 +264,9 @@ const ProductCard = ({
 
         {!product.inStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-60 rounded-md">
-            <span className="text-white font-bold text-sm">Out of Stock</span>
+            <span className="text-white font-bold text-sm">
+              {product.shopType === "Grocery" ? "Out of Stock" : "Not Available"}
+            </span>
           </div>
         )}
         {product.inStock && (

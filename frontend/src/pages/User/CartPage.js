@@ -185,7 +185,7 @@ const CartPage = () => {
             }`}
             onClick={() => setActiveCart("foodCart")}
           >
-            🍔 Food Cart ({user?.foodCart.length})
+            🍔 Food Cart ({user?.foodCart?.length})
           </button>
           <button
             className={`px-4 py-2 rounded-lg font-semibold ${
@@ -195,7 +195,7 @@ const CartPage = () => {
             }`}
             onClick={() => setActiveCart("groceryCart")}
           >
-            🛒 Grocery Cart ({user?.groceryCart.length})
+            🛒 Grocery Cart ({user?.groceryCart?.length})
           </button>
         </div>
 
@@ -205,7 +205,7 @@ const CartPage = () => {
             <span className="w-3 h-3 bg-green-600 rounded-full animate-bounce [animation-delay:0.2s]"></span>
             <span className="w-3 h-3 bg-green-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
           </div>
-        ) : currentCartItems.length === 0 ? (
+        ) : currentCartItems?.length === 0 ? (
           <p className="text-center text-gray-500 dark:text-gray-400">
             Your {activeCart === "foodCart" ? "food" : "grocery"} cart is empty.
           </p>
@@ -213,7 +213,7 @@ const CartPage = () => {
           <div className="bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-xl max-w-3xl mx-auto border border-green-100 dark:border-gray-700 flex flex-col">
             {/* Scrollable Cart Items */}
             <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
-              {currentCartItems.map((item) => (
+              {currentCartItems?.map((item) => (
                 <div
                   key={item.product._id}
                   className="flex items-center justify-between border-b border-green-100 dark:border-gray-700 pb-4"
