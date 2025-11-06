@@ -15,6 +15,10 @@ const CartPage = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const sampleProduct = activeCart === 'foodCart' ? foodCartItems[0]?.product : groceryCartItems[0]?.product;
+  const shopLat = sampleProduct?.shop?.lat;
+  const shopLong = sampleProduct?.shop?.long;
+
   // Fetch carts
   useEffect(() => {
     const fetchCarts = async () => {
@@ -94,7 +98,7 @@ const CartPage = () => {
       const { data } = await api.post(
         `${endpoint}`,
         { productId, cartKey },
-        {withCredentials: true}
+        { withCredentials: true }
       );
 
       if (!data.success) throw new Error("Update failed");
@@ -155,6 +159,8 @@ const CartPage = () => {
         cartItems,
         totalPrice: getTotalPrice(cartItems),
         cartKey: activeCart,
+        shopLat,
+        shopLong
       },
     });
   };
@@ -174,7 +180,7 @@ const CartPage = () => {
         <h1 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white text-center">
           Your Cart
         </h1>
-
+        
         {/* Cart Tabs */}
         <div className="flex justify-center mb-6 space-x-4">
           <button

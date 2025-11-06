@@ -25,8 +25,7 @@ const CommissionHistory = () => {
         const res = await api.get(
           `/api/delivery/${deliveryBoyId}/commissionHistory`
         );
-        const data = await res.json();
-        setHistory(data.commissionHistory || []);
+        setHistory(res.data.commissionHistory || []);
       } catch (err) {
         console.error("Error fetching commission history:", err);
       } finally {

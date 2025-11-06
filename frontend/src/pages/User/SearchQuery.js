@@ -8,6 +8,7 @@ import SearchPageSkeleton from "../../skeletons/SearchPageSkeleton";
 import { UserContext } from "../../context/userContext";
 import { ToastContainer } from "react-toastify";
 import api from "../../utils/axiosInstance";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const SearchQuery = () => {
   const { query } = useParams();
@@ -18,12 +19,12 @@ const SearchQuery = () => {
   const { user, setUser } = useContext(UserContext);
 
   useEffect(() => {
-    // Reset products and pagination when query changes
     setProducts([]);
     setPage(1);
     setHasMore(true);
   }, [query]);
 
+  // Fetch products
   useEffect(() => {
     const fetchQueryProducts = async () => {
       if (!query) return;
@@ -35,7 +36,7 @@ const SearchQuery = () => {
         );
 
         setProducts((prev) => (page === 1 ? data : [...prev, ...data]));
-        setHasMore(data.length > 0);
+        setHasMore(data.length === 12);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -45,6 +46,19 @@ const SearchQuery = () => {
     fetchQueryProducts();
   }, [page, query]);
 
+  useEffect(() => {
+    const checkScrollable = () => {
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = window.innerHeight;
+      return scrollHeight > clientHeight + 50;
+    };
+
+    if (!loading && hasMore && !checkScrollable()) {
+      setPage((prev) => prev + 1);
+    }
+  }, [products, loading, hasMore]);
+
+  // Show skeleton on first load
   if (loading && page === 1) return <SearchPageSkeleton />;
 
   return (
@@ -52,24 +66,42 @@ const SearchQuery = () => {
       <ToastContainer position="top-right" autoClose={3000} />
       <Navbar />
 
+      {/* Empty State */}
       {products.length === 0 && !loading ? (
-        <p className="text-center mt-12 text-gray-500">
-          No products found for "<span className="font-semibold">{query}</span>"
-        </p>
+        <div className="flex flex-col items-center justify-center min-h-[70vh]">
+          <DotLottieReact
+            src="/lottie/nothing.lottie"
+            loop
+            autoplay
+            className="w-64 h-64"
+          />
+          <p className="text-center mt-6 text-gray-500 dark:text-white text-lg">
+            No products found for "
+            <span className="font-semibold">{query}</span>"
+          </p>
+        </div>
       ) : (
         <InfiniteScroll
-          dataLength={products.length} // Current product count
-          next={() => setPage((prev) => prev + 1)} // Load next page
-          hasMore={hasMore} // Keep fetching until no more data
+          dataLength={products.length}
+          next={() => setPage((prev) => prev + 1)}
+          hasMore={hasMore}
           loader={
-            <p className="text-center text-gray-500">
-              Loading more products...
-            </p>
+            <div className="flex justify-center py-4">
+              <div className="w-6 h-6 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+            </div>
           }
           endMessage={
-            <p className="text-center text-gray-400">
-              No more products to show.
-            </p>
+            <div className="flex flex-col items-center justify-center min-h-[70vh]">
+              <DotLottieReact
+                src="/lottie/emptyList.lottie"
+                loop
+                autoplay
+                className="w-64 h-64"
+              />
+              <p className="text-center mt-6 text-gray-500 dark:text-white text-lg">
+                No more products to show.
+              </p>
+            </div>
           }
         >
           <div className="mt-6 p-4 grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-8 gap-6 mb-12 lg:mb-0">

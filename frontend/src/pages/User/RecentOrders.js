@@ -4,6 +4,7 @@ import Navbar from "../../components/Navbar";
 import { Link } from "react-router-dom";
 import { MdOutlineArrowOutward, MdAccessTimeFilled } from "react-icons/md";
 import api from "../../utils/axiosInstance";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const OrderCard = ({ order }) => {
   const formatDate = (dateString) =>
@@ -166,10 +167,12 @@ const RecentOrders = () => {
 
         {loading ? (
           <div className="flex flex-col justify-center items-center py-6 space-y-5">
-            <MdAccessTimeFilled className="text-3xl text-green-500 animate-ping" />
-            <p className="text-gray-500 dark:text-gray-300 text-lg text-center">
-              Fetching your latest orders… ⏳
-            </p>
+          <DotLottieReact
+            src="/lottie/glass.lottie"
+            loop
+            autoplay
+            className="w-64 h-64"
+          />
           </div>
         ) : error ? (
           <div className="text-center text-red-500 flex flex-col gap-4">

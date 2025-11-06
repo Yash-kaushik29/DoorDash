@@ -29,6 +29,8 @@ const ShopSchema = new mongoose.Schema(
     address: {
       type: addressSchema,
     },
+    lat: { type: String },
+    long: { type: String },
     isOpen: {
       type: Boolean,
       default: false,

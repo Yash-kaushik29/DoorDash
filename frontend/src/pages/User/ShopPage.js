@@ -92,6 +92,7 @@ const ShopPage = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-4">
               <h1 className="text-3xl font-bold text-white">{shop?.name}</h1>
+              <h3>{shop?.address?.addressLine}, {shop?.address?.city}</h3>
             </div>
           </div>
         )}

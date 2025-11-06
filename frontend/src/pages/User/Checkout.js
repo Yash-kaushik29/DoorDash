@@ -10,6 +10,7 @@ import CheckoutCoupons from "../../components/CheckoutCoupons";
 import CheckoutSummary from "../../components/CheckoutSummary";
 import CheckoutAddress from "../../components/CheckoutAddress ";
 import api from "../../utils/axiosInstance";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const Checkout = () => {
   const location = useLocation();
@@ -21,11 +22,15 @@ const Checkout = () => {
     totalPrice: cartTotalPrice,
     sellers,
     cartKey,
+    shopLat,
+    shopLong,
   } = location.state || {
     cartItems: [],
     totalPrice: 0,
     sellers: 1,
     cartKey: "foodCart",
+    shopLat,
+    shopLong,
   };
 
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -36,6 +41,7 @@ const Checkout = () => {
   const [deliveryCharge, setDeliveryCharge] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [distance, setDistance] = useState(0);
 
   const isFoodOrder = cartKey === "foodCart";
 
@@ -92,6 +98,7 @@ const Checkout = () => {
       Math.sin(dLat / 2) ** 2 +
       Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    setDistance(R * c);
     return R * c;
   };
 
@@ -116,14 +123,9 @@ const Checkout = () => {
   const handleSelectAddress = (addr) => {
     setSelectedAddress(addr);
 
-    const distance = calculateDistance(
-      28.83811395386716,
-      78.24223013771964,
-      addr.lat,
-      addr.long
-    );
+    const dis = calculateDistance(shopLat, shopLong, addr.lat, addr.long);
 
-    const delivery = getFoodDeliveryCharge(distance);
+    const delivery = getFoodDeliveryCharge(dis);
     setDeliveryCharge(delivery);
   };
 
@@ -166,7 +168,7 @@ const Checkout = () => {
             ...prev,
             [cartKey]: data.cart,
           }));
-          setTimeout(() => navigate(`/order/${data.order._id}`), 2000);
+          setTimeout(() => navigate(`/order/${data.order._id}`), 5000);
         } else toast.error(data.message);
       } else {
         await handlePayment(orderPayload);
@@ -217,7 +219,7 @@ const Checkout = () => {
                 ...prev,
                 [cartKey]: data.cart,
               }));
-              setTimeout(() => navigate(`/order/${data.order._id}`), 2000);
+              setTimeout(() => navigate(`/order/${data.order._id}`), 5000);
             } else toast.error(data.message);
           } else toast.error("❌ Payment Verification Failed!");
         },
@@ -240,17 +242,12 @@ const Checkout = () => {
   if (isPlacingOrder) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-stone-100">
-        <video
-          src="/logoAnimation.mp4"
-          autoPlay
+        <DotLottieReact
+          src="/lottie/delivery.lottie"
           loop
-          muted
-          playsInline
-          className="w-64 h-64 object-contain"
+          autoplay
+          className="w-64 h-64"
         />
-        <p className="mt-6 text-green-600 font-semibold text-lg">
-          Placing your order...
-        </p>
       </div>
     );
   }
@@ -284,6 +281,7 @@ const Checkout = () => {
           isFoodOrder={isFoodOrder}
           taxes={taxes}
           deliveryCharge={deliveryCharge}
+          distance={distance}
           convenienceFees={convenienceFees}
           discount={discount}
           getGroceryServiceCharge={getGroceryServiceCharge}

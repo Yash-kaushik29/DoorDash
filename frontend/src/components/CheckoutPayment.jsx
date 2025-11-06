@@ -51,7 +51,7 @@ const CheckoutPayment = ({
       >
         {paymentMethod === "Razorpay" ? "Proceed to Pay 💳" : "Place Order 🎉"}
       </button>
-      <div className="py-3 mt-2 font-bold" >Order will start from 03 November, 2025. Explore our menu.</div>
+      <div className="py-3 mt-2 font-bold" >Order will start from 08 November, 2025. Explore our menu.</div>
     </div>
   );
 };

@@ -14,6 +14,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { IoIosCart } from "react-icons/io";
 import DownloadInvoiceButton from "../../components/DownloadInvoiceButton";
 import api from "../../utils/axiosInstance";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const OrderDetails = () => {
   const { orderId } = useParams();
@@ -38,7 +39,7 @@ const OrderDetails = () => {
         setError("Failed to fetch order details");
         console.error(err);
       } finally {
-        setLoading(false);
+        setLoading(true);
       }
     };
     fetchOrderDetails();
@@ -110,7 +111,20 @@ const OrderDetails = () => {
     </div>
   );
 
-  if (loading) return <OrderDetailsLoader />;
+  if (loading)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[100vh] dark:bg-gray-900">
+        <DotLottieReact
+          src="/lottie/Food.lottie"
+          loop
+          autoplay
+          className="w-64 h-64"
+        />
+        <p className="text-center mt-6 text-gray-500 dark:text-white text-lg">
+          Getting your order...
+        </p>
+      </div>
+    );
   if (error)
     return (
       <div className="text-center mt-10 text-red-600 dark:text-red-400">
@@ -125,9 +139,12 @@ const OrderDetails = () => {
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200 py-6 px-2 sm:px-6">
         {/* Order Summary */}
         <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 mt-4">
-          <div className="flex items-center gap-2 mb-4" >
+          <div className="flex items-center gap-2 mb-4">
             <h2 className="text-2xl font-semibold">Order #{order?.id}</h2>
-            {order.deliveryStatus === "Delivered" && order.orderType === 'Food' && <DownloadInvoiceButton orderId={order._id} />}
+            {order.deliveryStatus === "Delivered" &&
+              order.orderType === "Food" && (
+                <DownloadInvoiceButton orderId={order._id} />
+              )}
           </div>
 
           {/* Status Row */}

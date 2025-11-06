@@ -253,39 +253,31 @@ router.get("/order/:orderId", async (req, res) => {
 });
 
 router.put("/order/confirm-pickup", async (req, res) => {
-  const { orderId, productId } = req.body;
+  const { orderId } = req.body;
 
   try {
     const order = await Order.findById(orderId);
     if (!order) return res.status(404).json({ message: "Order not found" });
 
-    let updated = false;
-    let count = 0;
+    order.items = order.items.map((item) => ({
+      ...item,
+      status: "Out For Delivery",
+    }));
 
-    order.items = order.items.map((item) => {
-      if (item.product.toString() === productId) {
-        item.status = "Out For Delivery";
-        updated = true;
-      }
-      if (item.status === "Out For Delivery") count++;
-      return item;
-    });
+    order.deliveryStatus = "Out For Delivery";
 
-    if (!updated) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found in order" });
-    }
-
-    if (count === order.items.length) order.deliveryStatus = "Out For Delivery";
     await order.save();
 
-    res.json({ success: true, message: "Marked as Out for Delivery!" });
+    res.json({
+      success: true,
+      message: "Order marked as Out For Delivery!",
+    });
   } catch (error) {
     console.error("Error updating order:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 router.put("/order/confirm-delivery/:orderId", async (req, res) => {
   try {

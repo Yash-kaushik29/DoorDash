@@ -3,6 +3,7 @@ import React from 'react'
 const CheckoutSummary = ({
   cartTotalPrice,
   deliveryCharge,
+  distance,
   taxes,
   convenienceFees,
   selectedCoupon,
@@ -25,7 +26,7 @@ const CheckoutSummary = ({
       {isFoodOrder ? (
         <>
           <div className="flex justify-between">
-            <span>Delivery Fee 🚚:</span>
+            <span>Delivery Fee {distance > 0 && (<span>({distance.toFixed(2)} Km)</span>)} 🚚 :</span>
             <span className="text-green-500 font-semibold">₹{deliveryCharge.toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
@@ -48,7 +49,7 @@ const CheckoutSummary = ({
             </span>
           </div>
           <div className="flex justify-between">
-            <span>Delivery Fee 🚚:</span>
+            <span>Delivery Fee {distance > 0 && (<span>({distance.toFixed(2)} Km)</span>)} 🚚:</span>
             <span className="text-green-500 font-semibold">{deliveryCharge.toFixed(2)}</span>
           </div>
         </>

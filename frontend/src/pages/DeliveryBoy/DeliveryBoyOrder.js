@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
-import { FaMoneyBillWave, FaPhoneAlt, FaMapMarkerAlt, FaUser } from "react-icons/fa";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {
+  FaMoneyBillWave,
+  FaPhoneAlt,
+  FaMapMarkerAlt,
+  FaUser,
+} from "react-icons/fa";
 import { IoFastFoodSharp } from "react-icons/io5";
 import { MdDeliveryDining } from "react-icons/md";
 import DeliveryBoyHeader from "../../components/DeliveryBoyHeader";
@@ -11,7 +17,6 @@ const DeliveryBoyOrder = () => {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showConfirm, setShowConfirm] = useState(false); // 🔹 new
   const navigate = useNavigate();
   const token = localStorage.getItem("GullyFoodsDeliveryToken");
 
@@ -22,10 +27,9 @@ const DeliveryBoyOrder = () => {
   useEffect(() => {
     const fetchOrderDetails = async () => {
       try {
-        const response = await api.get(
-          `/api/delivery/order/${orderId}`,
-          { withCredentials: true }
-        );
+        const response = await api.get(`/api/delivery/order/${orderId}`, {
+          withCredentials: true,
+        });
         setOrder(response.data);
         setLoading(false);
       } catch (error) {
@@ -33,21 +37,21 @@ const DeliveryBoyOrder = () => {
         setLoading(false);
       }
     };
-
     fetchOrderDetails();
   }, [orderId]);
 
-  const markAsOutForDelivery = async (productId) => {
+  const markAsOutForDelivery = async () => {
     try {
       await api.put(
         `/api/delivery/order/confirm-pickup`,
-        { orderId, productId },
+        { orderId },
         { withCredentials: true }
       );
-      alert("Marked as Out For Delivery");
-      window.location.reload();
+      toast.success("Order marked as Out For Delivery ✅");
+      setOrder({ ...order, deliveryStatus: "Out For Delivery" });
     } catch (error) {
       console.error("Error updating status:", error);
+      toast.error("Failed to update status");
     }
   };
 
@@ -58,12 +62,15 @@ const DeliveryBoyOrder = () => {
         {},
         { withCredentials: true }
       );
-
-      alert("Order marked as Delivered");
-      setOrder({ ...order, deliveryStatus: "Delivered" }); // 🔹 update local state
-      setShowConfirm(false); // close modal
+      toast.success("Order marked as Delivered 🎉");
+      setOrder({
+        ...order,
+        deliveryStatus: "Delivered",
+        paymentStatus: "Paid",
+      });
     } catch (error) {
       console.error("Error confirming delivery:", error);
+      toast.error("Failed to confirm delivery");
     }
   };
 
@@ -73,20 +80,19 @@ const DeliveryBoyOrder = () => {
   return (
     <div>
       <DeliveryBoyHeader />
+      <ToastContainer position="top-center" autoClose={2000} />
       <div className="min-h-screen p-4 bg-gray-100 dark:bg-gray-800">
         <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">
           Order Details
         </h1>
 
-        {/* Order Details Section */}
-
+        {/* Order Info Section */}
         <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2">
             <IoFastFoodSharp className="text-green-500" /> Order Info
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left Section */}
             <div className="space-y-3">
               <p className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
                 <MdDeliveryDining className="text-blue-500" />
@@ -100,8 +106,7 @@ const DeliveryBoyOrder = () => {
                 <FaMoneyBillWave className="text-green-500" />
                 <span className="font-semibold">Amount:</span>
                 <span className="font-bold text-green-600 dark:text-green-400">
-                  ₹
-                  {order?.totalAmount}
+                  ₹{order?.totalAmount}
                 </span>
               </p>
 
@@ -138,7 +143,7 @@ const DeliveryBoyOrder = () => {
               </p>
             </div>
 
-            {/* Right Section */}
+            {/* Customer Info */}
             <div className="space-y-3">
               <p className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
                 <FaUser className="text-purple-500" />
@@ -181,100 +186,86 @@ const DeliveryBoyOrder = () => {
           </div>
         </div>
 
-        {/* Product List Section */}
+        <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl p-6 mb-8 border border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2">
+            <MdDeliveryDining className="text-orange-500" /> Pickup From
+          </h2>
+
+          <p className="text-gray-700 dark:text-gray-200 mb-2">
+            <span className="font-semibold">Shop Name:</span>{" "}
+            {order?.items?.[0]?.product?.shopName || "GullyFoods Main Outlet"}
+          </p>
+
+          {order?.shopAddress && (
+            <p className="text-gray-700 dark:text-gray-200 mb-2">
+              <span className="font-semibold">Address:</span>{" "}
+              {order.shopAddress}
+            </p>
+          )}
+
+          {order?.shopPhone && (
+            <p className="text-gray-700 dark:text-gray-200 mb-2">
+              <span className="font-semibold">Phone:</span>{" "}
+              <a
+                href={`tel:${order.shopPhone}`}
+                className="text-blue-500 hover:underline"
+              >
+                {order.shopPhone}
+              </a>
+            </p>
+          )}
+
+          {order?.shopLat && order?.shopLong && (
+            <a
+              href={`https://www.google.com/maps?q=${order.shopLat},${order.shopLong}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition w-full sm:w-auto"
+            >
+              <FaMapMarkerAlt className="mr-2" /> View Shop on Map
+            </a>
+          )}
+        </div>
+
+        {/* Product List */}
         <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
           Products
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {order?.items.map((item, index) => (
+        <div className="bg-white dark:bg-gray-700 shadow-md rounded-lg p-4 mb-8">
+          {order?.items?.map((item, i) => (
             <div
-              key={index}
-              className="bg-white dark:bg-gray-700 shadow-md rounded-lg p-4 flex flex-col justify-between"
+              key={i}
+              className="flex justify-between items-center border-b border-gray-200 dark:border-gray-600 py-2"
             >
-              <div>
-                <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">
-                  {item.product.name}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  <span className="font-semibold">Shop:</span>{" "}
-                  {item.product.shopName}
-                </p>
-                <p className="text-gray-600 dark:text-gray-300">
-                  <span className="font-semibold">Quantity:</span>{" "}
-                  {item.quantity}
-                </p>
-
-                <p
-                  className={`mt-2 font-semibold ${
-                    item.status === "Processing"
-                      ? "text-blue-600 dark:text-blue-400"
-                      : item.status === "Out For Delivery" ||
-                        item.status === "Preparing"
-                      ? "text-yellow-600 dark:text-yellow-400"
-                      : item.status === "Delivered"
-                      ? "text-green-600 dark:text-green-400"
-                      : item.status === "Cancelled"
-                      ? "text-red-600 dark:text-red-400"
-                      : "text-gray-600 dark:text-gray-400"
-                  }`}
-                >
-                  Status: {item.status}
-                </p>
-              </div>
-
-              {/* Show button only when product is still active */}
-              {(item.status === "Preparing" ||
-                item.status === "Processing") && (
-                <button
-                  onClick={() => markAsOutForDelivery(item.product._id)}
-                  className="mt-4 w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
-                >
-                  Mark as Out For Delivery
-                </button>
-              )}
+              <span className="text-gray-800 dark:text-gray-100">
+                {item.product.name}
+              </span>
+              <span className="text-gray-600 dark:text-gray-300">
+                x{item.quantity}
+              </span>
             </div>
           ))}
         </div>
 
-        {/* ✅ Show button only if not delivered */}
-        {order?.deliveryStatus !== "Delivered" &&
-          order.deliveryStatus !== "Cancelled" && (
+        <div className="flex flex-col sm:flex-row gap-4">
+          {order.deliveryStatus !== "Delivered" && (
             <button
-              onClick={() => setShowConfirm(true)}
-              className="mt-8 w-full md:w-auto px-6 py-3 rounded-lg bg-green-600 text-white hover:bg-green-700"
+              onClick={markAsOutForDelivery}
+              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Confirm Pickup (Out For Delivery)
+            </button>
+          )}
+
+          {order?.deliveryStatus === "Out For Delivery" && (
+            <button
+              onClick={confirmDelivery}
+              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-green-600 text-white hover:bg-green-700"
             >
               Confirm Order Delivered
             </button>
           )}
-
-        {/* ✅ Confirmation Modal */}
-        {showConfirm && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-lg w-11/12 max-w-md">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-                Confirm Delivery
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Are you sure you want to mark this order as delivered? This
-                action cannot be undone.
-              </p>
-              <div className="flex justify-end gap-4">
-                <button
-                  onClick={() => setShowConfirm(false)}
-                  className="px-4 py-2 rounded-lg bg-gray-400 text-white hover:bg-gray-500"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmDelivery}
-                  className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
-                >
-                  Confirm
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
