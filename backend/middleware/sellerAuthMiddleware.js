@@ -19,8 +19,6 @@ const authenticateSeller = async (req, res, next) => {
         });
       }
 
-      console.log(decoded.sellerID)
-
       // Fetch seller from database
       const currSeller = await Seller.findById(decoded.sellerID);
       if (!currSeller) {

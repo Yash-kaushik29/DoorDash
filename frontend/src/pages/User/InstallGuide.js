@@ -15,47 +15,202 @@ const InstallGuide = () => {
 
   const tabContent = {
     android: (
-      <div className="space-y-4">
-        <ol className="list-decimal list-inside space-y-2">
-          <li>
-            Open <strong>Chrome</strong> (or supported browser) on your phone.
-          </li>
-          <li>Go to the <strong>GullyFoods</strong> website.</li>
-          <li>
-            Look for the <strong>“Install App”</strong> banner OR tap the browser menu →{" "}
-            <em>Add to Home Screen</em>.
-          </li>
-          <li>Tap <strong>Add</strong> and voilà! 🎉</li>
-        </ol>
-        <div className="bg-gray-200 dark:bg-gray-700 rounded-md h-40 flex items-center justify-center text-gray-500 dark:text-gray-300">
-          [Android screenshot placeholder]
+      <div className="space-y-6">
+        <h3 className="text-2xl font-semibold text-center text-gray-800 dark:text-gray-100">
+          🤖 Add <span className="text-green-600">GullyFoods</span> to Your
+          Android Home Screen
+        </h3>
+
+        {/* Step 1 */}
+        <div className="bg-gray-50 dark:bg-gray-800 p-5 rounded-xl shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+            Step 1️⃣ — Open GullyFoods in Chrome
+          </h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Open <strong>Chrome</strong> (or any supported browser) on your
+            phone and visit{" "}
+            <a
+              href="https://www.gullyfoods.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-500"
+            >
+              www.gullyfoods.app
+            </a>
+            .
+          </p>
+          <div className="mt-3 flex justify-center">
+            <img
+              src="/setupGuide/androidstep1.jpg"
+              alt="Open GullyFoods in Chrome"
+              className="rounded-lg w-40 sm:w-56 shadow-md border border-gray-300 dark:border-gray-700"
+            />
+          </div>
+        </div>
+
+        {/* Step 2 */}
+        <div className="bg-gray-50 dark:bg-gray-800 p-5 rounded-xl shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+            Step 2️⃣ — Tap the Menu Icon
+          </h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Tap the <strong>three vertical dots</strong> in the top-right corner
+            of Chrome to open the browser menu.
+          </p>
+          <div className="mt-3 flex justify-center">
+            <img
+              src="/setupGuide/androidstep2.jpg"
+              alt="Open Chrome Menu"
+              className="rounded-lg w-40 sm:w-56 shadow-md border border-gray-300 dark:border-gray-700"
+            />
+          </div>
+        </div>
+
+        {/* Step 3 */}
+        <div className="bg-green-50 dark:bg-green-900 p-5 rounded-xl border border-green-400 shadow-sm">
+          <h4 className="text-lg font-semibold text-green-800 dark:text-green-200">
+            Step 3️⃣ — Select “Add to Home Screen” 🎉
+          </h4>
+          <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+            From the menu, tap <strong>Add to Home Screen</strong>. Confirm by
+            tapping <strong>Add</strong>, and GullyFoods will appear on your
+            home screen like a native app!
+          </p>
+          <div className="mt-3 flex justify-center">
+            <img
+              src="/setupGuide/androidstep3.jpg"
+              alt="Add to Home Screen"
+              className="rounded-lg w-40 sm:w-56 shadow-md border border-green-400 dark:border-green-600"
+            />
+          </div>
         </div>
       </div>
     ),
     ios: (
-      <div className="space-y-4">
-        <ol className="list-decimal list-inside space-y-2">
-          <li>
-            Open <strong>Safari</strong> and go to <strong>GullyFoods</strong>.
-          </li>
-          <li>Tap the <strong>Share</strong> button (square with arrow up).</li>
-          <li>Scroll and select <strong>Add to Home Screen</strong>.</li>
-          <li>Tap <strong>Add</strong> in the top-right corner. Done! 🎉</li>
-        </ol>
-        <div className="bg-gray-200 dark:bg-gray-700 rounded-md h-40 flex items-center justify-center text-gray-500 dark:text-gray-300">
-          [iOS screenshot placeholder]
+      <div className="space-y-6">
+        <h3 className="text-2xl font-semibold text-center text-gray-800 dark:text-gray-100">
+          📱 Add <span className="text-green-600">GullyFoods</span> to Your
+          iPhone Home Screen
+        </h3>
+
+        {/* Step 1 */}
+        <div className="bg-gray-50 dark:bg-gray-800 p-5 rounded-xl shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+            Step 1️⃣ — Open GullyFoods in Safari
+          </h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Open <strong>Safari</strong> and visit{" "}
+            <a
+              href="www.gullyfoods.app"
+              target="_blank"
+              className="underline text-blue-500"
+            >
+              www.gullyfoods.app
+            </a>
+            .
+          </p>
+        </div>
+
+        {/* Step 2 */}
+        <div className="bg-gray-50 dark:bg-gray-800 p-5 rounded-xl shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+            Step 2️⃣ — Tap the Share Icon
+          </h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Tap the <strong>Share</strong> button — it’s the{" "}
+            <strong>square with an upward arrow</strong> at the bottom of the
+            screen.
+          </p>
+          <div className="mt-3 flex justify-center">
+            <img
+              src="/setupGuide/iosstep1.jpg"
+              alt="Tap Share Button"
+              className="rounded-lg w-40 sm:w-56 shadow-md border border-gray-300 dark:border-gray-700"
+            />
+          </div>
+        </div>
+
+        {/* Step 3 */}
+        <div className="bg-gray-50 dark:bg-gray-800 p-5 rounded-xl shadow-sm">
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+            Step 3️⃣ — Select “Add to Home Screen”
+          </h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Scroll through the options and choose{" "}
+            <strong>Add to Home Screen</strong>. You’ll see a preview of the
+            icon and name.
+          </p>
+          <div className="mt-3 flex justify-center">
+            <img
+              src="/setupGuide/iosstep2.jpg"
+              alt="Add to Home Screen Option"
+              className="rounded-lg w-40 sm:w-56 shadow-md border border-gray-300 dark:border-gray-700"
+            />
+          </div>
+        </div>
+
+        {/* Step 4 */}
+        <div className="bg-green-50 dark:bg-green-900 p-5 rounded-xl border border-green-400 shadow-sm">
+          <h4 className="text-lg font-semibold text-green-800 dark:text-green-200">
+            Step 4️⃣ — Confirm and Done 🎉
+          </h4>
+          <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+            Tap <strong>Add</strong> in the top-right corner. GullyFoods will
+            now appear on your home screen like a regular app.
+          </p>
+          <div className="mt-3 flex justify-center">
+            <img
+              src="/setupGuide/iosstep3.jpg"
+              alt="Added to Home Screen"
+              className="rounded-lg w-40 sm:w-56 shadow-md border border-green-400 dark:border-green-600"
+            />
+          </div>
         </div>
       </div>
     ),
     desktop: (
-      <div className="space-y-4">
-        <ol className="list-decimal list-inside space-y-2">
-          <li>Open Chrome, Edge, or Firefox and go to <strong>GullyFoods</strong>.</li>
-          <li>Click the <strong>install icon</strong> in the address bar or open menu → <em>Install App</em>.</li>
-          <li>Confirm and enjoy the desktop shortcut! 🎉</li>
-        </ol>
-        <div className="bg-gray-200 dark:bg-gray-700 rounded-md h-40 flex items-center justify-center text-gray-500 dark:text-gray-300">
-          [Desktop screenshot placeholder]
+      <div className="space-y-6">
+        <h3 className="text-2xl font-semibold text-center text-gray-800 dark:text-gray-100">
+          💻 Install <span className="text-green-600">GullyFoods</span> on Your
+          Computer
+        </h3>
+
+        {/* Steps List */}
+        <div className="bg-gray-50 dark:bg-gray-800 p-5 rounded-xl shadow-sm">
+          <ol className="list-decimal list-inside space-y-3 text-gray-700 dark:text-gray-300">
+            <li>
+              Open <strong>Chrome</strong>, <strong>Edge</strong>, or{" "}
+              <strong>Firefox</strong> and go to{" "}
+              <a
+                href="https://www.gullyfoods.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-blue-500"
+              >
+                www.gullyfoods.app
+              </a>
+              .
+            </li>
+
+            <li>
+              Click the <strong>install icon</strong> (📥) in the address bar,
+              or open the browser menu → <em>Install App</em>.
+            </li>
+
+            <li>
+              Confirm the installation — GullyFoods will now appear as a desktop
+              app! 🎉
+            </li>
+          </ol>
+
+          {/* Preview Image */}
+          <div className="mt-5 flex justify-center">
+            <img
+              src="/setupGuide/webstep1.jpg"
+              alt="Install GullyFoods on desktop"
+              className="rounded-lg w-full shadow-md border border-gray-300 dark:border-gray-700"
+            />
+          </div>
         </div>
       </div>
     ),
@@ -69,7 +224,8 @@ const InstallGuide = () => {
           🚀 Install GullyFoods Like a Pro!
         </h1>
         <p className="text-center mb-6 max-w-xl text-gray-700 dark:text-gray-300">
-          Having trouble installing? No worries! Select your device below to see detailed instructions.
+          Having trouble installing? No worries! Select your device below to see
+          detailed instructions.
         </p>
 
         {/* Tabs */}
