@@ -29,8 +29,8 @@ const Checkout = () => {
     totalPrice: 0,
     sellers: 1,
     cartKey: "foodCart",
-    shopLat,
-    shopLong,
+    shopLat: "",
+    shopLong: "",
   };
 
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -50,31 +50,19 @@ const Checkout = () => {
 
   if (cartItems.length === 0) navigate("/cart");
 
-  // Fetch active coupons
   useEffect(() => {
-    const fetchActiveCoupons = async () => {
-      if (ready && !user) return;
-      try {
-        const { data } = await api.get(`/api/user-profile/active-coupons`, {
-          withCredentials: true,
-        });
+  if (!ready) return;
+  console.log("User ready:", user);
+  if (!user) {
+    console.log("Navigating to profile...");
+    navigate("/user/profile");
+    return;
+  }
+  console.log("Fetching addresses & coupons...");
+  fetchAddresses();
+  fetchActiveCoupons();
+}, [ready, user]);
 
-        if (data.success) setActiveCoupons(data.activeCoupons);
-        else toast.error(data.message);
-      } catch (error) {
-        console.error("Error fetching active coupons:", error);
-        toast.error("Failed to load coupons");
-      }
-    };
-
-    fetchActiveCoupons();
-  }, [user]);
-
-  // Fetch addresses
-  useEffect(() => {
-    if (ready && !user) navigate("/user/profile");
-    if (ready) fetchAddresses();
-  }, [user, ready]);
 
   const fetchAddresses = async () => {
     try {
@@ -86,6 +74,17 @@ const Checkout = () => {
     } catch (err) {
       console.error(err);
       toast.error("Error fetching addresses");
+    }
+  };
+
+  const fetchActiveCoupons = async () => {
+    console.log("hi");
+    try {
+      const { data } = await api.get(`/api/user-profile/active-coupons`);
+      if (data.success) setActiveCoupons(data.activeCoupons);
+      else toast.error(data.message);
+    } catch (err) {
+      console.error("Error fetching active coupons:", err);
     }
   };
 
@@ -114,9 +113,9 @@ const Checkout = () => {
   };
 
   const getGroceryServiceCharge = (cartPrice) => {
-    if (cartPrice < 300) return 20;
-    if (cartPrice < 500) return 15;
-    if (cartPrice < 700) return 10;
+    if (cartPrice < 300) return 10;
+    if (cartPrice < 500) return 7.5;
+    if (cartPrice < 700) return 5;
     return 0;
   };
 
@@ -296,13 +295,13 @@ const Checkout = () => {
         />
 
         {/* Coupon Selection */}
-        <CheckoutCoupons
+        {/* <CheckoutCoupons
           cartTotalPrice={cartTotalPrice}
           setDiscount={setDiscount}
           activeCoupons={activeCoupons}
           selectedCoupon={selectedCoupon}
           setSelectedCoupon={setSelectedCoupon}
-        />
+        /> */}
       </div>
     </div>
   );
