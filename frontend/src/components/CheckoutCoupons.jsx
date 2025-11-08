@@ -10,7 +10,7 @@ const CheckoutCoupons = ({
   const handleSelect = (item) => {
     const coupon = item.coupon;
 
-    if (cartTotalPrice < coupon.minOrder) return;
+    if (cartTotalPrice < coupon?.minOrder) return;
 
     if (selectedCoupon?._id === item._id) {
       setSelectedCoupon(null);
@@ -21,10 +21,10 @@ const CheckoutCoupons = ({
     setSelectedCoupon(item);
 
     let discountAmount = 0;
-    if (coupon.discountType === "PERCENT") {
-      discountAmount = (cartTotalPrice * coupon.discount) / 100;
+    if (coupon?.discountType === "PERCENT") {
+      discountAmount = (cartTotalPrice * coupon?.discount) / 100;
     } else {
-      discountAmount = coupon.discount;
+      discountAmount = coupon?.discount;
     }
 
     setDiscount(discountAmount);
@@ -40,7 +40,7 @@ const CheckoutCoupons = ({
         {activeCoupons.map((item, index) => {
           const coupon = item.coupon;
           const isSelected = selectedCoupon?._id === item._id;
-          const notApplicable = cartTotalPrice < coupon.minOrder;
+          const notApplicable = cartTotalPrice < coupon?.minOrder;
 
           return (
             <div
@@ -64,7 +64,7 @@ const CheckoutCoupons = ({
                       : "text-gray-900 dark:text-green-500"
                   }`}
                 >
-                  {coupon.name}{" "}
+                  {coupon?.name}{" "}
                   {!notApplicable && (
                     <span className="ml-2 text-sm text-yellow-500">🎉</span>
                   )}
@@ -77,9 +77,9 @@ const CheckoutCoupons = ({
                       : "text-green-600 dark:text-green-400"
                   }`}
                 >
-                  {coupon.discountType === "PERCENT"
-                    ? `${coupon.discount}% OFF`
-                    : `₹${coupon.discount} OFF`}
+                  {coupon?.discountType === "PERCENT"
+                    ? `${coupon?.discount}% OFF`
+                    : `₹${coupon?.discount} OFF`}
                 </p>
               </div>
 
@@ -90,7 +90,7 @@ const CheckoutCoupons = ({
                     : "text-gray-600 dark:text-gray-400"
                 }`}
               >
-                Min Order: ₹{coupon.minOrder} 📦
+                Min Order: ₹{coupon?.minOrder} 📦
               </p>
 
               <p
@@ -100,12 +100,12 @@ const CheckoutCoupons = ({
                     : "text-gray-500 dark:text-gray-300"
                 }`}
               >
-                "{coupon.desc}" 🤩
+                "{coupon?.desc}" 🤩
               </p>
 
               {notApplicable && (
                 <p className="text-xs text-red-500 mt-1 font-medium">
-                  Not applicable for your current order amount
+                  Shop for ₹{coupon?.minOrder-cartTotalPrice} more to unlock
                 </p>
               )}
             </div>

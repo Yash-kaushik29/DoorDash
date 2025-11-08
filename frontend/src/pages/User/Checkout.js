@@ -60,7 +60,7 @@ const Checkout = () => {
   }
   console.log("Fetching addresses & coupons...");
   fetchAddresses();
-  // fetchActiveCoupons();
+  fetchActiveCoupons();
 }, [ready, user]);
 
 
@@ -78,7 +78,6 @@ const Checkout = () => {
   };
 
   const fetchActiveCoupons = async () => {
-    console.log("hi");
     try {
       const { data } = await api.get(`/api/user-profile/active-coupons`);
       if (data.success) setActiveCoupons(data.activeCoupons);
@@ -295,13 +294,13 @@ const Checkout = () => {
         />
 
         {/* Coupon Selection */}
-        {/* <CheckoutCoupons
+        <CheckoutCoupons
           cartTotalPrice={cartTotalPrice}
           setDiscount={setDiscount}
           activeCoupons={activeCoupons}
           selectedCoupon={selectedCoupon}
           setSelectedCoupon={setSelectedCoupon}
-        /> */}
+        />
       </div>
     </div>
   );

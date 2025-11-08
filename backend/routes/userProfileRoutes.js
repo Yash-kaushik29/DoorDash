@@ -348,7 +348,6 @@ router.post("/assign-coupons", async (req, res) => {
 });
 
 router.get("/active-coupons", authenticateUser, async (req, res) => {
-  console.log("HI")
   try {
     const userId = req.user._id;
 

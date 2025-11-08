@@ -12,20 +12,28 @@ const authenticateUser = require("../middleware/authMiddleware");
 const router = express();
 
 const assignRandomCoupons = async () => {
-  const allCoupons = await Coupon.find({
-    name: { $in: ["WELCOME5", "FLAT20", "BIG5", "GROCERY20", "CARNIVAL30"] },
+  const welcomeCoupon = await Coupon.findOne({ name: "WELCOME5" });
+
+  const otherCoupons = await Coupon.find({
+    name: { $in: ["FLAT20", "BIG5", "GROCERY20", "CARNIVAL30"] },
   });
 
-  if (allCoupons.length === 0) return [];
+  const result = [];
 
-  const shuffled = allCoupons.sort(() => 0.5 - Math.random());
+  if (welcomeCoupon) {
+    result.push({ coupon: welcomeCoupon._id, count: 1 });
+  }
 
-  const selectedCoupons = shuffled.slice(0, 3);
+  if (otherCoupons.length > 0) {
+    const shuffled = otherCoupons.sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 2);
 
-  return selectedCoupons.map((c) => ({
-    coupon: c._id,
-    count: 1,
-  }));
+    selected.forEach((c) => {
+      result.push({ coupon: c._id, count: 1 });
+    });
+  }
+
+  return result;
 };
 
 router.post("/send-otp", async (req, res) => {
