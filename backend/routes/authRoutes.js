@@ -495,6 +495,7 @@ router.post("/logout", (req, res) => {
 });
 
 router.get("/getSellerDetails", authenticateSeller, async (req, res) => {
+  console.log("Hi")
   try {
     const existingSeller = req.seller;
 
@@ -547,6 +548,7 @@ router.get("/getSellerDetails", authenticateSeller, async (req, res) => {
 });
 
 router.get("/getSeller", authenticateSeller, (req, res) => {
+  console.log("Hi")
   const sellerId = req.seller._id;
 
   res.json({
