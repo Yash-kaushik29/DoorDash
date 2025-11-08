@@ -316,7 +316,8 @@ const CartPage = () => {
                 <span>Total:</span>
                 <span>₹{getTotalPrice(currentCartItems).toFixed(2)}</span>
               </div>
-              <button
+              {activeCart === 'food' ? (
+                <button
                 className={`w-full py-3 mt-6 rounded-xl font-semibold transition shadow-lg ${
                   currentCartItems.some(
                     (item) =>
@@ -338,6 +339,9 @@ const CartPage = () => {
                   ? "Remove Unavailable Items"
                   : "Proceed to Checkout 🚀"}
               </button>
+              ) : (
+                <div>Groceries order will be available from tomorrow.</div>
+              )}
             </div>
           </div>
         )}
