@@ -23,6 +23,7 @@ const cloudinary = require("./cloudinary.js");
 const cronRoutes = require('./routes/cronRoutes.js');
 const QRCode = require("qrcode");
 const Coupons  = require("./models/Coupons.js");
+const Shop = require("./models/Shop.js");
 
 const app = express();
 dotenv.config();
@@ -155,6 +156,24 @@ app.post("/add-coupons", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Error inserting coupons", error: err.message });
+  }
+});
+
+app.put("/close-all-shops", async (req, res) => {
+  try {
+    const result = await Shop.updateMany({}, { $set: { isOpen: false } });
+
+    res.json({
+      success: true,
+      message: "All shops have been marked as closed.",
+      modifiedCount: result.modifiedCount,
+    });
+  } catch (err) {
+    console.error("Error closing shops:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to close all shops.",
+    });
   }
 });
 
