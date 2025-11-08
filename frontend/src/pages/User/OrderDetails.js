@@ -39,7 +39,7 @@ const OrderDetails = () => {
         setError("Failed to fetch order details");
         console.error(err);
       } finally {
-        setLoading(true);
+        setLoading(false);
       }
     };
     fetchOrderDetails();

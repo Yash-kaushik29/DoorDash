@@ -6,6 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { motion } from "framer-motion";
 import Navbar from "../../components/Navbar";
 import api from "../../utils/axiosInstance";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const Restaurants = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -20,9 +21,7 @@ const Restaurants = () => {
     const fetchRestaurants = async () => {
       try {
         setLoading(true);
-        const { data } = await api.get(
-          `/api/shop/get-restaurants`
-        );
+        const { data } = await api.get(`/api/shop/get-restaurants`);
 
         if (data.success) {
           setRestaurants(data.restaurants);
@@ -99,56 +98,68 @@ const Restaurants = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredRestaurants.map((r) => (
               <Link to={`/shop/${r._id}`} key={r._id}>
-                <motion.div
-                  className={`relative rounded-2xl shadow-lg backdrop-blur-md overflow-hidden transition transform
+  <motion.div
+    className={`relative rounded-2xl shadow-lg backdrop-blur-md overflow-hidden transition transform
       ${
         r.isOpen
           ? "hover:scale-[1.03] hover:shadow-2xl"
-          : "grayscale opacity-80"
+          : "opacity-90"
       }`}
-                >
-                  {/* Open/Closed Banner */}
-                  <div
-                    className={`absolute top-0 left-0 w-full text-center py-2 font-bold text-white shadow-md
-        ${r.isOpen ? "bg-green-600" : "bg-red-600"}`}
-                  >
-                    {r.isOpen
-                      ? `OPEN until ${r.closingTime || "late"}`
-                      : `CLOSED – Opens at ${r.openingTime || "soon"}`}
-                  </div>
+  >
+    {!r.isOpen && (
+      <div className="absolute inset-0 flex flex-col items-center justify-start z-20 pointer-events-none">
+        <DotLottieReact
+          src="/lottie/closed.lottie"
+          loop
+          autoplay
+          className="w-64 h-64 drop-shadow-xl saturate-150"
+        />
+        <p className="text-gray-800 dark:text-white font-semibold text-sm text-center mt-1">
+          CLOSED – Opens at {r.openingTime || "soon"}
+        </p>
+      </div>
+    )}
 
-                  {/* Restaurant Image */}
-                  <img
-                    src={r.images?.[0] || "https://via.placeholder.com/300x200"}
-                    alt={r.name}
-                    className="w-full h-48 object-cover"
-                  />
+    {/* Card Content (grayscale when closed) */}
+    <div className={`${!r.isOpen ? "grayscale" : ""}`}>
+      {/* OPEN Banner */}
+      {r.isOpen && (
+        <div className="absolute top-0 left-0 w-full text-center py-2 font-bold text-white bg-green-600 shadow-md z-10">
+          OPEN until {r.closingTime || "late"}
+        </div>
+      )}
 
-                  {/* Details */}
-                  <div className="p-5">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 truncate">
-                      {r.name}
-                    </h2>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1">
-                      {r.category || "Uncategorized"}
-                    </p>
+      {/* Restaurant Image */}
+      <img
+        src={r.images?.[0] || "https://via.placeholder.com/300x200"}
+        alt={r.name}
+        className="w-full h-48 object-cover"
+      />
 
-                    {/* Extra Info */}
-                    <div className="mt-3 text-sm text-gray-500 dark:text-gray-400 flex justify-between">
-                      {/* Total Products */}
-                      <span>{r.products?.length || 0} Products</span>
+      {/* Details */}
+      <div className="p-5 bg-white dark:bg-gray-800">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 truncate">
+          {r.name}
+        </h2>
+        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mt-1">
+          {r.category || "Uncategorized"}
+        </p>
 
-                      {/* Top 2 Categories Preview */}
-                      <span>
-                        {r.productCategories?.slice(0, 2).join(", ")}
-                        {r.productCategories?.length > 2
-                          ? ` +${r.productCategories.length - 2}`
-                          : ""}
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-              </Link>
+        {/* Extra Info */}
+        <div className="mt-3 text-sm text-gray-500 dark:text-gray-400 flex justify-between">
+          <span>{r.products?.length || 0} Products</span>
+          <span>
+            {r.productCategories?.slice(0, 2).join(", ")}
+            {r.productCategories?.length > 2
+              ? ` +${r.productCategories.length - 2}`
+              : ""}
+          </span>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+</Link>
+
             ))}
           </div>
         )}

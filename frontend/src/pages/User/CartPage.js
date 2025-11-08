@@ -6,6 +6,7 @@ import { IoAddCircle, IoRemoveCircle } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import api from "../../utils/axiosInstance";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const CartPage = () => {
   const { user, setUser } = useContext(UserContext);
@@ -15,7 +16,10 @@ const CartPage = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const sampleProduct = activeCart === 'foodCart' ? foodCartItems[0]?.product : groceryCartItems[0]?.product;
+  const sampleProduct =
+    activeCart === "foodCart"
+      ? foodCartItems[0]?.product
+      : groceryCartItems[0]?.product;
   const shopLat = sampleProduct?.shop?.lat;
   const shopLong = sampleProduct?.shop?.long;
 
@@ -160,7 +164,7 @@ const CartPage = () => {
         totalPrice: getTotalPrice(cartItems),
         cartKey: activeCart,
         shopLat,
-        shopLong
+        shopLong,
       },
     });
   };
@@ -180,7 +184,7 @@ const CartPage = () => {
         <h1 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white text-center">
           Your Cart
         </h1>
-        
+
         {/* Cart Tabs */}
         <div className="flex justify-center mb-6 space-x-4">
           <button
@@ -212,9 +216,18 @@ const CartPage = () => {
             <span className="w-3 h-3 bg-green-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
           </div>
         ) : currentCartItems?.length === 0 ? (
-          <p className="text-center text-gray-500 dark:text-gray-400">
-            Your {activeCart === "foodCart" ? "food" : "grocery"} cart is empty.
-          </p>
+          <div className="flex flex-col items-center mt-12" >
+            <DotLottieReact
+              src="/lottie/emptyCart.lottie"
+              loop
+              autoplay
+              className="w-64 h-64"
+            />
+            <p className="text-center font-semibold text-xl text-gray-500 dark:text-gray-400">
+              Your {activeCart === "foodCart" ? "food" : "grocery"} cart is
+              empty.
+            </p>
+          </div>
         ) : (
           <div className="bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-xl max-w-3xl mx-auto border border-green-100 dark:border-gray-700 flex flex-col">
             {/* Scrollable Cart Items */}
