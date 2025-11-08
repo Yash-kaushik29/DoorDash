@@ -316,7 +316,7 @@ const CartPage = () => {
                 <span>Total:</span>
                 <span>₹{getTotalPrice(currentCartItems).toFixed(2)}</span>
               </div>
-              {activeCart === 'food' ? (
+              {activeCart === 'foodCart' ? (
                 <button
                 className={`w-full py-3 mt-6 rounded-xl font-semibold transition shadow-lg ${
                   currentCartItems.some(

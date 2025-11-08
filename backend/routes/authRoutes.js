@@ -278,7 +278,7 @@ router.post("/user-login", async (req, res) => {
     if (!existingUser) {
       return res
         .status(400)
-        .json({ success: false, message: "User does not exist!" });
+        .json({ success: false, message: "Please Signup first from below link!" });
     }
 
     const existingOtp = await Otp.findOne({ phone, otpFor: "login" });
