@@ -475,10 +475,15 @@ router.get("/getUser", authenticateUser, (req, res) => {
 
 router.post("/logout", (req, res) => {
   try {
+    const isProduction = process.env.NODE_ENV === "production";
+    const domainName = isProduction ? "gullyfoods.app" : "localhost";
+
     res.clearCookie("authToken", {
       httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      secure: isProduction,
+      path: "/",
+      domain: domainName,
     });
 
     return res.status(200).json({
@@ -495,7 +500,6 @@ router.post("/logout", (req, res) => {
 });
 
 router.get("/getSellerDetails", authenticateSeller, async (req, res) => {
-  console.log("Hi")
   try {
     const existingSeller = req.seller;
 
@@ -548,7 +552,6 @@ router.get("/getSellerDetails", authenticateSeller, async (req, res) => {
 });
 
 router.get("/getSeller", authenticateSeller, (req, res) => {
-  console.log("Hi")
   const sellerId = req.seller._id;
 
   res.json({
