@@ -60,7 +60,7 @@ const Checkout = () => {
   }
   console.log("Fetching addresses & coupons...");
   fetchAddresses();
-  fetchActiveCoupons();
+  // fetchActiveCoupons();
 }, [ready, user]);
 
 
