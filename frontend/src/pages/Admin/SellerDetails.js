@@ -100,8 +100,8 @@ const SellerDetails = () => {
           <span className="text-gray-600 dark:text-gray-300 font-semibold text-lg">
             Total: <span className="text-green-600">
               ₹
-            {totalEarnings
-              ?.reduce((sum, sale) => sum + sale.amount, 0)
+            {totalEarnings.length > 0 && totalEarnings
+              ?.reduce((sum, sale) => sum + sale?.amount, 0)
               .toFixed(2)}
             </span>
           </span>

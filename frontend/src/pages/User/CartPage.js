@@ -216,7 +216,7 @@ const CartPage = () => {
             <span className="w-3 h-3 bg-green-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
           </div>
         ) : currentCartItems?.length === 0 ? (
-          <div className="flex flex-col items-center mt-12" >
+          <div className="flex flex-col items-center mt-12">
             <DotLottieReact
               src="/lottie/emptyCart.lottie"
               loop
@@ -316,8 +316,7 @@ const CartPage = () => {
                 <span>Total:</span>
                 <span>₹{getTotalPrice(currentCartItems).toFixed(2)}</span>
               </div>
-              {activeCart === 'foodCart' ? (
-                <button
+              <button
                 className={`w-full py-3 mt-6 rounded-xl font-semibold transition shadow-lg ${
                   currentCartItems.some(
                     (item) =>
@@ -339,9 +338,6 @@ const CartPage = () => {
                   ? "Remove Unavailable Items"
                   : "Proceed to Checkout 🚀"}
               </button>
-              ) : (
-                <div>Groceries order will be available from tomorrow.</div>
-              )}
             </div>
           </div>
         )}
