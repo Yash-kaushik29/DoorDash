@@ -49,7 +49,7 @@ const CheckoutPayment = ({
           }
         `}
       >
-        {paymentMethod === "Razorpay" ? "Proceed to Pay 💳" : "Place Order 🎉"}
+        {!selectedAddress ? "Please Select an address" : paymentMethod === "Razorpay" ? "Proceed to Pay 💳" : "Place Order 🎉"}
       </button>
     </div>
   );

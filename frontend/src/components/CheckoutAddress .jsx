@@ -16,6 +16,7 @@ const CheckoutAddress = ({ userAddresses, selectedAddress, setSelectedAddress, h
 
   return (
     <div className="space-y-3 mb-6">
+      <h3 className='text-center text-green-500' >Tap on the address to select it.</h3>
       {userAddresses.map((addr, index) => (
         <div
           key={index}

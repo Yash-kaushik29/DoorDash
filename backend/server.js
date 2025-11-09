@@ -161,7 +161,7 @@ app.post("/add-coupons", async (req, res) => {
 
 app.put("/close-all-shops", async (req, res) => {
   try {
-    const result = await Shop.updateMany({}, { $set: { isOpen: false } });
+    const result = await Shop.updateMany({}, { $set: { isOpen: true } });
 
     res.json({
       success: true,
