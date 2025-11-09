@@ -96,30 +96,30 @@ cron.schedule("0 3 * * *", async () => {
   }
 });
 
-cron.schedule("1,31 * * * *", async () => {
-  try {
-    const now = new Date();
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+// cron.schedule("1,31 * * * *", async () => {
+//   try {
+//     const now = new Date();
+//     const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-    const shops = await Shop.find();
+//     const shops = await Shop.find();
 
-    for (let shop of shops) {
-      // Skip manually closed shops
-      if (shop.isManuallyClosed) continue;
+//     for (let shop of shops) {
+//       // Skip manually closed shops
+//       if (shop.isManuallyClosed) continue;
 
-      const openMinutes = timeToMinutes(shop.openingTime);
-      const closeMinutes = timeToMinutes(shop.closingTime);
+//       const openMinutes = timeToMinutes(shop.openingTime);
+//       const closeMinutes = timeToMinutes(shop.closingTime);
 
-      const shouldBeOpen = currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+//       const shouldBeOpen = currentMinutes >= openMinutes && currentMinutes < closeMinutes;
 
-      if (shop.isOpen !== shouldBeOpen) {
-        shop.isOpen = shouldBeOpen;
-        await shop.save();
-      }
-    }
+//       if (shop.isOpen !== shouldBeOpen) {
+//         shop.isOpen = shouldBeOpen;
+//         await shop.save();
+//       }
+//     }
 
-    console.log("Shops status updated at", now.toLocaleTimeString());
-  } catch (error) {
-    console.error("Error updating shop status:", error);
-  }
-});
+//     console.log("Shops status updated at", now.toLocaleTimeString());
+//   } catch (error) {
+//     console.error("Error updating shop status:", error);
+//   }
+// });
