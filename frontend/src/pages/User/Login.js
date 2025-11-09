@@ -66,8 +66,6 @@ export default function Login() {
     if (!isValidPhone(phone))
       return toast.error("Enter a valid 10-digit mobile number.");
 
-    setOtpSent(true);
-
     setLoading(true);
     try {
       const res = await api.post(

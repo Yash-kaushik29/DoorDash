@@ -48,6 +48,7 @@ const InstallPrompt = () => {
       deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
       if (choice.outcome === "accepted") {
+        toast.success('Installing your app! Enjoy 😀 ')
         setShowBanner(false);
       }
       setDeferredPrompt(null);
