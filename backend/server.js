@@ -161,11 +161,29 @@ app.post("/add-coupons", async (req, res) => {
 
 app.put("/close-all-shops", async (req, res) => {
   try {
-    const result = await Shop.updateMany({}, { $set: { isOpen: true } });
+    const result = await Shop.updateMany({}, { $set: { isOpen: false } });
 
     res.json({
       success: true,
       message: "All shops have been marked as closed.",
+      modifiedCount: result.modifiedCount,
+    });
+  } catch (err) {
+    console.error("Error closing shops:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to close all shops.",
+    });
+  }
+});
+
+app.put("/open-all-shops", async (req, res) => {
+  try {
+    const result = await Shop.updateMany({}, { $set: { isOpen: true } });
+
+    res.json({
+      success: true,
+      message: "All shops have been marked as open.",
       modifiedCount: result.modifiedCount,
     });
   } catch (err) {
