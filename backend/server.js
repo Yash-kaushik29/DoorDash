@@ -190,7 +190,7 @@ app.put("/open-all-shops", async (req, res) => {
     console.error("Error closing shops:", err);
     res.status(500).json({
       success: false,
-      message: "Failed to close all shops.",
+      message: "Failed to open all shops.",
     });
   }
 });

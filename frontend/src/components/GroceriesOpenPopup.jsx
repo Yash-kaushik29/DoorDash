@@ -49,6 +49,8 @@ const GroceriesOpenPopup = () => {
           {/* Message */}
           <h3 className="text-xl font-bold text-green-600 dark:text-green-400 mt-2">
             🛒 Groceries are now open!
+            <p className="text-sm">Fruits & vegetables - 7 AM onwards</p>
+            <p className="text-sm">Daily Essentials - 9:30 AM onwards</p>
           </h3>
           <p className="text-gray-700 dark:text-gray-300 mt-1">
             Shop your favorite items fresh and fast — only on{" "}
