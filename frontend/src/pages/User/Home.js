@@ -223,7 +223,7 @@ const Home = () => {
 
       {/* Featured Products */}
       <section className="py-8 container mx-auto px-4">
-        <h2 className="text-3xl font-bold mb-4">Featured Products</h2>
+        <h2 className="text-3xl font-bold mb-4">GullyFoods's Picks</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-8 gap-4">
           {memoizedProducts}
         </div>

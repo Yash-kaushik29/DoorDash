@@ -51,26 +51,36 @@ const Checkout = () => {
   if (cartItems.length === 0) navigate("/cart");
 
   useEffect(() => {
-  if (!ready) return;
-  console.log("User ready:", user);
-  if (!user) {
-    console.log("Navigating to profile...");
-    navigate("/user/profile");
-    return;
-  }
-  console.log("Fetching addresses & coupons...");
-  fetchAddresses();
-  fetchActiveCoupons();
-}, [ready, user]);
-
+    if (!ready) return;
+    console.log("User ready:", user);
+    if (!user) {
+      console.log("Navigating to profile...");
+      navigate("/user/profile");
+      return;
+    }
+    console.log("Fetching addresses & coupons...");
+    fetchAddresses();
+    fetchActiveCoupons();
+  }, [ready, user]);
 
   const fetchAddresses = async () => {
     try {
       const res = await api.get(`/api/user-profile/getAddresses`, {
         params: { userId: user._id },
       });
-      if (res.data.success) setUserAddresses(res.data.addresses);
-      else toast.error("Failed to fetch addresses");
+
+      if (res.data.success) {
+        const addresses = res.data.addresses || [];
+        setUserAddresses(addresses);
+
+        if (addresses.length > 0) {
+          handleSelectAddress(addresses[0]);
+        } else {
+          setSelectedAddress(null); 
+        }
+      } else {
+        toast.error("Failed to fetch addresses");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Error fetching addresses");
