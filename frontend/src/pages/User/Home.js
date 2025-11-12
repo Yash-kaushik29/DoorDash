@@ -13,7 +13,7 @@ import InstallPrompt from "../../components/InstallPrompt";
 import { motion } from "framer-motion";
 import api from "../../utils/axiosInstance";
 import { FiRefreshCw } from "react-icons/fi";
-import GroceriesOpenPopup from "../../components/GroceriesOpenPopup";
+import HomePagePopup from "../../components/HomePagePopup";
 
 const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
@@ -108,7 +108,7 @@ const Home = () => {
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-100">
       <ToastContainer position="top-right" autoClose={3000} />
-      <GroceriesOpenPopup />
+      <HomePagePopup />
       <Navbar />
       <InstallPrompt />
 

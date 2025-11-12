@@ -73,7 +73,7 @@ const HelpSupport = () => {
               </div>
 
               <a
-                href="https://wa.me/918650065295"
+                href="https://wa.me/917409565977"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm p-4 hover:bg-green-100 dark:hover:bg-green-600 transition transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"

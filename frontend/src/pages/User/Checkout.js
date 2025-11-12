@@ -176,7 +176,7 @@ const Checkout = () => {
             ...prev,
             [cartKey]: data.cart,
           }));
-          setTimeout(() => navigate(`/order/${data.order._id}`), 5000);
+          navigate(`/order/${data.order._id}`);
         } else toast.error(data.message);
       } else {
         await handlePayment(orderPayload);
@@ -227,7 +227,7 @@ const Checkout = () => {
                 ...prev,
                 [cartKey]: data.cart,
               }));
-              setTimeout(() => navigate(`/order/${data.order._id}`), 5000);
+              navigate(`/order/${data.order._id}`);
             } else toast.error(data.message);
           } else toast.error("❌ Payment Verification Failed!");
         },
