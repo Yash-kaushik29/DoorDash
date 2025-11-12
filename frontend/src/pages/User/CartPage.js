@@ -22,6 +22,7 @@ const CartPage = () => {
       : groceryCartItems[0]?.product;
   const shopLat = sampleProduct?.shop?.lat;
   const shopLong = sampleProduct?.shop?.long;
+  const shopName = sampleProduct?.shopName;
 
   // Fetch carts
   useEffect(() => {
@@ -218,7 +219,7 @@ const CartPage = () => {
         ) : currentCartItems?.length === 0 ? (
           <div className="flex flex-col items-center mt-12">
             <DotLottieReact
-              src="/lottie/emptyCart.lottie"
+              src="/lottie/EmptyCart.lottie"
               loop
               autoplay
               className="w-64 h-64"
@@ -231,6 +232,7 @@ const CartPage = () => {
         ) : (
           <div className="bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-xl max-w-3xl mx-auto border border-green-100 dark:border-gray-700 flex flex-col">
             {/* Scrollable Cart Items */}
+            <div className="text-center text-green-500 font-semibold mb-4" >Ordering from {shopName}</div>
             <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
               {currentCartItems?.map((item) => (
                 <div
@@ -253,9 +255,6 @@ const CartPage = () => {
                     <h3 className="font-semibold text-gray-900 dark:text-white text-md">
                       {item.product.name}
                     </h3>
-                    <p className="text-green-600 font-medium text-xs">
-                      {item.product.shopName}
-                    </p>
                     <p className="text-gray-500 dark:text-gray-400 text-sm">
                       ₹{item.product?.price} x {item?.quantity}
                     </p>

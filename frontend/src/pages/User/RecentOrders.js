@@ -168,7 +168,7 @@ const RecentOrders = () => {
         {loading ? (
           <div className="flex flex-col justify-center items-center py-6 space-y-5">
             <DotLottieReact
-              src="/lottie/glass.lottie"
+              src="/lottie/Glass.lottie"
               loop
               autoplay
               className="w-64 h-64"
