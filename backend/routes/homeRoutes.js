@@ -16,7 +16,7 @@ router.get('/get-popular-shops', async(req, res) => {
 
 router.get('/get-popular-products', async(req, res) => {
     try {
-        const products = await Product.find({shopName: "Nazeer Foods"}).limit(12);
+        const products = await Product.find({shopName: "Rolls Street Bites"});
         res.json({success: true, products});
     } catch(error) {
         console.log(error)
