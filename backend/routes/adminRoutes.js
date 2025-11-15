@@ -327,6 +327,62 @@ router.get("/getAllDeliveryBoys", async (req, res) => {
   });
 });
 
+router.put("/updateDeliveryStatus", async (req, res) => {
+  const { adminToken } = req.cookies;
+  const { orderId } = req.body;
+
+  if (!adminToken) {
+    return res.json({ success: false, message: "Unauthorized access" });
+  }
+
+  if (!orderId) {
+    return res.json({ success: false, message: "Order ID is required" });
+  }
+
+  jwt.verify(adminToken, process.env.JWT_SECRET_KEY, {}, async (err, admin) => {
+    if (err) {
+      return res.json({ success: false, message: "Invalid token" });
+    }
+
+    try {
+      const order = await Order.findById(orderId);
+
+      if (!order) {
+        return res.json({ success: false, message: "Order not found" });
+      }
+
+      if (order.deliveryStatus !== "Processing") {
+        return res.json({
+          success: false,
+          message:
+            "Order cannot be updated. Allowed only when status is 'Processing'.",
+        });
+      }
+
+      order.deliveryStatus = "Preparing";
+
+      order.items = order.items.map((item) => ({
+        ...item.toObject(),
+        status: "Preparing"
+      }));
+
+      await order.save();
+
+      return res.json({
+        success: true,
+        message: "Order and items updated to Preparing",
+        order,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  });
+});
+
 // Assign/Change Delivery Boy
 router.post("/assignDeliveryBoy", async (req, res) => {
   const { adminToken } = req.cookies;
@@ -572,7 +628,7 @@ router.get("/deliveryBoy/:deliveryBoyId", async (req, res) => {
       .populate("outstandingPayments.orderId")
       .lean();
 
-    console.log(deliveryBoy)  
+    console.log(deliveryBoy);
 
     if (deliveryBoy?.outstandingPayments) {
       deliveryBoy.outstandingPayments.sort(
