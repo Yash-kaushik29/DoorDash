@@ -108,7 +108,7 @@ const Home = () => {
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-100">
       <ToastContainer position="top-right" autoClose={3000} />
-      <HomePagePopup />
+      {/* <HomePagePopup /> */}
       <Navbar />
       <InstallPrompt />
 
@@ -223,7 +223,9 @@ const Home = () => {
 
       {/* Featured Products */}
       <section className="py-8 container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-green-600 text-center mb-8">GullyFoods's Picks</h2>
+        <h2 className="text-3xl font-bold text-green-600 text-center mb-8">
+          GullyFoods's Picks
+        </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-8 gap-4 mt-6">
           {memoizedProducts}
         </div>

@@ -22,7 +22,7 @@ const SingleOrder = () => {
   const fetchOrderDetails = async (id) => {
     try {
       const response = await api.get(`/api/admin/getOrderById/${id}`, {
-        withCredentials: true
+        withCredentials: true,
       });
       if (response.data.success) {
         setOrder(response.data.order);
@@ -38,7 +38,7 @@ const SingleOrder = () => {
   const fetchDeliveryBoys = async () => {
     try {
       const response = await api.get(`/api/admin/getAllDeliveryBoys`, {
-        withCredentials: true
+        withCredentials: true,
       });
       if (response.data.success) {
         setDeliveryBoys(response.data.deliveryBoys);
@@ -181,7 +181,6 @@ Link: ${link}`;
   return (
     <div className="p-4 bg-gray-100 text-black dark:bg-gray-900 dark:text-white min-h-screen">
       <ToastContainer position="top-right" autoClose={3000} />
-      <AdminHeader />
       <div className="max-w-4xl mx-auto">
         <h2 className="text-2xl font-bold my-4">Order Details</h2>
 
@@ -251,11 +250,22 @@ Link: ${link}`;
               </span>
             </p>
 
+            <p className="my-2">
+              Order From{" "}
+              <span className="text-green-600 font-semibold">
+                {order.items[0]?.product.shopName}
+              </span>
+            </p>
+
+
             {/* Delivery Address */}
             <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
               <h4 className="text-lg font-semibold mb-2">Delivery Address</h4>
 
-              <p><strong>{order.shippingAddress.fullName}</strong> — {order.shippingAddress.phone}</p>
+              <p>
+                <strong>{order.shippingAddress.fullName}</strong> —{" "}
+                {order.shippingAddress.phone}
+              </p>
               <p>{order.shippingAddress.addressLine}</p>
               <p>{order.shippingAddress.area}</p>
               {order.shippingAddress.landMark && (
@@ -276,9 +286,15 @@ Link: ${link}`;
             {order.hasReviewed && (
               <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
                 <h4 className="text-lg font-semibold mb-2">Customer Review</h4>
-                <p><strong>App Rating:</strong> {order.appRatings} / 5</p>
-                <p><strong>Delivery Rating:</strong> {order.deliveryRatings} / 5</p>
-                <p><strong>Overall Rating:</strong> {order.overallRatings} / 5</p>
+                <p>
+                  <strong>App Rating:</strong> {order.appRatings} / 5
+                </p>
+                <p>
+                  <strong>Delivery Rating:</strong> {order.deliveryRatings} / 5
+                </p>
+                <p>
+                  <strong>Overall Rating:</strong> {order.overallRatings} / 5
+                </p>
                 <p className="mt-2 italic">"{order.review}"</p>
               </div>
             )}
@@ -324,7 +340,12 @@ Link: ${link}`;
                   <tr key={index} className="border-b dark:border-gray-700">
                     <td className="py-2 px-4">{item.product?.name}</td>
                     <td className="py-2 px-4">{item.quantity}</td>
-                    <td className="py-2 px-4">{item.quantity} * ₹{item.product?.price} = <span className="text-green-500 font-semibold" >₹{item.quantity * item.product?.price}</span></td>
+                    <td className="py-2 px-4">
+                      {item.quantity} * ₹{item.product?.price} ={" "}
+                      <span className="text-green-500 font-semibold">
+                        ₹{item.quantity * item.product?.price}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -389,7 +410,9 @@ Link: ${link}`;
 
         {/* Assign Delivery Boy */}
         <div className="mt-6">
-          <h3 className="text-lg font-bold mb-2">Assign/Change Delivery Boy:</h3>
+          <h3 className="text-lg font-bold mb-2">
+            Assign/Change Delivery Boy:
+          </h3>
           <div className="flex gap-2">
             <select
               value={selectedDeliveryBoy}
