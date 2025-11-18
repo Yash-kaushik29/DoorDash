@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import api from "../../utils/axiosInstance";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const GroceryProducts = () => {
   const { category } = useParams();
@@ -53,9 +54,24 @@ const GroceryProducts = () => {
         </h2>
 
         {loading ? (
-          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
+          <div className="flex flex-col items-center justify-center">
+            <DotLottieReact
+            src="/lottie/GroceryLoading.lottie"
+            loop
+            autoplay
+            className="w-full h-full mx-auto"
+          />
+          <p className="font-semibold text-lg" >Looking for products ...</p>
+          </div>
         ) : Object.keys(grouped).length === 0 ? (
-          <p className="text-gray-600 dark:text-gray-300">No products found.</p>
+            <div className="flex flex-col items-center justify-center">
+            <DotLottieReact
+            src="/lottie/noProducts.lottie"
+            autoplay
+            className="w-full h-full mx-auto"
+          />
+          <p className="font-semibold text-lg" >No Products in this category yet!</p>
+          </div>
         ) : (
           Object.entries(grouped).map(([subcat, items]) => (
             <div key={subcat} className="mb-4">
