@@ -191,17 +191,41 @@ const Home = () => {
             <Link
               key={i}
               to={`/products/${cat.name.toLowerCase()}`}
-              className="relative rounded-2xl overflow-hidden shadow-lg hover:scale-105 transform transition duration-300"
+              className={`relative rounded-2xl overflow-hidden shadow-lg transform transition duration-300 ${
+                cat.name === "Groceries"
+                  ? "sm:col-span-2 h-64 hover:scale-[1.03] animate-[pulse_3s_infinite]"
+                  : "h-48 hover:scale-105"
+              }`}
             >
               <img
                 src={cat.img}
                 alt={cat.name}
-                className="w-full h-48 object-cover"
+                className={`w-full h-full object-cover ${
+                  cat.name !== "Groceries" ? "brightness-75" : "brightness-100"
+                }`}
               />
-              <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                <div className="text-white text-xl font-bold flex items-center gap-2">
+
+              <div
+                className={`absolute inset-0 flex flex-col items-center justify-center ${
+                  cat.name === "Groceries"
+                    ? "bg-gradient-to-b from-black/20 to-black/60"
+                    : "bg-black/40"
+                }`}
+              >
+                <div className="text-white text-2xl font-bold flex items-center gap-2">
                   {cat.icon} {cat.name}
                 </div>
+
+                {cat.name === "Groceries" && (
+                  <>
+                    <div className="mt-2 bg-yellow-400 text-black text-sm font-semibold px-3 py-1 rounded-full">
+                      Instant Delivery ⚡
+                    </div>
+                    <div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                      Hot 🔥
+                    </div>
+                  </>
+                )}
               </div>
             </Link>
           ))}

@@ -6,7 +6,7 @@ const ShopCard = ({shop}) => {
     <Link to={`/shop/${shop._id}`}>
       <div className="flex flex-col items-center text-center space-y-2 w-32 h-32">
         <img
-          src={shop.images[0]}
+          src={shop?.images[1] || shop.images[0]}
           alt={shop.name}
           className="w-24 h-24 rounded-full object-cover border border-gray-300 shadow-sm"
         />
