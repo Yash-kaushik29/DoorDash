@@ -108,7 +108,7 @@ const Home = () => {
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-100">
       <ToastContainer position="top-right" autoClose={3000} />
-      {/* <HomePagePopup /> */}
+      <HomePagePopup />
       <Navbar />
       <InstallPrompt />
 
@@ -191,11 +191,14 @@ const Home = () => {
             <Link
               key={i}
               to={`/products/${cat.name.toLowerCase()}`}
-              className={`relative rounded-2xl overflow-hidden shadow-lg transform transition duration-300 ${
-                cat.name === "Groceries"
-                  ? "sm:col-span-2 h-64 hover:scale-[1.03] animate-[pulse_3s_infinite]"
-                  : "h-48 hover:scale-105"
-              }`}
+              className={`
+        relative rounded-2xl overflow-hidden shadow-lg transform transition duration-300
+        ${
+          cat.name === "Groceries"
+            ? "h-64 sm:h-48 hover:scale-[1.03] animate-[pulse_3s_infinite]"
+            : "h-48 hover:scale-105"
+        }
+      `}
             >
               <img
                 src={cat.img}
@@ -219,7 +222,7 @@ const Home = () => {
                 {cat.name === "Groceries" && (
                   <>
                     <div className="mt-2 bg-yellow-400 text-black text-sm font-semibold px-3 py-1 rounded-full">
-                      Instant Delivery ⚡
+                      Instant Delivery 💨
                     </div>
                     <div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
                       Hot 🔥

@@ -67,6 +67,7 @@ const GroceryProducts = () => {
             <div className="flex flex-col items-center justify-center">
             <DotLottieReact
             src="/lottie/noProducts.lottie"
+            loop
             autoplay
             className="w-full h-full mx-auto"
           />
