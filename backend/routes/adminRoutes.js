@@ -363,7 +363,7 @@ router.put("/updateDeliveryStatus", async (req, res) => {
 
       order.items = order.items.map((item) => ({
         ...item.toObject(),
-        status: "Preparing"
+        status: "Preparing",
       }));
 
       await order.save();
@@ -539,21 +539,79 @@ router.get("/products", async (req, res) => {
   }
 });
 
+router.get("/users", async (req, res) => {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 25;
+    const sortBy = req.query.sortBy;
+
+    let pipeline = [
+      {
+        $project: {
+          username: 1,
+          phone: 1,
+          foodCart: 1,
+          groceryCart: 1,
+          foodCartLength: { $size: "$foodCart" },
+          groceryCartLength: { $size: "$groceryCart" }
+        }
+      }
+    ];
+
+    if (sortBy === "food") {
+      pipeline.push({ $sort: { foodCartLength: -1 } });
+    } else if (sortBy === "grocery") {
+      pipeline.push({ $sort: { groceryCartLength: -1 } });
+    }
+
+    pipeline.push(
+      { $skip: (page - 1) * limit },
+      { $limit: limit }
+    );
+
+    const users = await User.aggregate(pipeline);
+
+    const totalUsers = await User.countDocuments();
+
+    res.json({
+      success: true,
+      users,
+      page,
+      limit,
+      totalUsers,
+      totalPages: Math.ceil(totalUsers / limit)
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 // Get user details by ID
 router.get("/user/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
-      .select("username email createdAt orders")
+      .select("username phone email addresses foodCart groceryCart createdAt orders")
+      .populate({
+        path: "foodCart.productId",
+        model: "Product",
+        select: "name price image",
+      })
+      .populate({
+        path: "groceryCart.productId",
+        model: "Product",
+        select: "name price image",
+      })
       .populate({
         path: "orders",
-        select: "id amount paymentStatus deliveryStatus createdAt items",
+        select: "amount paymentStatus deliveryStatus createdAt items",
         populate: {
           path: "items.product",
           model: "Product",
           select: "name price image",
         },
       })
-      .lean(); // Improves performance
+      .lean(); 
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -565,6 +623,7 @@ router.get("/user/:id", async (req, res) => {
     res.status(500).json({ message: err.message || "Server error" });
   }
 });
+
 
 router.put("/cancelOrder", async (req, res) => {
   try {

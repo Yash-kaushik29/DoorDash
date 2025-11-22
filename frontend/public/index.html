@@ -1,54 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
 
-    <!-- ✅ Favicon -->
-    <link rel="icon" href="%PUBLIC_URL%/icons/gullyfoodsLogo512.png" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/icons/gullyfoodsLogo512.png" />
+<head>
+  <meta charset="utf-8" />
 
-    <!-- ✅ Basic Meta -->
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#ffffff" />
-    <meta
-      name="description"
-      content="Order food, groceries, and essentials from your favorite local shops with GullyFoods — where taste meets budget 🍴"
-    />
-    <meta
-      name="keywords"
-      content="GullyFoods, food delivery, grocery delivery, order food online, local restaurants, affordable meals, Gully Foods app"
-    />
-    <meta name="author" content="GullyFoods Team" />
+  <!-- ✅ Favicon -->
+  <link rel="icon" href="%PUBLIC_URL%/icons/gullyfoodsLogo512.png" />
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/icons/gullyfoodsLogo512.png" />
 
-    <!-- ✅ Open Graph (for Google, Facebook, WhatsApp) -->
-    <meta property="og:title" content="GullyFoods – Where Taste Meets Budget" />
-    <meta
-      property="og:description"
-      content="Get your favorite food, groceries, and essentials delivered from nearby stores — fast, fresh, and affordable with GullyFoods!"
-    />
-    <meta property="og:image" content="%PUBLIC_URL%/icons/gullyfoodsLogo512.png" />
-    <meta property="og:url" content="https://gullyfoods.app" />
-    <meta property="og:type" content="website" />
+  <!-- ✅ Basic Meta -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description"
+    content="Order food, groceries, and essentials from your favorite local shops with GullyFoods — where taste meets budget 🍴" />
+  <meta name="keywords"
+    content="GullyFoods, food delivery, grocery delivery, order food online, local restaurants, affordable meals, Gully Foods app" />
+  <meta name="author" content="GullyFoods Team" />
 
-    <!-- ✅ Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="GullyFoods – Where Taste Meets Budget" />
-    <meta
-      name="twitter:description"
-      content="Order delicious food and groceries from local shops with GullyFoods 🍴✨"
-    />
-    <meta name="twitter:image" content="%PUBLIC_URL%/icons/gullyfoodsLogo512.png" />
+  <!-- ✅ Open Graph (for Google, Facebook, WhatsApp) -->
+  <meta property="og:title" content="GullyFoods – Where Taste Meets Budget" />
+  <meta property="og:description"
+    content="Get your favorite food, groceries, and essentials delivered from nearby stores — fast, fresh, and affordable with GullyFoods!" />
+  <meta property="og:image" content="%PUBLIC_URL%/icons/gullyfoodsLogo512.png" />
+  <meta property="og:url" content="https://gullyfoods.app" />
+  <meta property="og:type" content="website" />
 
-    <!-- ✅ Manifest -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  <!-- ✅ Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="GullyFoods – Where Taste Meets Budget" />
+  <meta name="twitter:description" content="Order delicious food and groceries from local shops with GullyFoods 🍴✨" />
+  <meta name="twitter:image" content="%PUBLIC_URL%/icons/gullyfoodsLogo512.png" />
 
-    <title>GullyFoods – Your lane, your taste, your GullyFoods</title>
+  <!-- ✅ Manifest -->
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
-    <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
-  </head>
+  <title>GullyFoods – Your lane, your taste, your GullyFoods</title>
 
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-  </body>
+  <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
+  <script>
+    if (typeof navigator.serviceWorker !== 'undefined') {
+      navigator.serviceWorker.register('sw.js')
+    }
+  </script>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+</body>
+
 </html>

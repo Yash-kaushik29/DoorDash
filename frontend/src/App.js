@@ -55,6 +55,7 @@ import Policy from "./Policy";
 import InstallGuide from "./pages/User/InstallGuide";
 import SalesHistory from "./pages/Seller/SalesHistory";
 import { SellerContextProvider } from "./context/sellerContext";
+import Users from "./pages/Admin/Users";
 
 const App = () => {
   return (
@@ -115,7 +116,8 @@ const App = () => {
         <Route path="/admin/seller/:sellerId" element={<SellerDetails />} />
         <Route path="/admin/getSellers" element={<SellerList />} />
         <Route path="/admin/adminProducts" element={<AdminProducts />} />
-        <Route path="/admin/userDetails" element={<UserDetails />} />
+        <Route path="/admin/users" element={<Users />} />
+        <Route path="/admin/userDetails/:userId" element={<UserDetails />} />
         <Route path="/admin/outstandingAmounts" element={<OutstandingAmountList />} />
         <Route path="/admin/deliveryBoyDetails/:deliveryBoyId" element={<DeliveryBoyDetails />} />
       </Routes>

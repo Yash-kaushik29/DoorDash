@@ -201,7 +201,7 @@ const AdminDashboard = () => {
             </div>
           </Link>
 
-          <Link to="/admin/userDetails">
+          <Link to="/admin/users">
             <div className="flex justify-between bg-gradient-to-br from-indigo-400 to-indigo-600 text-white p-4 rounded-lg shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 cursor-pointer">
               <h2 className="text-xl font-semibold">User Details</h2>
               <User className="w-8 h-8 opacity-80" />
