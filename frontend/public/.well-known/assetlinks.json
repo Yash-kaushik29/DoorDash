@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.gullyfoods.twa",
+        "sha256_cert_fingerprints": ["BD:D6:25:CA:78:2E:8D:A9:E0:48:E2:36:FC:43:27:C7:21:2B:CD:51:59:09:9D:0C:DD:76:AD:40:40:58:A8:17"]
+      }
+    }]
