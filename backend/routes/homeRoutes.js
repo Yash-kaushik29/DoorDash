@@ -14,14 +14,19 @@ router.get('/get-popular-shops', async(req, res) => {
     }
 });
 
-router.get('/get-popular-products', async(req, res) => {
+router.get('/get-popular-products', async (req, res) => {
     try {
-        const products = await Product.find({shopName: "Rolls Street Bites"});
-        res.json({success: true, products});
-    } catch(error) {
-        console.log(error)
-        res.json({success: false, message: "Error Loading the data!"});
+        const products = await Product.find({
+            shopName: "Moga Punjabi Tadka",
+            "categories.0": "South Indian"  
+        });
+
+        res.json({ success: true, products });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Error Loading the data!" });
     }
 });
+
 
 module.exports = router;

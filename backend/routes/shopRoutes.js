@@ -227,6 +227,38 @@ router.put("/edit-product", async (req, res) => {
   }
 });
 
+router.delete("/delete-product/:id", async (req, res) => {
+  try {
+    const productId = req.params.id;
+
+    // 1️⃣ FIND PRODUCT FIRST
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // 2️⃣ REMOVE PRODUCT FROM SELLER
+    await Seller.updateOne(
+      { _id: product.seller }, // assuming product has seller field
+      { $pull: { products: productId } }
+    );
+
+    // 3️⃣ REMOVE PRODUCT FROM SHOP
+    await Shop.updateMany(
+      { products: productId },
+      { $pull: { products: productId } }
+    );
+
+    // 4️⃣ DELETE PRODUCT DOCUMENT
+    await Product.findByIdAndDelete(productId);
+
+    return res.json({ message: "Product deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 router.get("/get-products", authenticateSeller, async (req, res) => {
   try {
     const seller = req.seller;
