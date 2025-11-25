@@ -17,9 +17,9 @@ router.get('/get-popular-shops', async(req, res) => {
 router.get('/get-popular-products', async (req, res) => {
     try {
         const products = await Product.find({
-            shopName: "Moga Punjabi Tadka",
-            "categories.0": "South Indian"  
-        });
+            shopName: "Moga Eleven",
+            "categories.0": "Main Course"  
+        }).limit(20);
 
         res.json({ success: true, products });
     } catch (error) {

@@ -52,13 +52,11 @@ const Checkout = () => {
 
   useEffect(() => {
     if (!ready) return;
-    console.log("User ready:", user);
     if (!user) {
       console.log("Navigating to profile...");
       navigate("/user/profile");
       return;
     }
-    console.log("Fetching addresses & coupons...");
     fetchAddresses();
     fetchActiveCoupons();
   }, [ready, user]);
