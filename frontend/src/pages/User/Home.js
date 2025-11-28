@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import api from "../../utils/axiosInstance";
 import { FiRefreshCw } from "react-icons/fi";
 import HomePagePopup from "../../components/HomePagePopup";
+import ReviewCarousel from "../../components/ReviewCarousel";
 
 const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
@@ -167,10 +168,12 @@ const Home = () => {
             Gully<span className="text-green-500">Foods</span>
           </span>
         </div>
-        <span className="italic text-gray-600 font-semibold dark:text-white text-lg text-center">
+        {/* <span className="italic text-gray-600 font-semibold dark:text-white text-lg text-center">
           Your lane, your taste, your GullyFoods ✨
-        </span>
+        </span> */}
       </div>
+
+      <ReviewCarousel />
 
       {/* Search Bar */}
       <div className="max-w-xl mx-auto mt-4 px-4">

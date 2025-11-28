@@ -24,6 +24,7 @@ const cronRoutes = require('./routes/cronRoutes.js');
 const QRCode = require("qrcode");
 const Coupons  = require("./models/Coupons.js");
 const Shop = require("./models/Shop.js");
+const pdfExportRoutes = require("./routes/pdfExportRoutes");
 
 const app = express();
 dotenv.config();
@@ -87,6 +88,7 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/notification", notificationsRoutes);
 app.use('/api/grocery', groceryRoutes);
+app.use('/api/export', pdfExportRoutes);
 
 app.get('/api/check', async(req, res) => {
   res.send({succes: true, message: "Backend connected"})
