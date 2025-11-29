@@ -23,7 +23,7 @@ export default function ReviewCarousel() {
 
   return (
     <div className="py-3 mx-4">
-        <h2 className="text-center mb-3" >What our happy customers say 💖</h2>
+      <h2 className="text-center mb-3">What our happy customers say 💖</h2>
       <Swiper
         modules={[Autoplay]}
         spaceBetween={10}
@@ -54,8 +54,8 @@ function ReviewCard({ review }) {
 
   return (
     <div
-      className="h-[90px] rounded-md border border-gray-200 dark:border-gray-800 
-                    bg-white dark:bg-gray-800 p-3 shadow-sm flex flex-col justify-between"
+      className="min-h-[90px] rounded-md border border-gray-200 dark:border-gray-800 
+              bg-white dark:bg-gray-800 p-3 shadow-sm flex flex-col justify-between"
     >
       <div className="flex flex-col-reverse gap-y-2 justify-center text-xs">
         <div className="flex items-center gap-[2px]">
@@ -71,7 +71,7 @@ function ReviewCard({ review }) {
               ★
             </span>
           ))}
-          <span className="text-yellow-500 font-medium">  ({avgRating}) </span>
+          <span className="text-yellow-500 font-medium"> ({avgRating})</span>
         </div>
 
         <span className="font-semibold text-green-500 truncate">
@@ -79,7 +79,7 @@ function ReviewCard({ review }) {
         </span>
       </div>
 
-      <p className="text-[11px] leading-tight text-gray-600 dark:text-gray-200 line-clamp-2">
+      <p className="text-[11px] leading-[1.4] text-gray-600 dark:text-gray-200 line-clamp-2">
         {review.review}
       </p>
     </div>
