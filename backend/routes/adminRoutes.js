@@ -226,15 +226,10 @@ router.get("/getOrdersByMonth", async (req, res) => {
       page = parseInt(page);
       limit = parseInt(limit);
 
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
       const filterQuery =
         filter && filter !== "All" ? { deliveryStatus: filter } : {};
 
       const orders = await Order.find({
-        createdAt: { $gte: startOfMonth, $lt: endOfMonth },
         ...filterQuery,
       })
         .select("id items amount deliveryStatus paymentStatus createdAt")
@@ -243,7 +238,6 @@ router.get("/getOrdersByMonth", async (req, res) => {
         .skip((page - 1) * limit);
 
       const totalOrders = await Order.countDocuments({
-        createdAt: { $gte: startOfMonth, $lt: endOfMonth },
         ...filterQuery,
       });
 
