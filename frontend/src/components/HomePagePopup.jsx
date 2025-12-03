@@ -33,7 +33,10 @@ const HomePagePopup = () => {
           >
             {/* Close Button */}
             <button
-              onClick={() => setVisible(false)}
+              onClick={() => {
+                localStorage.setItem("popupSeen", "true");
+                setVisible(false);
+              }}
               className="absolute top-3 right-3 text-gray-500 hover:text-red-500 transition"
             >
               <X className="w-5 h-5" />
@@ -49,32 +52,33 @@ const HomePagePopup = () => {
 
             {/* Title */}
             <h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mt-2">
-              ✨ GullyFoods Just Got Better!
+              ⚡ GullyFoods is Faster Than Ever!
             </h3>
 
             {/* Message */}
             <div className="text-gray-700 dark:text-gray-300 mt-3 space-y-2 text-sm">
               <p>
-                We were performing a quick system upgrade earlier — which caused
-                some shops to appear <strong>closed</strong>.
+                We've just completed a major system upgrade to give you a
+                smoother, faster experience.
               </p>
 
               <p className="font-medium text-green-600 dark:text-green-400">
-                Everything is now fixed! 💚
+                Everything is running perfectly now! 💚
               </p>
 
-              <p>🚀 Shops are live again</p>
-              <p className="font-bold text-lg" >💸 Delivery charges have been reduced</p>
-              <p>⚡ App performance is smoother than ever</p>
+              <p>🚀 Shops are live & working normally</p>
+              <p className="font-bold text-lg">💸 Delivery charges are lower</p>
+              <p>⚡ Faster loads & quicker checkout</p>
             </div>
 
             <p className="text-gray-600 dark:text-gray-400 mt-4 text-sm">
-              Thanks for your patience — happy ordering! 🍽️
+              Thank you for staying with us — happy eating! 🍽️
             </p>
 
             {/* CTA Button */}
             <button
               onClick={() => {
+                localStorage.setItem("popupSeen", "true");
                 setVisible(false);
                 navigate("/products/restaurants");
               }}
