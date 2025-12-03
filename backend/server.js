@@ -15,16 +15,18 @@ const orderRoutes = require("./routes/orderRoutes");
 const notificationsRoutes = require("./routes/notificationsRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const deliveryRoutes = require("./routes/deliveryRoutes");
-const groceryRoutes = require('./routes/groceryRoutes');
+const groceryRoutes = require("./routes/groceryRoutes");
 const multer = require("multer");
 const axios = require("axios");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("./cloudinary.js");
-const cronRoutes = require('./routes/cronRoutes.js');
+const cronRoutes = require("./routes/cronRoutes.js");
 const QRCode = require("qrcode");
-const Coupons  = require("./models/Coupons.js");
+const Coupons = require("./models/Coupons.js");
 const Shop = require("./models/Shop.js");
 const pdfExportRoutes = require("./routes/pdfExportRoutes");
+const rateLimit = require("express-rate-limit");
+
 
 const app = express();
 dotenv.config();
@@ -36,10 +38,21 @@ app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:3000", "https://door-dash-sigma.vercel.app", "https://gullyfoods.app"],
+    origin: [
+      "http://localhost:3000",
+      "https://door-dash-sigma.vercel.app",
+      "https://gullyfoods.app",
+    ],
     methods: ["POST", "PUT", "GET", "DELETE"],
   })
 );
+
+app.use(rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+}));
 
 mongoose
   .connect(process.env.MONGODB_URI_KEY, {
@@ -55,9 +68,24 @@ mongoose
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: "gullyfoods_uploads", 
+    folder: "gullyfoods_uploads",
     allowed_formats: ["jpg", "jpeg", "png", "webp"],
   },
+});
+
+app.set("trust proxy", true);
+
+const ipMap = {};
+
+app.use((req, res, next) => {
+  const ip =
+    req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
+
+  ipMap[ip] = (ipMap[ip] || 0) + 1;
+
+  console.log("⚠ Traffic from IP:", ip, "| Requests:", ipMap[ip]);
+
+  next();
 });
 
 const upload = multer({ storage });
@@ -77,7 +105,6 @@ app.post("/upload", upload.array("photos"), async (req, res) => {
   }
 });
 
-
 app.use("/api/auth", authRoutes);
 app.use("/api/shop", shopRoutes);
 app.use("/api/user-profile", userProfileRoutes);
@@ -87,12 +114,12 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/notification", notificationsRoutes);
-app.use('/api/grocery', groceryRoutes);
-app.use('/api/export', pdfExportRoutes);
+app.use("/api/grocery", groceryRoutes);
+app.use("/api/export", pdfExportRoutes);
 
-app.get('/api/check', async(req, res) => {
-  res.send({succes: true, message: "Backend connected"})
-})
+app.get("/api/check", async (req, res) => {
+  res.send({ succes: true, message: "Backend connected" });
+});
 
 app.use("/api/admin", adminRoutes);
 
@@ -147,17 +174,27 @@ app.get("/promo/qr", async (req, res) => {
 
 app.post("/add-coupons", async (req, res) => {
   try {
-    const { coupons } = req.body; 
+    const { coupons } = req.body;
 
     if (!Array.isArray(coupons) || coupons.length === 0) {
-      return res.status(400).json({ success: false, message: "Coupons array required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Coupons array required" });
     }
 
-    const insertedCoupons = await Coupons.insertMany(coupons, { ordered: false }); 
+    const insertedCoupons = await Coupons.insertMany(coupons, {
+      ordered: false,
+    });
     res.json({ success: true, insertedCoupons });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Error inserting coupons", error: err.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error inserting coupons",
+        error: err.message,
+      });
   }
 });
 

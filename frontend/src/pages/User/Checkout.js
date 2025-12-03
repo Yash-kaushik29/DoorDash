@@ -111,12 +111,12 @@ const Checkout = () => {
   const getFoodDeliveryCharge = (distance) => {
     if (distance <= 3) return 20;
     if (distance <= 4) return 25;
-    if (distance <= 5) return 35;
-    if (distance <= 6) return 40;
-    if (distance <= 8) return 50;
-    if (distance <= 10) return 60;
-    if (distance <= 12) return 65;
-    return distance * 7;
+    if (distance <= 5) return 30;
+    if (distance <= 6) return 35;
+    if (distance <= 8) return 40;
+    if (distance <= 10) return 50;
+    if (distance <= 12) return 60;
+    return distance * 6;
   };
 
   const getGroceryServiceCharge = (cartPrice) => {

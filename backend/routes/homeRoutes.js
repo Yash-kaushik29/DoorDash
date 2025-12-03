@@ -24,7 +24,6 @@ router.get("/get-popular-products", async (req, res) => {
 
     res.json({ success: true, products });
   } catch (error) {
-    console.log(error);
     res.json({ success: false, message: "Error Loading the data!" });
   }
 });
