@@ -56,6 +56,16 @@ const ShopSchema = new mongoose.Schema(
     images: {
       type: [String],
     },
+    shopDiscount: {
+      type: Number,
+      default: 0, 
+      min: 0,
+    },
+    priority: {
+      type: Number,
+      default: 0,
+      index: true,
+    },
   },
   { timestamps: true }
 );

@@ -182,7 +182,7 @@ router.get("/getCart", authenticateUser, async (req, res) => {
   try {
     const foodProductIds = currUser.foodCart.map((item) => item.productId);
 
-    const foodProducts = await Product.find({ _id: { $in: foodProductIds } }).populate("shop", "isOpen lat long");
+    const foodProducts = await Product.find({ _id: { $in: foodProductIds } }).populate("shop", "isOpen lat long shopDiscount");
 
     const foodCart = currUser.foodCart.map((cartItem) => {
       const product = foodProducts.find(

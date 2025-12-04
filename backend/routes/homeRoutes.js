@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get("/get-popular-shops", async (req, res) => {
   try {
-    const shops = await Shop.find();
+    const shops = await Shop.find({ category: { $ne: "Grocery" } }).sort({priority: -1});
     res.json({ success: true, shops });
   } catch (error) {
     console.log(error);
@@ -20,7 +20,7 @@ router.get("/get-popular-products", async (req, res) => {
     const products = await Product.find({
       shopName: "Moga Eleven",
       "categories.0": "Main Course",
-    }).limit(20);
+    }).populate("shop", "shopDiscount").limit(20);
 
     res.json({ success: true, products });
   } catch (error) {

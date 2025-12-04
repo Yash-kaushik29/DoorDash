@@ -73,21 +73,6 @@ const storage = new CloudinaryStorage({
   },
 });
 
-app.set("trust proxy", true);
-
-const ipMap = {};
-
-app.use((req, res, next) => {
-  const ip =
-    req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
-
-  ipMap[ip] = (ipMap[ip] || 0) + 1;
-
-  console.log("⚠ Traffic from IP:", ip, "| Requests:", ipMap[ip]);
-
-  next();
-});
-
 const upload = multer({ storage });
 
 app.post("/upload", upload.array("photos"), async (req, res) => {

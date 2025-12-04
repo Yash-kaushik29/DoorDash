@@ -23,6 +23,7 @@ const CartPage = () => {
   const shopLat = sampleProduct?.shop?.lat;
   const shopLong = sampleProduct?.shop?.long;
   const shopName = sampleProduct?.shopName;
+  const shopDiscount = sampleProduct?.shop?.shopDiscount || 0;
 
   // Fetch carts
   useEffect(() => {
@@ -158,11 +159,14 @@ const CartPage = () => {
 
   const handleCheckout = () => {
     const cartItems =
-      activeCart === "foodCart" ? foodCartItems : groceryCartItems;
+    activeCart === "foodCart" ? foodCartItems : groceryCartItems;
+
+    const totalPrice = getTotalPrice(cartItems) * (1-shopDiscount/100);  
+
     navigate("/checkout", {
       state: {
         cartItems,
-        totalPrice: getTotalPrice(cartItems),
+        totalPrice,
         cartKey: activeCart,
         shopLat,
         shopLong,
@@ -232,7 +236,9 @@ const CartPage = () => {
         ) : (
           <div className="bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-xl max-w-3xl mx-auto border border-green-100 dark:border-gray-700 flex flex-col">
             {/* Scrollable Cart Items */}
-            <div className="text-center text-green-500 font-semibold mb-4" >Ordering from {shopName}</div>
+            <div className="text-center text-green-500 font-semibold mb-4">
+              Ordering from {shopName}
+            </div>
             <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
               {currentCartItems?.map((item) => (
                 <div
@@ -255,9 +261,25 @@ const CartPage = () => {
                     <h3 className="font-semibold text-gray-900 dark:text-white text-md">
                       {item.product.name}
                     </h3>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">
-                      ₹{item.product?.price} x {item?.quantity}
-                    </p>
+                    {shopDiscount > 0 ? (
+                      <p className="mt-1 text-sm">
+                        <span className="line-through text-gray-400 mr-2">
+                          ₹{item.product.price}
+                        </span>
+                        <span className="text-green-600 font-semibold">
+                          ₹
+                          {Math.round(
+                            item.product.price -
+                              (item.product.price * shopDiscount) / 100
+                          )}
+                        </span>
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-green-600 font-semibold text-sm">
+                        ₹{item.product.price}
+                      </p>
+                    )}
+
                     {!item.product.inStock && (
                       <p className="text-red-500 text-xs font-semibold mt-1">
                         Out of Stock 🚫
@@ -311,10 +333,44 @@ const CartPage = () => {
 
             {/* Total & Checkout */}
             <div className="mt-6 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-inner sticky bottom-0">
-              <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white">
-                <span>Total:</span>
-                <span>₹{getTotalPrice(currentCartItems).toFixed(2)}</span>
-              </div>
+              {shopDiscount > 0 ? (
+                (() => {
+                  const originalTotal = getTotalPrice(currentCartItems);
+                  const discountAmount = Math.round(
+                    (originalTotal * shopDiscount) / 100
+                  );
+                  const finalTotal = Math.max(
+                    1,
+                    originalTotal - discountAmount
+                  );
+
+                  return (
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">
+                      <div className="flex justify-between">
+                        <span>Total:</span>
+                        <div className="text-right">
+                          <p className="line-through text-gray-400 text-sm">
+                            ₹{originalTotal.toFixed(2)}
+                          </p>
+                          <p className="text-green-600">
+                            ₹{finalTotal.toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-green-500 mt-1 text-right">
+                        You are saving ₹{discountAmount.toFixed(2)}
+                      </p>
+                    </div>
+                  );
+                })()
+              ) : (
+                <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white">
+                  <span>Total:</span>
+                  <span>₹{getTotalPrice(currentCartItems).toFixed(2)}</span>
+                </div>
+              )}
+
               <button
                 className={`w-full py-3 mt-6 rounded-xl font-semibold transition shadow-lg ${
                   currentCartItems.some(

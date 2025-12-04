@@ -235,6 +235,12 @@ const ProductCard = ({
         </span>
       )}
 
+      {product?.shop?.shopDiscount > 0 && (
+        <span className="absolute top-0 left-2 bg-gradient-to-r from-red-600 to-orange-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-xl z-10">
+          {product?.shop?.shopDiscount}%<p>OFF</p>
+        </span>
+      )}
+
       {bestSeller && (
         <span className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-b-lg z-10">
           Bestseller
@@ -265,7 +271,9 @@ const ProductCard = ({
         {!product.inStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-60 rounded-md">
             <span className="text-white font-bold text-sm">
-              {product.shopType === "Grocery" ? "Out of Stock" : "Not Available"}
+              {product.shopType === "Grocery"
+                ? "Out of Stock"
+                : "Not Available"}
             </span>
           </div>
         )}
@@ -311,14 +319,28 @@ const ProductCard = ({
         <p className="mt-1 text-xs text-yellow-500">{product.shopName}</p>
       )}
 
-      {product.price < product.basePrice ? (
+      {product.basePrice > product.price ? (
         <p className="mt-1 text-sm">
           <span className="line-through text-gray-400 mr-2">
             ₹{product.basePrice}
           </span>
           <span className="text-green-500 font-semibold">₹{product.price}</span>
         </p>
+      ) : product?.shop?.shopDiscount > 0 ? (
+        <p className="mt-1 text-sm">
+          <span className="line-through text-gray-400 mr-2">
+            ₹{product.price}
+          </span>
+          <span className="text-red-500 font-semibold">
+            ₹
+            {Math.round(
+              product.price -
+                (product.price * product?.shop?.shopDiscount) / 100
+            )}
+          </span>
+        </p>
       ) : (
+        // ✅ NORMAL PRICE
         <p className="mt-1 text-green-500 font-semibold text-sm">
           ₹{product.price}
         </p>

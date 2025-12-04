@@ -342,7 +342,7 @@ router.get("/getShop/:shopId", async (req, res) => {
 router.get("/getShopAndProducts/:shopId", async (req, res) => {
   try {
     const shop = await Shop.findById(req.params.shopId);
-    const products = await Product.find({ shop: req.params.shopId });
+    const products = await Product.find({ shop: req.params.shopId }).populate("shop", "shopDiscount");
 
     res.status(200).json({ shop, products });
   } catch (error) {
@@ -458,7 +458,7 @@ router.put("/update-profile", authenticateSeller, async (req, res) => {
 
 router.get("/get-restaurants", async (req, res) => {
   try {
-    const restaurants = await Shop.find({ category: { $ne: "Grocery" } });
+    const restaurants = await Shop.find({ category: { $ne: "Grocery" } }).sort({priority: -1});
 
     if (!restaurants || restaurants.length === 0) {
       return res

@@ -23,7 +23,7 @@ export default function ReviewCarousel() {
 
   return (
     <div className="py-3 mx-4">
-      <h2 className="text-center mb-3">What our happy customers say 💖</h2>
+      <h2 className="text-center mb-3">What Our Happy Customers Say 💖</h2>
       <Swiper
         modules={[Autoplay]}
         spaceBetween={10}

@@ -61,7 +61,7 @@ router.get("/search/:query", async (req, res) => {
 
     const products = await Product.find(
       { $text: { $search: query } },
-      { score: { $meta: "textScore" } } // get relevance score
+      { score: { $meta: "textScore" } } 
     )
       .sort({ score: { $meta: "textScore" } }) // sort by relevance
       .skip((page - 1) * limit)

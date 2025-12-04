@@ -6,89 +6,121 @@ import { useNavigate } from "react-router-dom";
 
 const HomePagePopup = () => {
   const [visible, setVisible] = useState(true);
+  const [countdown, setCountdown] = useState("");
   const navigate = useNavigate();
 
-  // Auto-hide after 10 seconds
   useEffect(() => {
+    if (!visible) return;
     const timer = setTimeout(() => setVisible(false), 10000);
     return () => clearTimeout(timer);
+  }, [visible]);
+
+  const getNextSaturdayMidnight = () => {
+    const now = new Date();
+    const day = now.getDay();
+    const daysUntilSaturday = (6 - day + 7) % 7 || 7;
+    const saturday = new Date(now);
+    saturday.setDate(now.getDate() + daysUntilSaturday);
+    saturday.setHours(0, 0, 0, 0);
+    return saturday;
+  };
+
+  useEffect(() => {
+    const target = getNextSaturdayMidnight();
+    const updateCountdown = () => {
+      const now = new Date();
+      const diff = target - now;
+
+      if (diff <= 0) {
+        setCountdown("🎉 LIVE NOW!");
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      setCountdown(`${days}d : ${hours}h : ${minutes}m : ${seconds}s`);
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  if (!visible) return null;
+  if(!visible) {
+    return null;
+  }
 
   return (
     <AnimatePresence>
-      {visible && (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.8 }}
+        className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm"
+      >
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm"
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 50, opacity: 0 }}
+          className="relative bg-white dark:bg-gray-700 rounded-2xl shadow-2xl p-6 max-w-sm w-[90%] text-center border border-green-300"
         >
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 50, opacity: 0 }}
-            className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-w-sm w-[90%] text-center"
+          <button
+            onClick={() => {
+              setVisible(false);
+            }}
+            className="absolute top-3 right-3 text-gray-500 hover:text-green-600 transition"
           >
-            {/* Close Button */}
-            <button
-              onClick={() => {
-                localStorage.setItem("popupSeen", "true");
-                setVisible(false);
-              }}
-              className="absolute top-3 right-3 text-gray-500 hover:text-red-500 transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <X className="w-5 h-5" />
+          </button>
 
-            {/* Animation */}
-            <DotLottieReact
-              src="/lottie/update.lottie"
-              loop
-              autoplay
-              className="w-52 h-52 mx-auto"
-            />
+          <DotLottieReact
+            src="/lottie/sale.lottie"
+            loop
+            autoplay
+            className="w-44 h-44 mx-auto"
+          />
 
-            {/* Title */}
-            <h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mt-2">
-              ⚡ GullyFoods is Faster Than Ever!
-            </h3>
+          <h3 className="text-2xl font-extrabold text-green-500 mt-2">
+            🎪 Gully<span className="text-black dark:text-gray-100">Foods</span> Flavor Carnival
+          </h3>
 
-            {/* Message */}
-            <div className="text-gray-700 dark:text-gray-300 mt-3 space-y-2 text-sm">
-              <p>
-                We've just completed a major system upgrade to give you a
-                smoother, faster experience.
-              </p>
+          <p className="italic text-black dark:text-gray-200 text-sm mt-1">
+            “Swaad ka Tadka, Jeb par Halka.”
+          </p>
 
-              <p className="font-medium text-green-600 dark:text-green-400">
-                Everything is running perfectly now! 💚
-              </p>
-
-              <p>🚀 Shops are live & working normally</p>
-              <p className="font-bold text-lg">💸 Delivery charges are lower</p>
-              <p>⚡ Faster loads & quicker checkout</p>
-            </div>
-
-            <p className="text-gray-600 dark:text-gray-400 mt-4 text-sm">
-              Thank you for staying with us — happy eating! 🍽️
+          <div className="mt-4 text-sm text-gray-700 dark:text-gray-300 space-y-1">
+            <p className="font-semibold text-green-600">
+              🔥 Exciting Discounts on All Restaurants
             </p>
+            <p>🍔 Food • 🛒 Grocery • 🧃 Everything</p>
+            <p className="text-green-500 font-medium">This weekend only!</p>
+          </div>
 
-            {/* CTA Button */}
-            <button
-              onClick={() => {
-                localStorage.setItem("popupSeen", "true");
-                setVisible(false);
-                navigate("/products/restaurants");
-              }}
-              className="mt-5 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-lg transition w-full"
-            >
-              Explore Now
-            </button>
-          </motion.div>
+          <div className="mt-4 bg-green-700 text-green-200 rounded-lg p-3 shadow-lg">
+            <p className="text-xs uppercase tracking-widest text-white">
+              Discounts Goes Live In
+            </p>
+            <p className="text-lg font-bold text-white mt-1">
+              {countdown || "Loading..."}
+            </p>
+          </div>
+
+          <button
+            onClick={() => {
+              localStorage.setItem("popupSeen", "true");
+              setVisible(false);
+              navigate("/products/restaurants");
+            }}
+            className="mt-5 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-lg transition w-full"
+          >
+            Explore Now
+          </button>
         </motion.div>
-      )}
+      </motion.div>
     </AnimatePresence>
   );
 };
