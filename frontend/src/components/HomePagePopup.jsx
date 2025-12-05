@@ -93,11 +93,11 @@ const HomePagePopup = () => {
           </p>
 
           <div className="mt-4 text-sm text-gray-700 dark:text-gray-300 space-y-1">
-            <p className="font-semibold text-green-600">
+            <p className="font-semibold text-green-600 text-lg">
               🔥 Exciting Discounts on All Restaurants
             </p>
             <p>🍔 Food • 🛒 Grocery • 🧃 Everything</p>
-            <p className="text-green-500 font-medium">This weekend only!</p>
+            <p className="text-green-500 font-medium">This Saturday & Sunday !</p>
           </div>
 
           <div className="mt-4 bg-green-700 text-green-200 rounded-lg p-3 shadow-lg">
