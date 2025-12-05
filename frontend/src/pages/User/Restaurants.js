@@ -7,6 +7,7 @@ import Navbar from "../../components/Navbar";
 import api from "../../utils/axiosInstance";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { FaStar } from "react-icons/fa";
+import './event.css'
 
 const Restaurants = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -137,6 +138,19 @@ const Restaurants = () => {
                     transition={{ duration: 0.18 }}
                     className="relative rounded-2xl shadow-md overflow-hidden bg-white dark:bg-gray-800"
                   >
+                    {/* 🎉 FLAVOR CARNIVAL FESTIVAL RIBBON */}
+                    {r.shopDiscount > 0 && (
+  <div className="absolute top-0 inset-x-0 z-30 overflow-hidden">
+    <div className="relative bg-gradient-to-r from-green-700 via-green-600 to-green-500 text-white text-sm font-extrabold text-center py-2 tracking-wide shadow-md">
+      🎪 FLAVOR CARNIVAL — {r.shopDiscount}% OFF
+
+      {/* Shine Layer */}
+      <span className="absolute inset-0 pointer-events-none shine-effect" />
+    </div>
+  </div>
+)}
+
+
                     {/* Closed overlay */}
                     {!isOpen && (
                       <div className="absolute inset-0 z-20 flex flex-col items-center justify-start bg-black/30 backdrop-blur-sm pointer-events-none">
@@ -155,7 +169,7 @@ const Restaurants = () => {
                     )}
 
                     {/* OPEN ribbon */}
-                    {isOpen && (
+                    {/* {isOpen && (
                       <div className="absolute top-3 left-3 z-10">
                         <span className="inline-flex items-center gap-2 bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">
                           OPEN
@@ -164,7 +178,7 @@ const Restaurants = () => {
                           </span>
                         </span>
                       </div>
-                    )}
+                    )} */}
 
                     <Link to={`/shop/${r._id}`} className="block group">
                       <div className="h-52 w-full relative overflow-hidden bg-gray-100 dark:bg-gray-700">
@@ -213,7 +227,6 @@ const Restaurants = () => {
 
                           {/* small meta */}
                           <div className="flex flex-col items-end text-right">
-                            {/* Rating (if available) */}
                             {typeof r?.rating !== "undefined" ? (
                               <div className="flex items-center gap-1 text-sm text-yellow-500">
                                 <FaStar className="h-4 w-4 text-yellow-400" />
@@ -225,7 +238,6 @@ const Restaurants = () => {
                               <div className="text-sm text-gray-400">—</div>
                             )}
 
-                            {/* products count */}
                             <div className="text-xs text-gray-500 mt-1">
                               {productsCount} product
                               {productsCount !== 1 ? "s" : ""}
@@ -233,7 +245,7 @@ const Restaurants = () => {
                           </div>
                         </div>
 
-                        {/* tags & categories */}
+                        {/* tags */}
                         <div className="mt-3 flex flex-wrap gap-2">
                           {tags.slice(0, 3).map((t, i) => (
                             <span
@@ -250,7 +262,7 @@ const Restaurants = () => {
                           )}
                         </div>
 
-                        {/* footer meta */}
+                        {/* footer */}
                         <div className="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
                           <div className="flex items-center gap-2">
                             <MdAccessTime className="text-lg" />

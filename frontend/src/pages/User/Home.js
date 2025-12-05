@@ -84,7 +84,7 @@ const Home = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: i * 0.08, duration: 0.4 }}
-        className="snap-center"
+        className="snap-center shrink-0"
       >
         <ShopCard shop={shop} />
       </motion.div>
@@ -240,12 +240,13 @@ const Home = () => {
 
       {/* Popular Shops */}
       <section className="pt-8 container mx-auto px-4">
-        <h2 className="text-3xl font-bold mb-4">Popular Shops</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold mb-4">Popular Shops</h2>
+
         <div
           className="
-          flex gap-4 overflow-x-auto scrollbar-hide pt-2 pb-4
-          snap-x snap-mandatory
-        "
+      flex gap-4 overflow-x-auto scrollbar-hide pt-2 pb-4
+      snap-x snap-mandatory
+    "
         >
           {memoizedShops}
         </div>
