@@ -10,7 +10,7 @@ const QRCode = require("qrcode");
 const authenticateUser = require("../middleware/authMiddleware");
 const authenticateSeller = require("../middleware/sellerAuthMiddleware");
 
-router.post("/create-order", authenticateUser,  async (req, res) => {
+router.post("/create-order", authenticateUser, async (req, res) => {
   const userId = req.user._id;
   const {
     cartItems,
@@ -30,32 +30,54 @@ router.post("/create-order", authenticateUser,  async (req, res) => {
   try {
     let subTotal = 0;
     let sellersNotified = [];
+    let shopDiscountValue = 0;
 
-    // Create order items
     const orderItems = await Promise.all(
       cartItems.map(async (item) => {
-        const product = await Product.findById(item.product).populate("seller");
+        const product = await Product.findById(item.product)
+          .populate({
+            path: "seller",
+            select: "_id",
+          })
+          .populate({
+            path: "shop",
+            select: "shopDiscount",
+          });
+
         if (!product) throw new Error("Product not found");
 
-        const sellerId = product.seller._id.toString();
-        if (!sellersNotified.includes(sellerId)) sellersNotified.push(sellerId);
+        const seller = product.seller;
+        const sellerId = seller._id.toString();
 
-        subTotal += product.price * item.quantity;
+        if (!sellersNotified.includes(sellerId)) {
+          sellersNotified.push(sellerId);
+        }
+
+        const price = product.price;
+        const qty = item.quantity;
+        const shopDiscount = product?.shop?.shopDiscount || 0;
+
+        subTotal += price * qty;
+
+        const itemDiscount = Math.round((price * shopDiscount) / 100) * qty;
+        shopDiscountValue += itemDiscount;
 
         return {
           product: item.product,
           seller: sellerId,
-          quantity: item.quantity,
+          quantity: qty,
+          priceAtOrder: price,
+          shopDiscount,
         };
       })
     );
 
-    // Calculate total amount
     const totalAmount =
-      subTotal +
+      subTotal -
+      shopDiscountValue -
+      discount +
       deliveryCharge +
-      (orderType === "Food" ? taxes + convenienceFees : serviceCharge) -
-      discount;
+      (orderType === "Food" ? taxes + convenienceFees : serviceCharge);
 
     const newOrder = new Order({
       user: userId,
@@ -63,12 +85,12 @@ router.post("/create-order", authenticateUser,  async (req, res) => {
       shippingAddress: address,
       orderType,
       paymentMethod,
+      amount: subTotal - shopDiscountValue,
       totalAmount,
-      amount: subTotal,
       taxes,
       convenienceFees,
       serviceCharge,
-      discount,
+      discount, 
       deliveryStatus: "Processing",
       deliveryCharge,
       paymentStatus,
@@ -77,7 +99,7 @@ router.post("/create-order", authenticateUser,  async (req, res) => {
 
     await newOrder.save();
 
-    // Clear the respective cart after order creation
+    // ✅ Clear cart
     const updateCart = {
       $push: {
         notifications: {
@@ -88,13 +110,13 @@ router.post("/create-order", authenticateUser,  async (req, res) => {
       },
     };
     updateCart[cartKey] = [];
-
     await User.findByIdAndUpdate(userId, updateCart);
+
+    // ✅ Coupon cleanup
     if (coupon) {
-      const userUpdate = await User.findOneAndUpdate(
+      await User.findOneAndUpdate(
         { _id: userId, "activeCoupons._id": coupon },
-        { $inc: { "activeCoupons.$.count": -1 } },
-        { new: true }
+        { $inc: { "activeCoupons.$.count": -1 } }
       );
 
       await User.updateOne(
@@ -103,7 +125,7 @@ router.post("/create-order", authenticateUser,  async (req, res) => {
       );
     }
 
-    // Notify sellers
+    // ✅ Notify sellers
     await Promise.all(
       sellersNotified.map((sellerId) =>
         Seller.findByIdAndUpdate(sellerId, {
@@ -111,7 +133,7 @@ router.post("/create-order", authenticateUser,  async (req, res) => {
             notifications: {
               order: newOrder._id,
               message: `New order received. You need to prepare ${
-                orderItems.filter((item) => item.seller === sellerId).length
+                orderItems.filter((i) => i.seller === sellerId).length
               } items.`,
             },
             orders: newOrder._id,
@@ -565,7 +587,9 @@ router.get("/active", authenticateUser, async (req, res) => {
     const userId = req.user?._id;
 
     if (!userId) {
-      return res.status(400).json({ success: false, message: "User ID missing" });
+      return res
+        .status(400)
+        .json({ success: false, message: "User ID missing" });
     }
 
     // Find the most recent active order
@@ -576,8 +600,7 @@ router.get("/active", authenticateUser, async (req, res) => {
       .sort({ createdAt: -1 })
       .select("id deliveryStatus orderType");
 
-    if (!order)
-      return res.json({ success: true, order: null });
+    if (!order) return res.json({ success: true, order: null });
 
     res.json({ success: true, order });
   } catch (error) {

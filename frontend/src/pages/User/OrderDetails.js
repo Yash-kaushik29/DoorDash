@@ -279,6 +279,12 @@ const OrderDetails = () => {
               </span>
             </p>
             <p className="font-semibold">
+              GST Charges:{" "}
+              <span className="text-green-500 ml-2">
+                {formatPrice(order?.taxes)}
+              </span>
+            </p>
+            <p className="font-semibold">
               Delivery Fee:{" "}
               <span className="text-green-500 ml-2">
                 {formatPrice(order?.deliveryCharge)}
