@@ -102,10 +102,10 @@ const HomePagePopup = () => {
 
           <div className="mt-4 bg-green-700 text-green-200 rounded-lg p-3 shadow-lg">
             <p className="text-xs uppercase tracking-widest text-white">
-              Discounts Goes Live In
+              Discounts Are Live
             </p>
             <p className="text-lg font-bold text-white mt-1">
-              {countdown || "Loading..."}
+              Grab Your Treat Now !
             </p>
           </div>
 
