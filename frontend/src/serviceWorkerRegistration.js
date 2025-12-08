@@ -11,16 +11,14 @@ const isLocalhost = Boolean(
 export function register(config) {
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      const swUrl = "/service-worker.js"; // ✅ fixed path
+      const swUrl = "/serviceWorkerRegistration.js";
 
       if (isLocalhost) {
-        // Running on localhost. Check if service worker still exists or not.
         checkValidServiceWorker(swUrl, config);
         navigator.serviceWorker.ready.then(() => {
           console.log("Service Worker is ready on localhost.");
         });
       } else {
-        // Register service worker
         registerValidSW(swUrl, config);
       }
     });
