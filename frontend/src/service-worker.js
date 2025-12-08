@@ -22,7 +22,7 @@ registerRoute(({ request, url }) => {
     return false;
   }
   return true;
-}, createHandlerBoundToURL((process.env.PUBLIC_URL || "") + "/index.html"));
+}, createHandlerBoundToURL((process.env.REACT_APP_PUBLIC_URL || "") + "/index.html"));
 
 registerRoute(
   ({ url }) =>

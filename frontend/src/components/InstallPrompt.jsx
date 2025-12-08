@@ -12,7 +12,8 @@ const InstallPrompt = () => {
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent.toLowerCase();
-    setIsIos(/iphone|ipad|ipod/.test(userAgent));
+    const ios = /iphone|ipad|ipod/.test(userAgent);
+    setIsIos(ios);
 
     // Hide if already installed
     if (
@@ -23,8 +24,8 @@ const InstallPrompt = () => {
       return;
     }
 
-    // Listen for beforeinstallprompt
     const handler = (e) => {
+      console.log("beforeinstallprompt fired ✅");
       e.preventDefault();
       setDeferredPrompt(e);
       setShowBanner(true);
@@ -32,34 +33,51 @@ const InstallPrompt = () => {
 
     window.addEventListener("beforeinstallprompt", handler);
 
-    // If it never fires (e.g. iOS or blocked), show banner anyway
-    const fallbackTimer = setTimeout(() => {
-      if (!deferredPrompt) setShowBanner(true);
-    }, 4000);
+    // For iOS only: there is no beforeinstallprompt, show banner with guide
+    if (ios) {
+      setShowBanner(true);
+    }
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
-      clearTimeout(fallbackTimer);
     };
-  }, [deferredPrompt]);
+  }, []);
 
   const handleInstall = async () => {
+    // ANDROID / DESKTOP CHROME
     if (!isIos && deferredPrompt) {
       deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
+
       if (choice.outcome === "accepted") {
-        toast.success('Installing your app! Enjoy 😀 ')
+        toast.success("Installing your app! Enjoy 😀");
         setShowBanner(false);
+      } else {
+        toast.info("You dismissed the install prompt.");
       }
+
       setDeferredPrompt(null);
-    } else {
-      toast.error("Couldn’t install the app. Try refreshing the page.", {
-        autoClose: 3000,
-      });
+      return;
     }
+
+    // iOS – no real install prompt, send them to the guide instead
+    if (isIos) {
+      toast.info(
+        "On iPhone, tap the Share icon in Safari and choose 'Add to Home Screen' 😊",
+        { autoClose: 5000 }
+      );
+      return;
+    }
+
+    // Fallback – should rarely happen now
+    toast.error("Installation is not available in this browser.", {
+      autoClose: 3000,
+    });
   };
 
   if (!showBanner) return null;
+
+  const canInstall = !isIos && !!deferredPrompt;
 
   return (
     <>
@@ -72,10 +90,11 @@ const InstallPrompt = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={handleInstall}
-              className="flex items-center gap-1 bg-white text-green-600 font-semibold px-3 py-1.5 rounded-lg shadow hover:bg-gray-100 transition"
+              disabled={!canInstall && !isIos}
+              className={`flex items-center gap-1 bg-white text-green-600 font-semibold px-3 py-1.5 rounded-lg shadow hover:bg-gray-100 transition disabled:opacity-60 disabled:cursor-not-allowed`}
             >
               <MdDownload className="text-lg" />
-              Install
+              {isIos ? "How to install" : "Install"}
             </button>
 
             <button
@@ -98,7 +117,6 @@ const InstallPrompt = () => {
         </div>
       </div>
 
-      {/* Toast container — must be outside the banner */}
       <ToastContainer />
     </>
   );
