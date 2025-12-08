@@ -219,6 +219,33 @@ app.put("/open-all-shops", async (req, res) => {
   }
 });
 
+app.put("/init-shop-fields", async (req, res) => {
+  try {
+    const result = await Shop.updateMany(
+      {
+      },
+      {
+        $set: {
+          shopDiscount: 0,
+        }
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Missing fields initialized successfully",
+      updatedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.error("INIT SHOP FIELDS ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Update failed",
+      error: error.message
+    });
+  }
+});
+
 app.listen(5000, () => {
   console.log(`Server is running on PORT 5000`);
 });

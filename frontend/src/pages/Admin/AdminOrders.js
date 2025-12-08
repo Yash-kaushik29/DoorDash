@@ -123,7 +123,7 @@ const AdminOrders = () => {
                   Order ID: <span className="text-green-500">#{order.id}</span>
                 </p>
                 <p>Items: {order.items.length}</p>
-                <p>Total Price: ₹{order.amount}</p>
+                <p>Total Price: ₹{order.totalAmount}</p>
                 <p>
                   Date: {new Date(order.createdAt).toLocaleDateString()}{" "}
                   <span className="text-gray-600 dark:text-gray-300 ml-1">

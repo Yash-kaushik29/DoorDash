@@ -232,7 +232,7 @@ router.get("/getOrdersByMonth", async (req, res) => {
       const orders = await Order.find({
         ...filterQuery,
       })
-        .select("id items amount deliveryStatus paymentStatus createdAt")
+        .select("id items totalAmount deliveryStatus paymentStatus createdAt")
         .sort({ createdAt: -1 })
         .limit(limit)
         .skip((page - 1) * limit);
@@ -617,7 +617,6 @@ router.get("/user/:id", async (req, res) => {
     res.status(500).json({ message: err.message || "Server error" });
   }
 });
-
 
 router.put("/cancelOrder", async (req, res) => {
   try {

@@ -109,7 +109,7 @@ const Home = () => {
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-gray-100">
       <ToastContainer position="top-right" autoClose={3000} />
-      <HomePagePopup />
+      {/* <HomePagePopup /> */}
       <Navbar />
       <InstallPrompt />
 
