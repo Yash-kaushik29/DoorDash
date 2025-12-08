@@ -15,7 +15,7 @@ const InstallPrompt = () => {
     const ios = /iphone|ipad|ipod/.test(userAgent);
     setIsIos(ios);
 
-    // Hide if already installed
+    // Hide banner if already installed
     if (
       window.matchMedia("(display-mode: standalone)").matches ||
       window.navigator.standalone === true
@@ -24,8 +24,8 @@ const InstallPrompt = () => {
       return;
     }
 
+    // Android install available
     const handler = (e) => {
-      console.log("beforeinstallprompt fired ✅");
       e.preventDefault();
       setDeferredPrompt(e);
       setShowBanner(true);
@@ -33,10 +33,15 @@ const InstallPrompt = () => {
 
     window.addEventListener("beforeinstallprompt", handler);
 
-    // For iOS only: there is no beforeinstallprompt, show banner with guide
+    // iOS fallback (no install event)
     if (ios) {
-      setShowBanner(true);
+      setTimeout(() => setShowBanner(true), 2000);
     }
+
+    // Remove banner after install
+    window.addEventListener("appinstalled", () => {
+      setShowBanner(false);
+    });
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
@@ -44,57 +49,62 @@ const InstallPrompt = () => {
   }, []);
 
   const handleInstall = async () => {
-    // ANDROID / DESKTOP CHROME
     if (!isIos && deferredPrompt) {
       deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
 
       if (choice.outcome === "accepted") {
-        toast.success("Installing your app! Enjoy 😀");
+        toast.success("Installing GullyFoods 🚀");
         setShowBanner(false);
       } else {
-        toast.info("You dismissed the install prompt.");
+        toast.info("Installation cancelled");
       }
 
       setDeferredPrompt(null);
       return;
     }
 
-    // iOS – no real install prompt, send them to the guide instead
     if (isIos) {
       toast.info(
-        "On iPhone, tap the Share icon in Safari and choose 'Add to Home Screen' 😊",
+        "On iPhone: Tap the Share icon in Safari → 'Add to Home Screen'",
         { autoClose: 5000 }
       );
       return;
     }
 
-    // Fallback – should rarely happen now
-    toast.error("Installation is not available in this browser.", {
-      autoClose: 3000,
-    });
+    toast.error("Installation not supported in this browser");
   };
 
   if (!showBanner) return null;
 
-  const canInstall = !isIos && !!deferredPrompt;
+  const canInstall = !isIos && Boolean(deferredPrompt);
 
   return (
     <>
-      <div className="w-full bg-green-500 text-white px-4 py-3 rounded-b-lg shadow-lg">
+      <div className="w-full bg-green-500 text-white px-4 py-3 rounded-b-lg shadow-lg animate-slide-down">
         <div className="flex items-center justify-between gap-3">
-          <span className="font-medium text-sm sm:text-base">
-            📱 Install <span className="font-bold">GullyFoods</span> for 1-tap access
-          </span>
+          
+          {/* App Icon + Text */}
+          <div className="flex items-center gap-3">
+            <img
+              src="/icons/gullyfoodsLogo192.png"
+              alt="GullyFoods Icon"
+              className="w-9 h-9 rounded-lg shadow bg-white"
+            />
+            <span className="font-medium text-sm sm:text-base">
+              Add app to your <span className="font-bold">home screen</span>
+            </span>
+          </div>
 
+          {/* Buttons */}
           <div className="flex items-center gap-2">
             <button
               onClick={handleInstall}
               disabled={!canInstall && !isIos}
-              className={`flex items-center gap-1 bg-white text-green-600 font-semibold px-3 py-1.5 rounded-lg shadow hover:bg-gray-100 transition disabled:opacity-60 disabled:cursor-not-allowed`}
+              className="flex items-center gap-1 bg-white text-green-600 font-semibold px-3 py-1.5 rounded-lg shadow hover:bg-gray-100 transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <MdDownload className="text-lg" />
-              {isIos ? "How to install" : "Install"}
+              {isIos ? "How" : "Add"}
             </button>
 
             <button
@@ -107,12 +117,12 @@ const InstallPrompt = () => {
         </div>
 
         <div className="mt-2 text-white opacity-90">
-          Facing problems installing?{" "}
+          Trouble installing?{" "}
           <Link
             to="/install-guide"
             className="underline font-semibold hover:text-gray-200"
           >
-            Check this guide!
+            See guide
           </Link>
         </div>
       </div>
