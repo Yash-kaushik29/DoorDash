@@ -473,6 +473,18 @@ router.get("/getUser", authenticateUser, (req, res) => {
   });
 });
 
+router.get("/me", authenticateUser, async (req, res) => {
+  res.json({ user: req.user });
+});
+
+router.delete("/delete-account", authenticateUser, async (req, res) => {
+  const userId = req.user._id;
+
+  await User.findByIdAndDelete(userId);
+
+  res.json({ message: "Account deleted successfully" });
+});
+
 router.post("/logout", (req, res) => {
   try {
     const isProduction = process.env.NODE_ENV === "production";

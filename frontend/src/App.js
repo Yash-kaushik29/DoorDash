@@ -56,6 +56,7 @@ import InstallGuide from "./pages/User/InstallGuide";
 import SalesHistory from "./pages/Seller/SalesHistory";
 import { SellerContextProvider } from "./context/sellerContext";
 import Users from "./pages/Admin/Users";
+import AccountDetails from "./pages/User/AccountDetails";
 
 const App = () => {
   return (
@@ -82,6 +83,7 @@ const App = () => {
           <Route path='/terms' element={<Terms />} />
           <Route path='/policy' element={<Policy />} />
           <Route path='/install-guide' element={<InstallGuide />} />
+          <Route path='/my-account' element={<AccountDetails />} />
         </Routes>
       </UserContextProvider>
 
