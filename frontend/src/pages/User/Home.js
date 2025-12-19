@@ -229,29 +229,34 @@ const Home = () => {
               key={cat.name}
               to={`/products/${cat.name.toLowerCase()}`}
               className="
-        group relative h-52 rounded-3xl overflow-hidden
-        shadow-lg hover:shadow-red-400/40
-        transition-all duration-500
-      "
+    group relative h-52 rounded-3xl overflow-hidden
+    shadow-lg hover:shadow-red-400/40
+    transition-all duration-500
+  "
             >
+              {/* IMAGE */}
               <img
                 src={cat.img}
                 alt={cat.name}
                 className="
-          w-full h-full object-cover
-          scale-100 group-hover:scale-110
-          transition-transform duration-700
-        "
+      absolute inset-0 w-full h-full object-cover
+      scale-100 group-hover:scale-110
+      transition-transform duration-700
+      z-0
+    "
               />
 
+              {/* GRADIENT OVERLAY */}
               <div
                 className="
-          absolute inset-0
-          bg-gradient-to-br from-red-900/70 via-black/40 to-green-900/60
-        "
+      absolute inset-0
+      bg-gradient-to-br from-red-900/60 via-black/40 to-green-900/50
+      z-10
+    "
               />
 
-              <div className="absolute inset-0 opacity-30 pointer-events-none">
+              {/* SNOW SPARKLES */}
+              <div className="absolute inset-0 opacity-30 pointer-events-none z-20">
                 <span className="absolute top-4 left-6 text-white animate-pulse">
                   ❄
                 </span>
@@ -263,40 +268,55 @@ const Home = () => {
                 </span>
               </div>
 
+              {/* BADGE */}
               <div
                 className="
-        absolute top-3 left-3
-        bg-red-600 text-white text-xs font-semibold
-        px-3 py-1 rounded-full shadow-md
-      "
+      absolute top-3 left-3 z-30
+      bg-red-600 text-white text-xs font-semibold
+      px-3 py-1 rounded-full shadow-md
+    "
               >
                 {cat.badge}
               </div>
 
-              <div className="relative z-10 h-full flex flex-col items-center justify-center text-center">
+              {/* CONTENT (NAME + ICON) */}
+              <div
+                className="
+      relative z-40 h-full
+      flex flex-col items-center justify-center
+      text-center
+    "
+              >
                 <div
                   className="
-          text-white text-3xl mb-2
-          drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]
-        "
+        text-white text-3xl mb-2
+        drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]
+      "
                 >
                   {cat.icon}
                 </div>
 
-                <h3 className="text-white text-2xl font-extrabold tracking-wide">
+                <h3
+                  className="
+        text-white text-2xl font-extrabold tracking-wide
+        drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]
+      "
+                >
                   {cat.name}
                 </h3>
 
-                <p className="mt-2 text-sm text-white/80">Tap to explore</p>
+                <p className="mt-2 text-sm text-white/90">Tap to explore</p>
               </div>
 
+              {/* GLOW RING */}
               <div
                 className="
-        absolute inset-0 rounded-3xl
-        ring-1 ring-white/20
-        group-hover:ring-2 group-hover:ring-red-400
-        transition-all duration-500
-      "
+      absolute inset-0 rounded-3xl
+      ring-1 ring-white/20
+      group-hover:ring-2 group-hover:ring-red-400
+      transition-all duration-500
+      z-50
+    "
               />
             </Link>
           ))}

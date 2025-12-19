@@ -231,17 +231,23 @@ const ProductCard = ({
       {/* 🎁 DISCOUNT TAG */}
       {product.basePrice > product.price && (
         <span
-          className="
-        absolute top-3 left-3 z-20
-        bg-gradient-to-r from-red-500 to-orange-500
-        text-white text-xs font-bold
-        px-3 py-1 rounded-full shadow-lg
-      "
+          className={`absolute top-0 left-2 bg-yellow-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-lg z-10 ${
+            Math.round(
+              ((product.basePrice - product.price) / product.basePrice) * 100
+            ) > 20 && "animate-pulse"
+          }`}
+
         >
           {Math.round(
             ((product.basePrice - product.price) / product.basePrice) * 100
           )}
-          % OFF
+          %<p>OFF</p>
+        </span>
+      )}
+
+      {product?.shop?.shopDiscount > 0 && (
+        <span className="absolute top-0 left-2 bg-gradient-to-r from-red-600 to-orange-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-xl z-50">
+          {product?.shop?.shopDiscount}%<p>OFF</p>
         </span>
       )}
 
@@ -326,18 +332,37 @@ const ProductCard = ({
         {/* 💰 PRICE */}
         <div className="mt-1 text-sm">
           {product.basePrice > product.price ? (
-            <>
+            <p className="mt-1 text-sm">
+              {" "}
               <span className="line-through text-gray-400 mr-2">
-                ₹{product.basePrice}
-              </span>
-              <span className="text-green-600 font-semibold">
+                {" "}
+                ₹{product.basePrice}{" "}
+              </span>{" "}
+              <span className="text-green-500 font-semibold">
                 ₹{product.price}
-              </span>
-            </>
+              </span>{" "}
+            </p>
+          ) : product?.shop?.shopDiscount > 0 ? (
+            <p className="mt-1 text-sm">
+              {" "}
+              <span className="line-through text-gray-400 mr-2">
+                {" "}
+                ₹{product.price}{" "}
+              </span>{" "}
+              <span className="text-red-500 font-semibold">
+                {" "}
+                ₹{" "}
+                {Math.round(
+                  product.price -
+                    (product.price * product?.shop?.shopDiscount) / 100
+                )}{" "}
+              </span>{" "}
+            </p>
           ) : (
-            <span className="text-green-600 font-semibold">
-              ₹{product.price}
-            </span>
+            <p className="mt-1 text-green-500 font-semibold text-sm">
+              {" "}
+              ₹{product.price}{" "}
+            </p>
           )}
         </div>
       </div>

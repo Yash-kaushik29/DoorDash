@@ -2,7 +2,7 @@
 // import { getMessaging } from "firebase/messaging";
 
 // const firebaseConfig = {
-//   apiKey: "AIzaSyCvK5AH-TE1DPObA5x3LLx5ePS10q1sBXw",
+//   apiKey: process.env.REACT_APP_FIREBASE_CONFIG_KEY,
 //   authDomain: "gullyfoods.firebaseapp.com",
 //   projectId: "gullyfoods",
 //   storageBucket: "gullyfoods.firebasestorage.app",

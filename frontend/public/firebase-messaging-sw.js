@@ -4,7 +4,7 @@
 // importScripts("https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js");
 
 // firebase.initializeApp({
-//   apiKey: "AIzaSyCvK5AH-TE1DPObA5x3LLx5ePS10q1sBXw",
+//   apiKey: process.env.REACT_APP_FIREBASE_CONFIG_KEY,
 //   authDomain: "gullyfoods.firebaseapp.com",
 //   projectId: "gullyfoods",
 //   storageBucket: "gullyfoods.firebasestorage.app",
