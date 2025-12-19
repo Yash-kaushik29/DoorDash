@@ -218,133 +218,129 @@ const ProductCard = ({
   }
 
   return (
-    <div className="relative bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transform transition duration-300 hover:scale-105">
-      {/* DISCOUNT BANNER */}
+    <div
+      className="
+    relative rounded-2xl overflow-hidden
+    bg-white/80 dark:bg-gray-800/80
+    backdrop-blur-md
+    shadow-md hover:shadow-red-300/30
+    transition-all duration-300
+    hover:-translate-y-1
+  "
+    >
+      {/* 🎁 DISCOUNT TAG */}
       {product.basePrice > product.price && (
         <span
-          className={`absolute -top-2 left-2 bg-yellow-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-lg z-10 ${
-            Math.round(
-              ((product.basePrice - product.price) / product.basePrice) * 100
-            ) > 20 && "animate-pulse"
-          }`}
+          className="
+        absolute top-3 left-3 z-20
+        bg-gradient-to-r from-red-500 to-orange-500
+        text-white text-xs font-bold
+        px-3 py-1 rounded-full shadow-lg
+      "
         >
           {Math.round(
             ((product.basePrice - product.price) / product.basePrice) * 100
           )}
-          %<p>OFF</p>
+          % OFF
         </span>
       )}
 
-      {product?.shop?.shopDiscount > 0 && (
-        <span className="absolute top-0 left-2 bg-gradient-to-r from-red-600 to-orange-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-xl z-10">
-          {product?.shop?.shopDiscount}%<p>OFF</p>
-        </span>
-      )}
-
-      {bestSeller && (
-        <span className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-b-lg z-10">
-          Bestseller
-        </span>
-      )}
-
-      {/* IMAGE */}
+      {/* 🖼 IMAGE CONTAINER */}
       <div className="relative">
+        {bestSeller && (
+          <span className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-b-lg z-10">
+            {" "}
+            Bestseller{" "}
+          </span>
+        )}
+
         <img
-          className="w-full h-32 object-cover rounded-md"
           src={
             product.images?.[0] ||
-            "https://tse3.mm.bing.net/th/id/OIP.j9lwZI84idgGDQj02DAXCgHaHa?pid=Api&P=0&h=180"
+            "https://tse3.mm.bing.net/th/id/OIP.j9lwZI84idgGDQj02DAXCgHaHa?pid=Api"
           }
           alt={product.name}
-          onError={(e) =>
-            (e.target.src =
-              "https://tse3.mm.bing.net/th/id/OIP.j9lwZI84idgGDQj02DAXCgHaHa?pid=Api&P=0&h=180")
-          }
+          className="
+        w-full h-36 object-cover
+        transition-transform duration-500
+        hover:scale-110
+      "
         />
 
         {product.dietType && (
-          <div className="absolute right-2 top-2">
+          <div className="absolute top-2 right-2">
             <DietIcon type={product.dietType} />
           </div>
         )}
 
+        {/* 🚫 STOCK */}
         {!product.inStock && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-60 rounded-md">
-            <span className="text-white font-bold text-sm">
-              {product.shopType === "Grocery"
-                ? "Out of Stock"
-                : "Not Available"}
-            </span>
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+            <span className="text-white font-bold text-sm">Not Available</span>
           </div>
         )}
+
+        {/* 🛒 CTA */}
         {product.inStock && (
           <div className="absolute bottom-0 w-full">
             {cartItem ? (
-              <div className="bg-green-500 flex items-center justify-evenly px-2 rounded-b-md text-white">
-                <button
-                  onClick={() => handleDecrement(product._id)}
-                  disabled={loading}
-                >
-                  −
-                </button>
+              <div
+                className="
+            bg-gradient-to-r from-green-500 to-emerald-500
+            flex items-center justify-evenly
+            text-white py-1
+          "
+              >
+                <button onClick={() => handleDecrement(product._id)}>−</button>
                 <span className="text-sm font-semibold">
                   {cartItem.quantity}
                 </span>
-                <button
-                  onClick={() => handleIncrement(product._id)}
-                  disabled={loading}
-                >
-                  +
-                </button>
+                <button onClick={() => handleIncrement(product._id)}>+</button>
               </div>
             ) : (
               <button
-                className="w-full bg-green-500 text-white text-xs py-1 rounded-b-md hover:bg-green-600"
                 onClick={addProductToCart}
-                disabled={loading}
+                className="
+              w-full py-1 text-xs font-semibold
+              bg-gradient-to-r from-green-500 to-emerald-500
+              text-white hover:brightness-110
+            "
               >
-                {loading ? "Adding..." : "Add"}
+                Add
               </button>
             )}
           </div>
         )}
       </div>
 
-      {/* INFO */}
-      <h3 className="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-        {product.name}
-      </h3>
+      {/* 📝 INFO */}
+      <div className="p-3">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+          {product.name}
+        </h3>
 
-      {variant === "food" && (
-        <p className="mt-1 text-xs text-yellow-500">{product.shopName}</p>
-      )}
+        {variant === "food" && (
+          <p className="text-xs text-red-500 mt-1">{product.shopName}</p>
+        )}
 
-      {product.basePrice > product.price ? (
-        <p className="mt-1 text-sm">
-          <span className="line-through text-gray-400 mr-2">
-            ₹{product.basePrice}
-          </span>
-          <span className="text-green-500 font-semibold">₹{product.price}</span>
-        </p>
-      ) : product?.shop?.shopDiscount > 0 ? (
-        <p className="mt-1 text-sm">
-          <span className="line-through text-gray-400 mr-2">
-            ₹{product.price}
-          </span>
-          <span className="text-red-500 font-semibold">
-            ₹
-            {Math.round(
-              product.price -
-                (product.price * product?.shop?.shopDiscount) / 100
-            )}
-          </span>
-        </p>
-      ) : (
-        // ✅ NORMAL PRICE
-        <p className="mt-1 text-green-500 font-semibold text-sm">
-          ₹{product.price}
-        </p>
-      )}
+        {/* 💰 PRICE */}
+        <div className="mt-1 text-sm">
+          {product.basePrice > product.price ? (
+            <>
+              <span className="line-through text-gray-400 mr-2">
+                ₹{product.basePrice}
+              </span>
+              <span className="text-green-600 font-semibold">
+                ₹{product.price}
+              </span>
+            </>
+          ) : (
+            <span className="text-green-600 font-semibold">
+              ₹{product.price}
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

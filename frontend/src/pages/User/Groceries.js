@@ -28,7 +28,7 @@ const Groceries = () => {
       <div className="min-h-screen bg-stone-50 dark:bg-gray-900 p-4 pb-16 lg:pb-0">
         <section className="mb-8">
           <h2 className="text-xl md:text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
-            Shop by Category
+            Shop by Category ❄️
           </h2>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 gap-3">
             {groceryCategories.map((category, index) => (

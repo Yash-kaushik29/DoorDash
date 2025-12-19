@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/User/Home";
 import Login from "./pages/User/Login";
@@ -57,8 +57,21 @@ import SalesHistory from "./pages/Seller/SalesHistory";
 import { SellerContextProvider } from "./context/sellerContext";
 import Users from "./pages/Admin/Users";
 import AccountDetails from "./pages/User/AccountDetails";
+// import {
+//   initPushNotifications,
+//   listenForegroundMessages,
+// } from "./utils/pushNotifications";
 
 const App = () => {
+  // useEffect(() => {
+  //   initPushNotifications();
+
+  //   listenForegroundMessages((payload) => {
+  //     const { title, body } = payload.notification || {};
+  //     alert(`${title}\n${body}`);
+  //   });
+  // }, []);
+
   return (
     <>
       <UserContextProvider>
@@ -68,7 +81,10 @@ const App = () => {
           <Route path="/signup" element={<Signup />} />
           <Route path="/user/profile" element={<UserProfile />} />
           <Route path="/products/groceries" element={<Groceries />} />
-          <Route path="/products/groceries/:category" element={<GroceryProducts />} />
+          <Route
+            path="/products/groceries/:category"
+            element={<GroceryProducts />}
+          />
           <Route path="/products/restaurants" element={<Restaurants />} />
           <Route path="/products/medicines" element={<Medicines />} />
           <Route path="/search/:query" element={<SearchQuery />} />
@@ -80,33 +96,36 @@ const App = () => {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/user/addresses/:userId" element={<Addresses />} />
           <Route path="/help-support" element={<HelpSupport />} />
-          <Route path='/terms' element={<Terms />} />
-          <Route path='/policy' element={<Policy />} />
-          <Route path='/install-guide' element={<InstallGuide />} />
-          <Route path='/my-account' element={<AccountDetails />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/policy" element={<Policy />} />
+          <Route path="/install-guide" element={<InstallGuide />} />
+          <Route path="/my-account" element={<AccountDetails />} />
         </Routes>
       </UserContextProvider>
 
       <SellerContextProvider>
         <Routes>
-        <Route path="/seller" exact element={<SellerDashboard />} />
-        <Route path="/seller-signup" element={<SellerSignup />} />
-        <Route path="/seller-login" element={<SellerLogin />} />
-        <Route path="/seller/add-shop" element={<AddShop />} />
-        <Route path="/seller/edit-shop/:shopId" element={<EditShop />} />
-        <Route path="/seller/add-product" element={<AddProductForm />} />
-        <Route
-          path="/seller/edit-product/:productId"
-          element={<EditProductForm />}
-        />
-        <Route path="/seller/my-products" element={<ProductsList />} />
-        <Route path="/seller/notifications" element={<OrderNotifications />} />
-        <Route path="/getOrderDetails/:orderId" element={<SellerOrder />} />
-        <Route path="/seller/my-orders" element={<Orders />} />
-        <Route path="/seller/profile" element={<SellerProfile />} />
-        <Route path="/seller/edit-profile" element={<EditProfile />} />
-        <Route path="/seller/sales-history" element={<SalesHistory />} />
-      </Routes>
+          <Route path="/seller" exact element={<SellerDashboard />} />
+          <Route path="/seller-signup" element={<SellerSignup />} />
+          <Route path="/seller-login" element={<SellerLogin />} />
+          <Route path="/seller/add-shop" element={<AddShop />} />
+          <Route path="/seller/edit-shop/:shopId" element={<EditShop />} />
+          <Route path="/seller/add-product" element={<AddProductForm />} />
+          <Route
+            path="/seller/edit-product/:productId"
+            element={<EditProductForm />}
+          />
+          <Route path="/seller/my-products" element={<ProductsList />} />
+          <Route
+            path="/seller/notifications"
+            element={<OrderNotifications />}
+          />
+          <Route path="/getOrderDetails/:orderId" element={<SellerOrder />} />
+          <Route path="/seller/my-orders" element={<Orders />} />
+          <Route path="/seller/profile" element={<SellerProfile />} />
+          <Route path="/seller/edit-profile" element={<EditProfile />} />
+          <Route path="/seller/sales-history" element={<SalesHistory />} />
+        </Routes>
       </SellerContextProvider>
 
       <Routes>
@@ -120,22 +139,34 @@ const App = () => {
         <Route path="/admin/adminProducts" element={<AdminProducts />} />
         <Route path="/admin/users" element={<Users />} />
         <Route path="/admin/userDetails/:userId" element={<UserDetails />} />
-        <Route path="/admin/outstandingAmounts" element={<OutstandingAmountList />} />
-        <Route path="/admin/deliveryBoyDetails/:deliveryBoyId" element={<DeliveryBoyDetails />} />
+        <Route
+          path="/admin/outstandingAmounts"
+          element={<OutstandingAmountList />}
+        />
+        <Route
+          path="/admin/deliveryBoyDetails/:deliveryBoyId"
+          element={<DeliveryBoyDetails />}
+        />
       </Routes>
 
       <Routes>
         <Route path="/delivery/signup" element={<DeliveryBoySignup />} />
         <Route path="/delivery/login" element={<DeliveryBoyLogin />} />
         <Route path="/delivery" element={<DeliveryBoyHome />} />
-        <Route path='/delivery/orders' element={<AvailableOrders />} />
+        <Route path="/delivery/orders" element={<AvailableOrders />} />
         <Route
           path="/delivery/orders/:status"
           element={<DeliveryBoyOrders />}
         />
         <Route path="/delivery/order/:orderId" element={<DeliveryBoyOrder />} />
-        <Route path="/delivery/commissionHistory" element={<CommissionHistory />} />
-        <Route path="/delivery/outstandingAmountDetails" element={<OutstandingAmountDetails />} />
+        <Route
+          path="/delivery/commissionHistory"
+          element={<CommissionHistory />}
+        />
+        <Route
+          path="/delivery/outstandingAmountDetails"
+          element={<OutstandingAmountDetails />}
+        />
       </Routes>
     </>
   );

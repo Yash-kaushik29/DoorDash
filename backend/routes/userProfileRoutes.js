@@ -366,5 +366,32 @@ router.get("/active-coupons", authenticateUser, async (req, res) => {
   }
 });
 
+router.post("/register-token", authenticateUser, async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token)
+      return res.status(400).json({ message: "FCM token is required" });
+
+    const userId = req.user._id || req.user.id;
+
+    await User.updateOne(
+      { _id: userId },
+      { $addToSet: { fcmTokens: token } } 
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "✅ Push token registered successfully",
+    });
+  } catch (err) {
+    console.error("Push Token Error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to save push token",
+    });
+  }
+});
+
 
 module.exports = router;

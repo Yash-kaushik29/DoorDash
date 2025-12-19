@@ -159,9 +159,9 @@ const CartPage = () => {
 
   const handleCheckout = () => {
     const cartItems =
-    activeCart === "foodCart" ? foodCartItems : groceryCartItems;
+      activeCart === "foodCart" ? foodCartItems : groceryCartItems;
 
-    const totalPrice = getTotalPrice(cartItems) * (1-shopDiscount/100);  
+    const totalPrice = getTotalPrice(cartItems) * (1 - shopDiscount / 100);
 
     navigate("/checkout", {
       state: {
@@ -185,27 +185,47 @@ const CartPage = () => {
   return (
     <div>
       <Navbar />
-      <main className="mb-20 pt-8 px-4 lg:px-8 min-h-screen bg-gray-100 dark:bg-gray-900 lg:mb-0">
-        <h1 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white text-center">
-          Your Cart
+
+      {/* 🎄 Festive Info Strip */}
+      <div
+        className="
+      text-center py-2 text-sm font-semibold
+      bg-gradient-to-r from-red-600 via-green-600 to-red-600
+      text-white shadow-sm
+    "
+      >
+        🎄 Christmas & New Year Specials are Live! 🎁
+      </div>
+
+      <main
+        className="
+      mb-20 lg:mb-0 pt-8 px-4 lg:px-8 min-h-screen
+      bg-gradient-to-b from-green-50 via-white to-emerald-50
+      dark:from-gray-900 dark:to-gray-900
+    "
+      >
+        {/* PAGE TITLE */}
+        <h1 className="text-2xl font-semibold mb-6 text-center text-green-700 dark:text-green-400">
+          🛒 Your Cart
         </h1>
 
-        {/* Cart Tabs */}
+        {/* CART TABS */}
         <div className="flex justify-center mb-6 space-x-4">
           <button
-            className={`px-4 py-2 rounded-lg font-semibold ${
+            className={`px-4 py-2 rounded-lg font-semibold transition ${
               activeCart === "foodCart"
-                ? "bg-green-500 text-white"
+                ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md"
                 : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
             }`}
             onClick={() => setActiveCart("foodCart")}
           >
             🍔 Food Cart ({user?.foodCart?.length})
           </button>
+
           <button
-            className={`px-4 py-2 rounded-lg font-semibold ${
+            className={`px-4 py-2 rounded-lg font-semibold transition ${
               activeCart === "groceryCart"
-                ? "bg-green-500 text-white"
+                ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md"
                 : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
             }`}
             onClick={() => setActiveCart("groceryCart")}
@@ -214,13 +234,15 @@ const CartPage = () => {
           </button>
         </div>
 
+        {/* LOADING */}
         {loading ? (
           <div className="flex justify-center items-center space-x-2 mt-12">
-            <span className="w-3 h-3 bg-green-700 rounded-full animate-bounce [animation-delay:0s]"></span>
-            <span className="w-3 h-3 bg-green-600 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-            <span className="w-3 h-3 bg-green-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+            <span className="w-3 h-3 bg-green-700 rounded-full animate-bounce [animation-delay:0s]" />
+            <span className="w-3 h-3 bg-green-600 rounded-full animate-bounce [animation-delay:0.2s]" />
+            <span className="w-3 h-3 bg-green-500 rounded-full animate-bounce [animation-delay:0.4s]" />
           </div>
         ) : currentCartItems?.length === 0 ? (
+          /* EMPTY CART */
           <div className="flex flex-col items-center mt-12">
             <DotLottieReact
               src="/lottie/EmptyCart.lottie"
@@ -234,16 +256,32 @@ const CartPage = () => {
             </p>
           </div>
         ) : (
-          <div className="bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-xl max-w-3xl mx-auto border border-green-100 dark:border-gray-700 flex flex-col">
-            {/* Scrollable Cart Items */}
-            <div className="text-center text-green-500 font-semibold mb-4">
-              Ordering from {shopName}
+          /* CART CONTENT */
+          <div
+            className="
+          max-w-3xl mx-auto p-6 rounded-2xl
+          bg-gradient-to-br from-green-50 via-white to-emerald-50
+          dark:from-gray-900 dark:via-gray-800 dark:to-gray-900
+          border border-green-100 dark:border-gray-700
+          shadow-xl
+          flex flex-col
+        "
+          >
+            {/* SHOP NAME */}
+            <div className="text-center text-green-600 font-semibold mb-4">
+              🎄 Ordering from {shopName}
             </div>
+
+            {/* CART ITEMS */}
             <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
-              {currentCartItems?.map((item) => (
+              {currentCartItems.map((item) => (
                 <div
                   key={item.product._id}
-                  className="flex items-center justify-between border-b border-green-100 dark:border-gray-700 pb-4"
+                  className="
+                flex items-center justify-between
+                border-b border-green-200/60 dark:border-gray-700
+                pb-4
+              "
                 >
                   <img
                     src={
@@ -251,16 +289,18 @@ const CartPage = () => {
                       "https://via.placeholder.com/100"
                     }
                     alt={item.product.name}
-                    className={`w-16 h-16 object-cover rounded-xl shadow-md ${
+                    className={`w-16 h-16 rounded-xl object-cover shadow-md ${
                       !item.product.inStock || !item.product?.shop?.isOpen
                         ? "opacity-50 grayscale"
                         : ""
                     }`}
                   />
+
                   <div className="flex-1 ml-4">
                     <h3 className="font-semibold text-gray-900 dark:text-white text-md">
                       {item.product.name}
                     </h3>
+
                     {shopDiscount > 0 ? (
                       <p className="mt-1 text-sm">
                         <span className="line-through text-gray-400 mr-2">
@@ -291,7 +331,9 @@ const CartPage = () => {
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 bg-green-100 dark:bg-gray-700 px-3 py-1 rounded-full shadow-inner">
+
+                  {/* QUANTITY */}
+                  <div className="flex items-center gap-2 bg-green-100/80 dark:bg-gray-700 px-3 py-1 rounded-full shadow-inner">
                     <IoRemoveCircle
                       className="text-red-500 hover:text-red-600 text-2xl cursor-pointer transition"
                       onClick={() =>
@@ -314,7 +356,7 @@ const CartPage = () => {
               ))}
             </div>
 
-            {/* Warnings */}
+            {/* WARNINGS */}
             {currentCartItems.some((item) => !item?.product?.shop?.isOpen) && (
               <p className="text-red-500 text-sm font-semibold text-center mt-4">
                 ⚠️ Some items are from closed shops. Remove them before
@@ -322,17 +364,16 @@ const CartPage = () => {
               </p>
             )}
 
-            {/* {currentSellers.length > 1 && (
-              <div className="mt-4 p-3 bg-gradient-to-r from-yellow-100 to-yellow-50 border-l-4 border-yellow-500 text-yellow-800 rounded-lg text-sm font-medium shadow-sm">
-                ⚡ Your order has items from <b>{currentSellers.length}</b>{" "}
-                shops. Extra{" "}
-                <span className="font-semibold">convenience fee</span> may
-                apply.
-              </div>
-            )} */}
-
-            {/* Total & Checkout */}
-            <div className="mt-6 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-gray-700 dark:to-gray-800 p-4 rounded-xl shadow-inner sticky bottom-0">
+            {/* TOTAL & CHECKOUT */}
+            <div
+              className="
+            mt-6 p-4 rounded-xl
+            bg-gradient-to-r from-green-100 to-emerald-100
+            dark:from-gray-700 dark:to-gray-800
+            border border-green-200/60
+            shadow-inner sticky bottom-0
+          "
+            >
               {shopDiscount > 0 ? (
                 (() => {
                   const originalTotal = getTotalPrice(currentCartItems);
@@ -345,8 +386,8 @@ const CartPage = () => {
                   );
 
                   return (
-                    <div className="text-lg font-bold text-gray-900 dark:text-white">
-                      <div className="flex justify-between">
+                    <>
+                      <div className="flex justify-between text-lg font-bold">
                         <span>Total:</span>
                         <div className="text-right">
                           <p className="line-through text-gray-400 text-sm">
@@ -357,15 +398,14 @@ const CartPage = () => {
                           </p>
                         </div>
                       </div>
-
-                      <p className="text-sm text-green-500 mt-1 text-right">
-                        You are saving ₹{discountAmount.toFixed(2)}
+                      <p className="text-sm text-green-600 mt-1 text-right">
+                        🎉 You saved ₹{discountAmount.toFixed(2)}
                       </p>
-                    </div>
+                    </>
                   );
                 })()
               ) : (
-                <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white">
+                <div className="flex justify-between text-lg font-bold">
                   <span>Total:</span>
                   <span>₹{getTotalPrice(currentCartItems).toFixed(2)}</span>
                 </div>
@@ -378,7 +418,7 @@ const CartPage = () => {
                       !item.product.inStock || !item?.product?.shop?.isOpen
                   )
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:scale-105 hover:shadow-xl"
+                    : "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:scale-[1.03] hover:shadow-xl"
                 }`}
                 onClick={handleCheckout}
                 disabled={currentCartItems.some(
@@ -391,7 +431,7 @@ const CartPage = () => {
                     !item.product.inStock || !item?.product?.shop?.isOpen
                 )
                   ? "Remove Unavailable Items"
-                  : "Proceed to Checkout 🚀"}
+                  : "Proceed to Checkout 🎁🚀"}
               </button>
             </div>
           </div>

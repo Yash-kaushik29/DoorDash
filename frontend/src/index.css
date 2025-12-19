@@ -25,3 +25,26 @@ body {
   font-family: 'Cinzel', sans-serif;
 }
 
+.snowflake {
+  position: absolute;
+  top: -10%;
+  color: white;
+  opacity: 0.8;
+  pointer-events: none;
+  animation-name: fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.animate-fall {
+  animation: fall linear infinite;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(120vh);
+  }
+}
+
+
+

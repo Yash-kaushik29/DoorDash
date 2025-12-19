@@ -23,7 +23,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    isSeller: {type: Boolean, default: false},
+    isSeller: { type: Boolean, default: false },
     addresses: [addressSchema],
     foodCart: [
       {
@@ -49,9 +49,13 @@ const UserSchema = new mongoose.Schema(
     activeCoupons: [
       {
         coupon: { type: mongoose.Schema.Types.ObjectId, ref: "Coupon" },
-        count: { type: Number, default: 1 }, 
+        count: { type: Number, default: 1 },
       },
     ],
+    fcmTokens: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,
