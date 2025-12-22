@@ -9,6 +9,7 @@ const PDFDocument = require("pdfkit");
 const QRCode = require("qrcode");
 const authenticateUser = require("../middleware/authMiddleware");
 const authenticateSeller = require("../middleware/sellerAuthMiddleware");
+const { sendTelegramMessage } = require("../config/telegram.config");
 
 router.post("/create-order", authenticateUser, async (req, res) => {
   const userId = req.user._id;
@@ -90,7 +91,7 @@ router.post("/create-order", authenticateUser, async (req, res) => {
       taxes,
       convenienceFees,
       serviceCharge,
-      discount, 
+      discount,
       deliveryStatus: "Processing",
       deliveryCharge,
       paymentStatus,
@@ -98,6 +99,15 @@ router.post("/create-order", authenticateUser, async (req, res) => {
     });
 
     await newOrder.save();
+
+    await sendTelegramMessage(`
+    🛒 <b>NEW ORDER RECEIVED</b>
+    
+    📦 Order ID: <b>#${newOrder?.id || "N/A"}</b>
+    💰 Amount: ₹${newOrder?.totalAmount}
+    
+    ⏰ ${new Date().toLocaleString("en-IN")}
+    `);
 
     // ✅ Clear cart
     const updateCart = {
