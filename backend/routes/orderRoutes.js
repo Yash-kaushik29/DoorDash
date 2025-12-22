@@ -105,6 +105,9 @@ router.post("/create-order", authenticateUser, async (req, res) => {
     
     📦 Order ID: <b>#${newOrder?.id || "N/A"}</b>
     💰 Amount: ₹${newOrder?.totalAmount}
+    🔗 <a href="https://gullyfoods.app/viewOrder/${newOrder?.id}">
+View Order Details
+</a>
     
     ⏰ ${new Date().toLocaleString("en-IN")}
     `);
