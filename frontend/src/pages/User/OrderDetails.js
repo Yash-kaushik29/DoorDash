@@ -279,7 +279,7 @@ const OrderDetails = () => {
               </span>
             </p>
             <p className="font-semibold">
-              GST Charges:{" "}
+              Tax:{" "}
               <span className="text-green-500 ml-2">
                 {formatPrice(order?.taxes)}
               </span>
@@ -290,6 +290,14 @@ const OrderDetails = () => {
                 {formatPrice(order?.deliveryCharge)}
               </span>
             </p>
+            {order?.orderType === "Grocery" && (
+              <p className="font-semibold">
+                Service Charge:{" "}
+                <span className="text-green-500 ml-2">
+                  {formatPrice(order?.serviceCharge)}
+                </span>
+              </p>
+            )}
             {order?.discount > 0 && (
               <p className="font-semibold">
                 Coupon Discount:{" "}

@@ -26,6 +26,7 @@ const Coupons = require("./models/Coupons.js");
 const Shop = require("./models/Shop.js");
 const pdfExportRoutes = require("./routes/pdfExportRoutes");
 const rateLimit = require("express-rate-limit");
+const Product = require("./models/Product.js");
 
 
 const app = express();
@@ -242,6 +243,66 @@ app.put("/init-shop-fields", async (req, res) => {
       success: false,
       message: "Update failed",
       error: error.message
+    });
+  }
+});
+
+app.post("/update-prices-by-shop", async (req, res) => {
+  try {
+    const { shopName, increasePercent } = req.body;
+
+    if (!shopName || typeof increasePercent !== "number") {
+      return res.status(400).json({
+        success: false,
+        message: "shopName and increasePercent are required"
+      });
+    }
+
+    if (increasePercent < 0 || increasePercent > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "increasePercent must be between 0 and 100"
+      });
+    }
+
+    const products = await Product.find({ shopName });
+
+    if (!products.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No products found for this shop"
+      });
+    }
+
+    let updatedCount = 0;
+
+    for (const product of products) {
+      if (!product.basePrice || product.basePrice <= 0) continue;
+
+      const newPrice = Math.round(
+        product.basePrice * (1 + increasePercent / 100)
+      );
+
+      product.price = newPrice;
+      await product.save();
+
+      updatedCount++;
+    }
+
+    return res.json({
+      success: true,
+      shopName,
+      increasePercent,
+      totalProducts: products.length,
+      updatedProducts: updatedCount,
+      message: `Updated prices for ${updatedCount} products`
+    });
+
+  } catch (error) {
+    console.error("Update price error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
     });
   }
 });

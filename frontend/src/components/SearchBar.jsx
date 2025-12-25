@@ -7,9 +7,12 @@ import { useNavigate } from "react-router-dom";
 const PLACEHOLDERS = [
   "Cakes 🎂",
   "pizza 🍕",
+  "Shampoo 🧴",
   "Coffee ☕",
+  "Toothpaste 🦷",
   "Burger combo 🍔",
   "Chaap 🍠",
+  "Biscuit 🍪",
   "Biryani 🍛",
   "🦌🛷💨💨",
 ];
