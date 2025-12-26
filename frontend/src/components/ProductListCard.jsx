@@ -41,7 +41,7 @@ const ProductListCard = ({ product, onToggleStock }) => {
         {product.inStock ? "Mark Out of Stock" : "Mark In Stock"}
       </button>
 
-      <button
+      {/* <button
         onClick={() => deleteProduct(product._id)}
         className={`w-full px-3 py-2 text-sm font-semibold rounded-lg text-white transition duration-150 ${
           product.inStock
@@ -50,7 +50,7 @@ const ProductListCard = ({ product, onToggleStock }) => {
         }`}
       >
         Delete Product
-      </button>
+      </button> */}
 
       {/* Edit Button */}
       <a

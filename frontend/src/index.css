@@ -40,6 +40,37 @@ body {
   animation: fall linear infinite;
 }
 
+.text-shine {
+  display: inline-block;
+  background: linear-gradient(
+    90deg,
+    #b5b5b5 0%,
+    #f5f5f5 35%,
+    #ffffff 45%,
+    #e6e6e6 50%,
+    #ffffff 55%,
+    #f5f5f5 65%,
+    #b5b5b5 100%
+  );
+
+  background-size: 250% auto;
+  background-position: -125% center;
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  animation: text-shine 3.5s linear infinite;
+}
+
+@keyframes text-shine {
+  0% {
+    background-position: -125% center;
+  }
+  100% {
+    background-position: 125% center;
+  }
+}
+
 @keyframes fall {
   to {
     transform: translateY(120vh);

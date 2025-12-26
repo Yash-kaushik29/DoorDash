@@ -249,60 +249,54 @@ app.put("/init-shop-fields", async (req, res) => {
 
 app.post("/update-prices-by-shop", async (req, res) => {
   try {
-    const { shopName, increasePercent } = req.body;
+    const { shopName, categories, percent } = req.body;
 
-    if (!shopName || typeof increasePercent !== "number") {
+    if (!shopName || !categories?.length || !percent) {
       return res.status(400).json({
         success: false,
-        message: "shopName and increasePercent are required"
+        message: "shopName, categories and percent are required",
       });
     }
 
-    if (increasePercent < 0 || increasePercent > 100) {
-      return res.status(400).json({
-        success: false,
-        message: "increasePercent must be between 0 and 100"
-      });
-    }
-
-    const products = await Product.find({ shopName });
+    const products = await Product.find({
+      shopName,
+      categories: { $in: categories },
+    });
 
     if (!products.length) {
       return res.status(404).json({
         success: false,
-        message: "No products found for this shop"
+        message: "No matching products found",
       });
     }
 
     let updatedCount = 0;
 
     for (const product of products) {
-      if (!product.basePrice || product.basePrice <= 0) continue;
+      if (!product.basePrice) continue;
 
       const newPrice = Math.round(
-        product.basePrice * (1 + increasePercent / 100)
+        product.basePrice + (product.basePrice * percent) / 100
       );
 
       product.price = newPrice;
       await product.save();
-
       updatedCount++;
     }
 
-    return res.json({
+    res.json({
       success: true,
+      message: "Prices updated successfully",
       shopName,
-      increasePercent,
-      totalProducts: products.length,
+      categories,
+      percent,
       updatedProducts: updatedCount,
-      message: `Updated prices for ${updatedCount} products`
     });
-
-  } catch (error) {
-    console.error("Update price error:", error);
+  } catch (err) {
+    console.error("Shop-category price update error:", err);
     res.status(500).json({
       success: false,
-      message: "Server error"
+      message: "Server error",
     });
   }
 });

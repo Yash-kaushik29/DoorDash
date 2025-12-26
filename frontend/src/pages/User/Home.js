@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import api from "../../utils/axiosInstance";
 import { FiRefreshCw } from "react-icons/fi";
 import "../../index.css";
+import CountdownTimer from "../../components/CountdownTimer";
 
 /* ❄️ Snowflakes Component */
 const Snowflakes = () => {
@@ -131,13 +132,8 @@ const Home = () => {
           <InstallPrompt />
           <Snowflakes />
 
-          <div className="relative pt-16 px-4 z-10 max-w-3xl mx-auto text-center space-y-4">
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              🎄Merry Christmas🎄
-              <span className="block text-yellow-300">
-                Let GullyFoods be your Secret Santa 🎅
-              </span>
-            </h1>
+          <div className="relative pt-6 px-4 z-10 max-w-3xl mx-auto text-center space-y-4">
+            <CountdownTimer />
 
             <div className="mt-4 space-y-2">
               <div className="inline-block bg-white/15 backdrop-blur-md px-5 py-2 rounded-full text-sm font-semibold shadow-md">
