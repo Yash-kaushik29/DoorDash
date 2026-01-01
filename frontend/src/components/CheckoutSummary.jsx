@@ -3,7 +3,6 @@ import React from "react";
 const CheckoutSummary = ({
   cartTotalPrice,
   deliveryCharge,
-  newDeliveryCharge,
   distance,
   taxes,
   convenienceFees,
@@ -13,7 +12,6 @@ const CheckoutSummary = ({
   discount,
   getGroceryServiceCharge,
 }) => {
-  const ORIGINAL_DELIVERY_FEE = deliveryCharge;
 
   return (
     <div className="mb-6 space-y-2">
@@ -30,39 +28,10 @@ const CheckoutSummary = ({
 
       {isFoodOrder ? (
         <>
-          {ORIGINAL_DELIVERY_FEE > 0 && (
-            <>
-              <div className="flex justify-between items-start">
-                <span>
-                  Delivery Fee{" "}
-                  {distance > 0 && (
-                    <span className="text-xs text-gray-500">
-                      ({distance.toFixed(2)} Km)
-                    </span>
-                  )}{" "}
-                  🚚
-                </span>
-
-                <span className="flex items-center gap-2 text-right">
-                  {newDeliveryCharge !== ORIGINAL_DELIVERY_FEE && (
-                    <span className="block text-xs line-through text-gray-400">
-                      ₹{ORIGINAL_DELIVERY_FEE.toFixed(2)}
-                    </span>
-                  )}
-
-                  <span className="text-green-600 font-semibold">
-                    ₹{newDeliveryCharge.toFixed(2)}
-                  </span>
-                </span>
-              </div>
-
-              {newDeliveryCharge !== ORIGINAL_DELIVERY_FEE && (
-                <p className="text-xs text-green-600 text-right mt-1">
-                  🎄 Christmas Special Delivery Offer Applied!
-                </p>
-              )}
-            </>
-          )}
+          <div className="flex justify-between">
+            <span>Delivery Fee {distance > 0 && (<span>({distance.toFixed(2)} Km)</span>)} 🚚:</span>
+            <span className="text-green-500 font-semibold">{deliveryCharge.toFixed(2)}</span>
+          </div>
           <div className="flex justify-between">
             <span>GST (5%) 💰:</span>
             <span className="text-green-500 font-semibold">
@@ -86,39 +55,10 @@ const CheckoutSummary = ({
               {getGroceryServiceCharge(cartTotalPrice).toFixed(2)}
             </span>
           </div>
-          {ORIGINAL_DELIVERY_FEE > 0 && (
-            <>
-              <div className="flex justify-between items-start">
-                <span>
-                  Delivery Fee{" "}
-                  {distance > 0 && (
-                    <span className="text-xs text-gray-500">
-                      ({distance.toFixed(2)} Km)
-                    </span>
-                  )}{" "}
-                  🚚
-                </span>
-
-                <span className="flex items-center gap-2 text-right">
-                  {newDeliveryCharge !== ORIGINAL_DELIVERY_FEE && (
-                    <span className="block text-xs line-through text-gray-400">
-                      ₹{ORIGINAL_DELIVERY_FEE.toFixed(2)}
-                    </span>
-                  )}
-
-                  <span className="text-green-600 font-semibold">
-                    ₹{newDeliveryCharge.toFixed(2)}
-                  </span>
-                </span>
-              </div>
-
-              {newDeliveryCharge !== ORIGINAL_DELIVERY_FEE && (
-                <p className="text-xs text-red-600 text-right mt-1">
-                  🎄 Christmas Special Delivery Offer Applied!
-                </p>
-              )}
-            </>
-          )}
+          <div className="flex justify-between">
+            <span>Delivery Fee {distance > 0 && (<span>({distance.toFixed(2)} Km)</span>)} 🚚:</span>
+            <span className="text-green-500 font-semibold">{deliveryCharge.toFixed(2)}</span>
+          </div>
         </>
       )}
 

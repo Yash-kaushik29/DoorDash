@@ -39,7 +39,6 @@ const Checkout = () => {
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [deliveryCharge, setDeliveryCharge] = useState(0);
-  const [newDeliveryCharge, setNewDeliveryCharge] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [distance, setDistance] = useState(0);
@@ -134,7 +133,6 @@ const Checkout = () => {
 
     const delivery = getFoodDeliveryCharge(dis);
     setDeliveryCharge(delivery);
-    setNewDeliveryCharge(cartTotalPrice > 499 ? 1 : cartTotalPrice > 149 ? 9 : delivery);
   };
 
   const handleCheckout = async () => {
@@ -151,7 +149,7 @@ const Checkout = () => {
       userId: user._id,
       cartItems,
       orderType: isFoodOrder ? "Food" : "Grocery",
-      deliveryCharge: newDeliveryCharge,
+      deliveryCharge,
       serviceCharge,
       taxes: isFoodOrder ? taxes : undefined,
       convenienceFees: isFoodOrder ? convenienceFees : undefined,
@@ -244,8 +242,8 @@ const Checkout = () => {
   const totalAmount =
     cartTotalPrice +
     (isFoodOrder
-      ? taxes + convenienceFees + newDeliveryCharge
-      : getGroceryServiceCharge(cartTotalPrice) + newDeliveryCharge);
+      ? taxes + convenienceFees + deliveryCharge
+      : getGroceryServiceCharge(cartTotalPrice) + deliveryCharge);
 
   if (isPlacingOrder) {
     return (
@@ -289,7 +287,6 @@ const Checkout = () => {
           isFoodOrder={isFoodOrder}
           taxes={taxes}
           deliveryCharge={deliveryCharge}
-          newDeliveryCharge={newDeliveryCharge}
           distance={distance}
           convenienceFees={convenienceFees}
           discount={discount}

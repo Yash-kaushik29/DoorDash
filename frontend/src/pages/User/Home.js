@@ -135,18 +135,6 @@ const Home = () => {
           <div className="relative pt-6 px-4 z-10 max-w-3xl mx-auto text-center space-y-4">
             <CountdownTimer />
 
-            <div className="mt-4 space-y-2">
-              <div className="inline-block bg-white/15 backdrop-blur-md px-5 py-2 rounded-full text-sm font-semibold shadow-md">
-                🚚 <span className="text-yellow-300">Delivery @ ₹1</span> on
-                orders above <span className="font-bold">₹499</span>
-              </div>
-
-              <div className="inline-block bg-white/10 backdrop-blur-md px-5 py-2 rounded-full text-sm font-semibold shadow-md">
-                ⚡ <span className="text-yellow-300">Delivery @ ₹9</span> on
-                orders above <span className="font-bold">₹149</span>
-              </div>
-            </div>
-
             <p className="text-white/90 text-lg">
               Food 🍕 • Groceries 🛒 • Medicines 💊
             </p>
