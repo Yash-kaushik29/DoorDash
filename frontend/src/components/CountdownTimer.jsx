@@ -32,7 +32,7 @@ const CountdownTimer = () => {
   return (
     <div className="text-center space-y-4">
       <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-        🎉 <span className="text-shine">Countdown to 2026</span> 🎉
+        🎉 <span className="text-shine">HAPPY NEW YEAR 2026</span> 🎉
         <span className="block text-yellow-300 text-xl mt-2">
           New year, new cravings 😋
         </span>
