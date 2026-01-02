@@ -362,10 +362,10 @@ const ProductCard = ({
               <span className="text-red-500 font-semibold">
                 {" "}
                 ₹{" "}
-                {Math.round(
+                {(
                   product.price -
-                    (product.price * product?.shop?.shopDiscount) / 100
-                )}{" "}
+                  (product.price * product?.shop?.shopDiscount) / 100
+                ).toFixed(2)}{" "}
               </span>{" "}
             </p>
           ) : (
