@@ -34,17 +34,17 @@ const Navbar = () => {
   return (
     <div className="relative">
       {/* Desktop Navbar */}
-      <header className="hidden lg:flex shadow-lg bg-red-600 text-white fixed top-0 left-0 w-full h-16 z-50">
+      <header className="hidden lg:flex shadow-lg bg-stone-50 dark:bg-gray-900 text-white fixed top-0 left-0 w-full h-16 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between h-full">
           {/* Brand Logo */}
           <Link to="/">
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2 text-xl">
-                <span className="font-bold heading-font">
+                <span className="font-bold heading-font text-black dark:text-white">
                   Gully<span className="text-green-500">Foods</span>
                 </span>
               </div>
-              <span className="italic font-semibold">
+              <span className="italic text-gray-600 dark:text-white font-semibold">
                 Your lane, your taste, your GullyFoods ✨
               </span>
             </div>
@@ -53,20 +53,20 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-6">
             <Link to="/recentOrders">
-              <button className="p-2 hover:text-green-600 transition">
+              <button className="p-2 hover:text-green-600 text-gray-600 dark:text-white transition">
                 <FaHistory size={20} />
               </button>
             </Link>
             <Link
               to="/cart"
-              className="p-2 flex flex-col items-center hover:text-green-500 transition"
+              className="p-2 flex flex-col items-center text-gray-600 dark:text-white hover:text-green-500 transition"
             >
               <div className="flex items-center gap-2">
                 {/* Food cart (shaker) */}
                 <div className="relative">
                   <RiDrinks2Line size={20} />
                   {user && user.foodCart?.length > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
                       {user.foodCart.length}
                     </span>
                   )}
@@ -78,7 +78,7 @@ const Navbar = () => {
                 <div className="relative">
                   <GiShoppingCart size={20} />
                   {user && user.groceryCart?.length > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
                       {user.groceryCart.length}
                     </span>
                   )}
@@ -88,7 +88,7 @@ const Navbar = () => {
               <span className="text-md">Carts</span>
             </Link>
 
-            <button onClick={toggleTheme} className="p-2 transition">
+            <button onClick={toggleTheme} className="p-2 transition text-gray-600 dark:text-white">
               {isDarkMode ? (
                 <FaSun className="hover:text-yellow-400" size={20} />
               ) : (
@@ -98,7 +98,7 @@ const Navbar = () => {
             {user ? (
               <Link
                 to="/user/profile"
-                className="p-2 transition flex items-center justify-center w-8 h-8 rounded-full bg-white text-red-600 hover:bg-green-500 font-semibold"
+                className="p-2 transition flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white hover:bg-green-600 font-semibold"
               >
                 {user?.username ? user.username.charAt(0).toUpperCase() : "U"}
               </Link>
@@ -117,10 +117,10 @@ const Navbar = () => {
       <main className="lg:pt-16"></main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-red-600 text-white shadow-md flex justify-around items-center py-1 border-t dark:border-gray-700 z-50">
+      <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white dark:bg-gray-900 text-white shadow-md flex justify-around items-center py-1 border-t dark:border-gray-700 z-50">
         <Link
           to="/"
-          className="p-2 flex flex-col items-center hover:text-red-600 transition"
+          className="p-2 flex flex-col items-center text-gray-600 dark:text-white transition"
         >
           <FaHome size={22} />
           <span className="text-xs">Home</span>
@@ -128,7 +128,7 @@ const Navbar = () => {
 
         <Link
           to="/recentOrders"
-          className="p-2 flex flex-col items-center hover:text-red-600 transition"
+          className="p-2 flex flex-col items-center text-gray-600 dark:text-white transition"
         >
           <FaHistory size={22} />
           <span className="text-xs">Orders</span>
@@ -136,14 +136,14 @@ const Navbar = () => {
 
         <Link
           to="/cart"
-          className="p-2 flex flex-col items-center hover:text-green-500 transition"
+          className="p-2 flex flex-col items-center text-gray-600 dark:text-white transition"
         >
           <div className="flex items-center gap-2">
             {/* Food cart (shaker) */}
             <div className="relative">
               <RiDrinks2Line size={20} />
               {user && user.foodCart?.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
                   {user.foodCart.length}
                 </span>
               )}
@@ -155,7 +155,7 @@ const Navbar = () => {
             <div className="relative">
               <GiShoppingCart size={20} />
               {user && user.groceryCart?.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
                   {user.groceryCart.length}
                 </span>
               )}
@@ -167,7 +167,7 @@ const Navbar = () => {
 
         <button
           onClick={toggleTheme}
-          className="p-2 flex flex-col items-center hover:text-yellow-400 transition"
+          className="p-2 flex flex-col items-center text-gray-600 dark:text-white hover:text-yellow-400 transition"
         >
           {isDarkMode ? <FaSun size={20} /> : <FaMoon size={20} />}
           <span className="text-xs">Theme</span>
@@ -178,7 +178,7 @@ const Navbar = () => {
             to="/user/profile"
             className="p-2 transition flex flex-col items-center gap-1 text-center"
           >
-            <div className="flex justify-center items-center w-8 h-8 rounded-full bg-white text-red-600 hover:bg-green-500 font-semibold">
+            <div className="flex justify-center items-center w-8 h-8 rounded-full bg-green-500 text-white hover:bg-green-600 font-semibold">
               {user?.username ? user.username.charAt(0).toUpperCase() : "U"}
             </div>
             <span className="text-xs ">Profile</span>

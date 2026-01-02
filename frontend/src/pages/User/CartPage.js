@@ -186,17 +186,6 @@ const CartPage = () => {
     <div>
       <Navbar />
 
-      {/* 🎄 Festive Info Strip */}
-      <div
-        className="
-      text-center py-2 text-sm font-semibold
-      bg-gradient-to-r from-red-600 via-green-600 to-red-600
-      text-white shadow-sm
-    "
-      >
-        🎄 Christmas & New Year Specials are Live! 🎁
-      </div>
-
       <main
         className="
       mb-20 lg:mb-0 pt-8 px-4 lg:px-8 min-h-screen
@@ -269,7 +258,7 @@ const CartPage = () => {
           >
             {/* SHOP NAME */}
             <div className="text-center text-green-600 font-semibold mb-4">
-              🎄 Ordering from {shopName}
+              Ordering from {shopName}
             </div>
 
             {/* CART ITEMS */}

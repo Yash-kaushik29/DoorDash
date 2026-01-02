@@ -14,7 +14,7 @@ const PLACEHOLDERS = [
   "Chaap 🍠",
   "Biscuit 🍪",
   "Biryani 🍛",
-  "🦌🛷💨💨",
+  "🏍️💨💨"
 ];
 
 const SearchBar = () => {

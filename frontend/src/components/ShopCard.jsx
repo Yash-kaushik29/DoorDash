@@ -16,7 +16,7 @@ const ShopCard = ({ shop }) => {
 
         {/* Discount Badge */}
         {shop?.shopDiscount > 0 && (
-          <span className="mt-1 text-red-600 text-lg font-extrabold">
+          <span className="mt-1 text-green-600 text-lg font-extrabold">
             {shop.shopDiscount}% OFF
           </span>
         )}

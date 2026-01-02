@@ -32,17 +32,16 @@ const FIXED_ORDER_IDS = [
   "WR3QR8",
   "8HMSZ2",
   "WSB9U1",
-  "VPHG5M",
-  "JM1G2J",
-  "JV2TDM",
-  "SI4QR1",
+  "30VWKV",
+  "UG6ONP",
+  "BQLXRW",
+  "NC1ACC",
 ];
 
 router.get("/reviews/latest", async (req, res) => {
   try {
     const reviews = await Order.find({
       id: { $in: FIXED_ORDER_IDS },
-      review: { $ne: "" },
       overallRatings: { $gt: 0 },
     })
       .select("id review appRatings deliveryRatings overallRatings user")

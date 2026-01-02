@@ -10,29 +10,12 @@ import ShopCard from "../../components/ShopCard";
 import ProductCard from "../../components/ProductCard";
 import { Link } from "react-router-dom";
 import InstallPrompt from "../../components/InstallPrompt";
+import ReviewCarousel from '../../components/ReviewCarousel';
 import { motion } from "framer-motion";
 import api from "../../utils/axiosInstance";
 import { FiRefreshCw } from "react-icons/fi";
 import "../../index.css";
-import CountdownTimer from "../../components/CountdownTimer";
 
-/* ❄️ Snowflakes Component */
-const Snowflakes = () => {
-  return [...Array(25)].map((_, i) => (
-    <span
-      key={i}
-      className="snowflake"
-      style={{
-        left: `${Math.random() * 100}%`,
-        animationDuration: `${8 + Math.random() * 6}s`,
-        animationDelay: `${Math.random() * 5}s`,
-        fontSize: `${12 + Math.random() * 10}px`,
-      }}
-    >
-      ❄
-    </span>
-  ));
-};
 
 const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
@@ -40,8 +23,6 @@ const Home = () => {
   const [shops, setShops] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [products, setProducts] = useState([]);
-
-  const isFestive = true;
 
   const fetchActiveOrder = async () => {
     try {
@@ -119,51 +100,11 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <ToastContainer position="top-right" autoClose={3000} />
+
+
       <Navbar />
 
-      {/* 🎄 FESTIVE HERO */}
-      {isFestive && (
-        <section
-          className="
-          relative overflow-hidden
-          bg-gradient-to-br from-red-700 via-red-600 to-red-800
-          text-white pb-24 rounded-b-[2.5rem]"
-        >
-          <InstallPrompt />
-          <Snowflakes />
-
-          <div className="relative pt-6 px-4 z-10 max-w-3xl mx-auto text-center space-y-4">
-            <CountdownTimer />
-
-            <p className="text-white/90 text-lg">
-              Food 🍕 • Groceries 🛒 • Medicines 💊
-            </p>
-
-            <div className="flex justify-center gap-3 mt-6">
-              <Link
-                to="/products/restaurants"
-                className="bg-white text-red-600 px-6 py-3 rounded-full font-semibold shadow-lg hover:scale-105 transition"
-              >
-                Order Food
-              </Link>
-
-              <Link
-                to="/products/groceries"
-                className="border border-white/70 px-6 py-3 rounded-full font-semibold hover:bg-white/10 transition"
-              >
-                Shop Groceries
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 🔍 FLOATING SEARCH */}
-      <div className="-mt-12 relative z-20 max-w-xl mx-auto px-4">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-2">
-          <SearchBar />
-        </div>
-      </div>
+      <InstallPrompt />
 
       {/* ACTIVE ORDER BAR */}
       {order && (
@@ -193,6 +134,25 @@ const Home = () => {
           </div>
         </div>
       )}
+
+      <div className="flex flex-col items-center pt-4 lg:hidden">
+        <div className="flex items-center gap-2 text-3xl">
+          <span className="font-bold text-black dark:text-white heading-font">
+            Gully<span className="text-green-500">Foods</span>
+          </span>
+        </div>
+        {/* <span className="italic text-gray-600 font-semibold dark:text-white text-lg text-center">
+          Your lane, your taste, your GullyFoods ✨
+        </span> */}
+      </div>
+
+      <ReviewCarousel />
+
+      {/* Search Bar */}
+      <div className="max-w-xl mx-auto mt-4 px-4">
+        <SearchBar />
+      </div>
+
 
       {/* CATEGORIES */}
       <section className="py-12 container mx-auto px-4">
@@ -330,7 +290,7 @@ const Home = () => {
       {/* PRODUCTS */}
       <section className="py-12 container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-8">
-          Santa's Picks 🎅
+          Our Picks 🎅
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {memoizedProducts}

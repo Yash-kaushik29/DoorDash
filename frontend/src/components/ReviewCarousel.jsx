@@ -80,7 +80,7 @@ function ReviewCard({ review }) {
       </div>
 
       <p className="text-[11px] leading-[1.4] text-gray-600 dark:text-gray-200 line-clamp-2">
-        {review.review}
+        {review?.review}
       </p>
     </div>
   );
