@@ -77,7 +77,7 @@ const SearchBar = () => {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           className="w-full px-11 py-3 rounded-full border border-gray-300
-          focus:outline-none focus:ring-2 focus:ring-red-500
+          focus:outline-none focus:ring-2 focus:ring-green-500
           shadow-md transition text-gray-800 bg-white"
         />
 
@@ -95,7 +95,7 @@ const SearchBar = () => {
         {/* Voice Button */}
         <button
           onClick={startVoiceSearch}
-          className="absolute left-4 text-gray-500 hover:text-red-500 transition"
+          className="absolute left-4 text-gray-500 hover:text-green-500 transition"
         >
           <FaMicrophone size={18} />
         </button>
@@ -103,7 +103,7 @@ const SearchBar = () => {
         {/* Search Button */}
         <button
           onClick={handleSearch}
-          className="absolute right-4 text-gray-500 hover:text-red-500 transition"
+          className="absolute right-4 text-gray-500 hover:text-green-500 transition"
         >
           <IoIosSearch size={22} />
         </button>

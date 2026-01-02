@@ -236,7 +236,6 @@ const ProductCard = ({
               ((product.basePrice - product.price) / product.basePrice) * 100
             ) > 20 && "animate-pulse"
           }`}
-
         >
           {Math.round(
             ((product.basePrice - product.price) / product.basePrice) * 100
@@ -287,36 +286,47 @@ const ProductCard = ({
         )}
 
         {/* 🛒 CTA */}
-        {product.inStock && (
-          <div className="absolute bottom-0 w-full">
-            {cartItem ? (
-              <div
-                className="
+        {product.inStock &&
+          (loading ? (
+            <div className="absolute bottom-0 w-full text-center text-xs py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+              Adding...
+            </div>
+          ) : (
+            <div className="absolute bottom-0 w-full">
+              {cartItem ? (
+                <div
+                  className="
             bg-gradient-to-r from-green-500 to-emerald-500
             flex items-center justify-evenly
             text-white py-1
           "
-              >
-                <button onClick={() => handleDecrement(product._id)}>−</button>
-                <span className="text-sm font-semibold">
-                  {cartItem.quantity}
-                </span>
-                <button onClick={() => handleIncrement(product._id)}>+</button>
-              </div>
-            ) : (
-              <button
-                onClick={addProductToCart}
-                className="
-              w-full py-1 text-xs font-semibold
-              bg-gradient-to-r from-green-500 to-emerald-500
-              text-white hover:brightness-110
-            "
-              >
-                Add
-              </button>
-            )}
-          </div>
-        )}
+                >
+                  <button onClick={() => handleDecrement(product._id)}>
+                    −
+                  </button>
+
+                  <span className="text-sm font-semibold">
+                    {cartItem.quantity}
+                  </span>
+
+                  <button onClick={() => handleIncrement(product._id)}>
+                    +
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={addProductToCart}
+                  className="
+            w-full py-1 text-xs font-semibold
+            bg-gradient-to-r from-green-500 to-emerald-500
+            text-white hover:brightness-110
+          "
+                >
+                  Add
+                </button>
+              )}
+            </div>
+          ))}
       </div>
 
       {/* 📝 INFO */}

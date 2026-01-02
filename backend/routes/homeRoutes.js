@@ -18,8 +18,8 @@ router.get("/get-popular-shops", async (req, res) => {
 router.get("/get-popular-products", async (req, res) => {
   try {
     const products = await Product.find({
-      shopName: "Delicious Cakey",
-      "categories.0": "Cakes",
+      shopName: "TONIQ - Dry Bar & Kitchen",
+      "categories.0": ["Korean Ice-Cream", "Desserts", "Burgers"],
     }).populate("shop", "shopDiscount").limit(20);
 
     res.json({ success: true, products });
