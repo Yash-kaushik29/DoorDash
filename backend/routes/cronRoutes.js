@@ -4,13 +4,20 @@ const DeliveryBoy = require("../models/DeliveryBoy");
 const Order = require("../models/Order");
 const Seller = require("../models/Seller");
 const User = require("../models/User");
-const Shop = require('../models/Shop');
+const Shop = require("../models/Shop");
 
 const timeToMinutes = (time) => {
   const [hours, minutes] = time.split(":").map(Number);
   return hours * 60 + minutes;
 };
 
+const isShopOpenNow = (current, open, close) => {
+  if (open < close) {
+    return current >= open && current < close;
+  }
+
+  return current >= open || current < close;
+};
 
 cron.schedule("0 1 * * *", async () => {
   try {
@@ -96,30 +103,47 @@ cron.schedule("0 3 * * *", async () => {
   }
 });
 
-// cron.schedule("1,31 * * * *", async () => {
-//   try {
-//     const now = new Date();
-//     const currentMinutes = now.getHours() * 60 + now.getMinutes();
+cron.schedule(
+  "1,31 * * * *",
+  async () => {
+    try {
+      const now = new Date();
 
-//     const shops = await Shop.find();
+      const istTime = new Date(
+        now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+      );
 
-//     for (let shop of shops) {
-//       // Skip manually closed shops
-//       if (shop.isManuallyClosed) continue;
+      const currentMinutes = istTime.getHours() * 60 + istTime.getMinutes();
 
-//       const openMinutes = timeToMinutes(shop.openingTime);
-//       const closeMinutes = timeToMinutes(shop.closingTime);
+      const shops = await Shop.find();
 
-//       const shouldBeOpen = currentMinutes >= openMinutes && currentMinutes < closeMinutes;
+      for (const shop of shops) {
+        if (shop.isManuallyClosed) continue;
 
-//       if (shop.isOpen !== shouldBeOpen) {
-//         shop.isOpen = shouldBeOpen;
-//         await shop.save();
-//       }
-//     }
+        const openMinutes = timeToMinutes(shop.openingTime);
+        const closeMinutes = timeToMinutes(shop.closingTime);
 
-//     console.log("Shops status updated at", now.toLocaleTimeString());
-//   } catch (error) {
-//     console.error("Error updating shop status:", error);
-//   }
-// });
+        const shouldBeOpen = isShopOpenNow(
+          currentMinutes,
+          openMinutes,
+          closeMinutes
+        );
+
+        if (shop.isOpen !== shouldBeOpen) {
+          shop.isOpen = shouldBeOpen;
+          await shop.save();
+        }
+      }
+
+      console.log(
+        "✅ Shops auto-updated at",
+        istTime.toLocaleTimeString("en-IN")
+      );
+    } catch (err) {
+      console.error("❌ Shop cron error:", err.message);
+    }
+  },
+  {
+    timezone: "Asia/Kolkata",
+  }
+);
