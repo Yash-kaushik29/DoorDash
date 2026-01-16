@@ -158,13 +158,13 @@ router.post("/user-signup", async (req, res) => {
         phone: newUser.phone || "",
       },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: "15d" }
+      { expiresIn: "90d" }
     );
 
     // Delete OTP after successful signup
     await Otp.deleteOne({ _id: existingOtp._id });
 
-    const maxAge = 15 * 24 * 60 * 60 * 1000;
+    const maxAge = 90 * 24 * 60 * 60 * 1000;
 
     const isProduction = process.env.NODE_ENV === "production";
     const domainName = isProduction ? "gullyfoods.app" : "localhost";
@@ -313,10 +313,10 @@ router.post("/user-login", async (req, res) => {
         phone: existingUser.phone,
       },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: "15d" }
+      { expiresIn: "90d" }
     );
 
-    const maxAge = 15 * 24 * 60 * 60 * 1000;
+    const maxAge = 90 * 24 * 60 * 60 * 1000;
 
     const isProduction = process.env.NODE_ENV === "production";
     const domainName = isProduction ? "gullyfoods.app" : "localhost";

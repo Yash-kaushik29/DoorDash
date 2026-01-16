@@ -186,7 +186,7 @@ const Navbar = () => {
         ) : (
           <Link
             to="/login"
-            className="p-2 flex flex-col items-center hover:text-green-500 transition"
+            className="p-2 flex flex-col items-center text-gray-600 dark:text-white hover:text-green-500 transition"
           >
             <RiAccountCircleLine size={22} />
             <span className="text-xs">Login</span>

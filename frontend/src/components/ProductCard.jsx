@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { FaRegCircleDot } from "react-icons/fa6";
 import api from "../utils/axiosInstance";
 import ReplacePopUp from "./ReplacePopUp";
+import ProductQuickView from "./ProductQuickView";
 
 const DietIcon = ({ type, size = 16 }) => {
   switch (type) {
@@ -64,6 +65,7 @@ const ProductCard = ({
   const [shopName, setShopName] = useState("");
   const [showReplacePopup, setShowReplacePopup] = useState(false);
   const [newProduct, setNewProduct] = useState("");
+  const [openQuickView, setOpenQuickView] = useState(false);
 
   const cartKey = variant === "grocery" ? "groceryCart" : "foodCart";
 
@@ -218,8 +220,13 @@ const ProductCard = ({
   }
 
   return (
-    <div
-      className="
+    <>
+      <div
+        onClick={() => setOpenQuickView(true)}
+        className="relative rounded-2xl overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-md hover:shadow-red-300/30 transition-all duration-300 hover:-translate-y-1"
+      >
+        <div
+          className="
     relative rounded-2xl overflow-hidden
     bg-white/80 dark:bg-gray-800/80
     backdrop-blur-md
@@ -227,156 +234,189 @@ const ProductCard = ({
     transition-all duration-300
     hover:-translate-y-1
   "
-    >
-      {/* 🎁 DISCOUNT TAG */}
-      {product.basePrice > product.price && (
-        <span
-          className={`absolute top-0 left-2 bg-yellow-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-lg z-10 ${
-            Math.round(
-              ((product.basePrice - product.price) / product.basePrice) * 100
-            ) > 20 && "animate-pulse"
-          }`}
         >
-          {Math.round(
-            ((product.basePrice - product.price) / product.basePrice) * 100
+          {/* 🎁 DISCOUNT TAG */}
+          {product.basePrice > product.price && (
+            <span
+              className={`absolute top-0 left-2 bg-yellow-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-lg z-10 ${
+                Math.round(
+                  ((product.basePrice - product.price) / product.basePrice) *
+                    100
+                ) > 20 && "animate-pulse"
+              }`}
+            >
+              {Math.round(
+                ((product.basePrice - product.price) / product.basePrice) * 100
+              )}
+              %<p>OFF</p>
+            </span>
           )}
-          %<p>OFF</p>
-        </span>
-      )}
 
-      {product?.shop?.shopDiscount > 0 && (
-        <span className="absolute top-0 left-2 bg-gradient-to-r from-red-600 to-orange-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-xl z-50">
-          {product?.shop?.shopDiscount}%<p>OFF</p>
-        </span>
-      )}
+          {product?.shop?.shopDiscount > 0 && (
+            <span className="absolute top-0 left-2 bg-gradient-to-r from-red-600 to-orange-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-xl z-50">
+              {product?.shop?.shopDiscount}%<p>OFF</p>
+            </span>
+          )}
 
-      {/* 🖼 IMAGE CONTAINER */}
-      <div className="relative">
-        {bestSeller && (
-          <span className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-b-lg z-10">
-            {" "}
-            Bestseller{" "}
-          </span>
-        )}
+          {/* 🖼 IMAGE CONTAINER */}
+          <div className="relative">
+            {bestSeller && (
+              <span className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-b-lg z-10">
+                {" "}
+                Bestseller{" "}
+              </span>
+            )}
 
-        <img
-          src={
-            product.images?.[0] ||
-            "https://tse3.mm.bing.net/th/id/OIP.j9lwZI84idgGDQj02DAXCgHaHa?pid=Api"
-          }
-          alt={product.name}
-          className="
+            <img
+              src={
+                product.images?.[0] ||
+                "https://tse3.mm.bing.net/th/id/OIP.j9lwZI84idgGDQj02DAXCgHaHa?pid=Api"
+              }
+              alt={product.name}
+              className="
         w-full h-36 object-cover
         transition-transform duration-500
         hover:scale-110
       "
-        />
+            />
 
-        {product.dietType && (
-          <div className="absolute top-2 right-2">
-            <DietIcon type={product.dietType} />
-          </div>
-        )}
+            {product.dietType && (
+              <div className="absolute top-2 right-2">
+                <DietIcon type={product.dietType} />
+              </div>
+            )}
 
-        {/* 🚫 STOCK */}
-        {!product.inStock && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-            <span className="text-white font-bold text-sm">Not Available</span>
-          </div>
-        )}
+            {/* 🚫 STOCK */}
+            {!product.inStock && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                <span className="text-white font-bold text-sm">
+                  Not Available
+                </span>
+              </div>
+            )}
 
-        {/* 🛒 CTA */}
-        {product.inStock &&
-          (loading ? (
-            <div className="absolute bottom-0 w-full text-center text-xs py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white">
-              Adding...
-            </div>
-          ) : (
-            <div className="absolute bottom-0 w-full">
-              {cartItem ? (
-                <div
-                  className="
+            {/* 🛒 CTA */}
+            {product.inStock &&
+              (loading ? (
+                <div className="absolute bottom-0 w-full text-center text-xs py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+                  Adding...
+                </div>
+              ) : (
+                <div className="absolute bottom-0 w-full">
+                  {cartItem ? (
+                    <div
+                      className="
             bg-gradient-to-r from-green-500 to-emerald-500
             flex items-center justify-evenly
             text-white py-1
           "
-                >
-                  <button onClick={() => handleDecrement(product._id)}>
-                    −
-                  </button>
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDecrement(product._id);
+                        }}
+                      >
+                        −
+                      </button>
 
-                  <span className="text-sm font-semibold">
-                    {cartItem.quantity}
-                  </span>
+                      <span className="text-sm font-semibold">
+                        {cartItem.quantity}
+                      </span>
 
-                  <button onClick={() => handleIncrement(product._id)}>
-                    +
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={addProductToCart}
-                  className="
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleIncrement(product._id);
+                        }}
+                      >
+                        +
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addProductToCart();
+                      }}
+                      className="
             w-full py-1 text-xs font-semibold
             bg-gradient-to-r from-green-500 to-emerald-500
             text-white hover:brightness-110
           "
-                >
-                  Add
-                </button>
+                    >
+                      Add
+                    </button>
+                  )}
+                </div>
+              ))}
+          </div>
+
+          {/* 📝 INFO */}
+          <div className="p-3">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+              {product.name}
+            </h3>
+
+            {variant === "food" && (
+              <p className="text-xs text-red-500 mt-1">{product.shopName}</p>
+            )}
+
+            {/* 💰 PRICE */}
+            <div className="mt-1 text-sm">
+              {product.basePrice > product.price ? (
+                <p className="mt-1 text-sm">
+                  {" "}
+                  <span className="line-through text-gray-400 mr-2">
+                    {" "}
+                    ₹{product.basePrice}{" "}
+                  </span>{" "}
+                  <span className="text-green-500 font-semibold">
+                    ₹{product.price}
+                  </span>{" "}
+                </p>
+              ) : product?.shop?.shopDiscount > 0 ? (
+                <p className="mt-1 text-sm">
+                  {" "}
+                  <span className="line-through text-gray-400 mr-2">
+                    {" "}
+                    ₹{product.price}{" "}
+                  </span>{" "}
+                  <span className="text-red-500 font-semibold">
+                    {" "}
+                    ₹{" "}
+                    {(
+                      product.price -
+                      (product.price * product?.shop?.shopDiscount) / 100
+                    ).toFixed(2)}{" "}
+                  </span>{" "}
+                </p>
+              ) : (
+                <p className="mt-1 text-green-500 font-semibold text-sm">
+                  {" "}
+                  ₹{product.price}{" "}
+                </p>
               )}
             </div>
-          ))}
-      </div>
-
-      {/* 📝 INFO */}
-      <div className="p-3">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-          {product.name}
-        </h3>
-
-        {variant === "food" && (
-          <p className="text-xs text-red-500 mt-1">{product.shopName}</p>
-        )}
-
-        {/* 💰 PRICE */}
-        <div className="mt-1 text-sm">
-          {product.basePrice > product.price ? (
-            <p className="mt-1 text-sm">
-              {" "}
-              <span className="line-through text-gray-400 mr-2">
-                {" "}
-                ₹{product.basePrice}{" "}
-              </span>{" "}
-              <span className="text-green-500 font-semibold">
-                ₹{product.price}
-              </span>{" "}
-            </p>
-          ) : product?.shop?.shopDiscount > 0 ? (
-            <p className="mt-1 text-sm">
-              {" "}
-              <span className="line-through text-gray-400 mr-2">
-                {" "}
-                ₹{product.price}{" "}
-              </span>{" "}
-              <span className="text-red-500 font-semibold">
-                {" "}
-                ₹{" "}
-                {(
-                  product.price -
-                  (product.price * product?.shop?.shopDiscount) / 100
-                ).toFixed(2)}{" "}
-              </span>{" "}
-            </p>
-          ) : (
-            <p className="mt-1 text-green-500 font-semibold text-sm">
-              {" "}
-              ₹{product.price}{" "}
-            </p>
-          )}
+          </div>
         </div>
       </div>
-    </div>
+
+      <ProductQuickView
+        open={openQuickView}
+        onClose={() => setOpenQuickView(false)}
+        product={product}
+        cartItem={cartItem}
+        loading={loading}
+        onAdd={addProductToCart}
+        onInc={() => handleIncrement(product._id)}
+        onDec={() => handleDecrement(product._id)}
+        variant={variant}
+        dietType={product.dietType}
+        DietIcon={DietIcon}
+        shopDiscount={product?.shop?.shopDiscount}
+      />
+    </>
   );
 };
 
