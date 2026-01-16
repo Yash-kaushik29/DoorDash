@@ -3,6 +3,7 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"], // Ensure Tailwind scans all files
   theme: {
     screens: {
+      xxs: "370px",
       xs: "480px",
       sm: "640px",
       md: "768px",

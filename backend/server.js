@@ -27,7 +27,7 @@ const Shop = require("./models/Shop.js");
 const pdfExportRoutes = require("./routes/pdfExportRoutes");
 const rateLimit = require("express-rate-limit");
 const Product = require("./models/Product.js");
-
+const User = require("./models/User.js");
 
 const app = express();
 dotenv.config();
@@ -48,12 +48,14 @@ app.use(
   })
 );
 
-app.use(rateLimit({
-  windowMs: 1 * 60 * 1000,
-  max: 200,
-  standardHeaders: true,
-  legacyHeaders: false,
-}));
+app.use(
+  rateLimit({
+    windowMs: 1 * 60 * 1000,
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
 
 mongoose
   .connect(process.env.MONGODB_URI_KEY, {
@@ -174,13 +176,11 @@ app.post("/add-coupons", async (req, res) => {
     res.json({ success: true, insertedCoupons });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error inserting coupons",
-        error: err.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error inserting coupons",
+      error: err.message,
+    });
   }
 });
 
@@ -223,26 +223,25 @@ app.put("/open-all-shops", async (req, res) => {
 app.put("/init-shop-fields", async (req, res) => {
   try {
     const result = await Shop.updateMany(
-      {
-      },
+      {},
       {
         $set: {
           shopDiscount: 0,
-        }
+        },
       }
     );
 
     return res.status(200).json({
       success: true,
       message: "Missing fields initialized successfully",
-      updatedCount: result.modifiedCount
+      updatedCount: result.modifiedCount,
     });
   } catch (error) {
     console.error("INIT SHOP FIELDS ERROR:", error);
     res.status(500).json({
       success: false,
       message: "Update failed",
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -254,14 +253,14 @@ app.post("/update-prices-by-shop", async (req, res) => {
     if (!shopName || typeof increasePercent !== "number") {
       return res.status(400).json({
         success: false,
-        message: "shopName and increasePercent are required"
+        message: "shopName and increasePercent are required",
       });
     }
 
     if (increasePercent < 0 || increasePercent > 100) {
       return res.status(400).json({
         success: false,
-        message: "increasePercent must be between 0 and 100"
+        message: "increasePercent must be between 0 and 100",
       });
     }
 
@@ -270,7 +269,7 @@ app.post("/update-prices-by-shop", async (req, res) => {
     if (!products.length) {
       return res.status(404).json({
         success: false,
-        message: "No products found for this shop"
+        message: "No products found for this shop",
       });
     }
 
@@ -295,14 +294,13 @@ app.post("/update-prices-by-shop", async (req, res) => {
       increasePercent,
       totalProducts: products.length,
       updatedProducts: updatedCount,
-      message: `Updated prices for ${updatedCount} products`
+      message: `Updated prices for ${updatedCount} products`,
     });
-
   } catch (error) {
     console.error("Update price error:", error);
     res.status(500).json({
       success: false,
-      message: "Server error"
+      message: "Server error",
     });
   }
 });
