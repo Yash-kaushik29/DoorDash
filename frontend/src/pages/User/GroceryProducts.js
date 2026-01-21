@@ -131,15 +131,15 @@ const GroceryProducts = () => {
         ) : (
           <div className="flex gap-4">
             {/* SIDEBAR */}
-            <aside className="w-36 sm:w-40 md:w-52 sticky top-10 h-[calc(100vh-40px)] overflow-y-auto border-r pr-2 pb-20">
+            <aside className="w-28 sm:w-32 md:w-40 sticky top-10 h-[calc(100vh-40px)] overflow-y-auto border-r pr-2 pb-20">
               <h3 className="text-green-500 font-semibold" >Subcategories</h3>
-              <div className="h-[1px] bg-green-500 px-4" ></div>
+              <div className="h-[1px] bg-green-500 px-4 mb-2" ></div>
               <ul className="space-y-1">
                 {subCategories.map((sub) => (
                   <li key={sub}>
                     <button
                       onClick={() => scrollToCategory(sub)}
-                      className={`w-full flex items-start px-2 py-1.5 rounded-md text-xs sm:text-sm font-medium transition text-left
+                      className={`w-full flex items-start px-2 py-1.5 rounded-md text-xs md:text-sm font-medium transition text-left
                 ${
                   activeSub === sub
                     ? "bg-green-600 text-white"
@@ -150,7 +150,7 @@ const GroceryProducts = () => {
                       <span className="whitespace-normal leading-snug">
                         {sub}
                         <span className="ml-1 text-[13px] opacity-80">
-                          ({subCategoryCounts[sub] || 0})
+                          [{subCategoryCounts[sub] || 0}]
                         </span>
                       </span>
                     </button>
