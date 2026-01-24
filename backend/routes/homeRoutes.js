@@ -19,7 +19,7 @@ router.get("/get-popular-products", async (req, res) => {
   try {
     const products = await Product.find({
       shopName: "TONIQ - Dry Bar & Kitchen",
-      "categories.0": ["Korean Ice-Cream", "Desserts", "Burgers"],
+      inStock: true,
     }).populate("shop", "shopDiscount").limit(20);
 
     res.json({ success: true, products });
