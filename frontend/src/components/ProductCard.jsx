@@ -355,7 +355,7 @@ const ProductCard = ({
           {/* 📝 INFO */}
           <div className="p-3">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-              {product.name}
+              {product.name.substr(0, 30)} <span className="text-green-500 hover:text-green-600" >{product?.name.length > 30 && " ...More"}</span>
             </h3>
 
             {variant === "food" && (

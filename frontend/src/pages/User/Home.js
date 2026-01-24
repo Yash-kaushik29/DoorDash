@@ -10,12 +10,11 @@ import ShopCard from "../../components/ShopCard";
 import ProductCard from "../../components/ProductCard";
 import { Link } from "react-router-dom";
 import InstallPrompt from "../../components/InstallPrompt";
-import ReviewCarousel from '../../components/ReviewCarousel';
+import ReviewCarousel from "../../components/ReviewCarousel";
 import { motion } from "framer-motion";
 import api from "../../utils/axiosInstance";
 import { FiRefreshCw } from "react-icons/fi";
 import "../../index.css";
-
 
 const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
@@ -78,7 +77,7 @@ const Home = () => {
           <ShopCard shop={shop} />
         </motion.div>
       )),
-    [shops]
+    [shops],
   );
 
   const memoizedProducts = useMemo(
@@ -92,7 +91,7 @@ const Home = () => {
           setUser={setUser}
         />
       )),
-    [products, user, setUser]
+    [products, user, setUser],
   );
 
   if (!ready) return <HomePageSkeleton />;
@@ -100,7 +99,6 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <ToastContainer position="top-right" autoClose={3000} />
-
 
       <Navbar />
 
@@ -135,15 +133,19 @@ const Home = () => {
         </div>
       )}
 
-      <div className="flex flex-col items-center pt-4 lg:hidden">
+      <div
+        className="flex flex-col items-center pt-4 lg:hidden bg-[#FAF5EF]
+ dark:bg-gray-900"
+      >
         <div className="flex items-center gap-2 text-3xl">
-          <span className="font-bold text-black dark:text-white heading-font">
-            Gully<span className="text-green-500">Foods</span>
+          <span
+            className="heading-font imageBg font-extrabold text-5xl sm:text-6xl"
+            data-text="GullyFoods"
+          >
+            GullyFoods
           </span>
         </div>
-        {/* <span className="italic text-gray-600 font-semibold dark:text-white text-lg text-center">
-          Your lane, your taste, your GullyFoods ✨
-        </span> */}
+        <p className="pb-2 text-gray-700 dark:text-white font-semibold" ><span className="text-orange-500" >Grab Your</span> REPUBLIC DAY <span className="text-green-500" >Treat Now</span></p>
       </div>
 
       <ReviewCarousel />
@@ -152,7 +154,6 @@ const Home = () => {
       <div className="max-w-xl mx-auto mt-4 px-4">
         <SearchBar />
       </div>
-
 
       {/* CATEGORIES */}
       <section className="py-12 container mx-auto px-4">
@@ -289,9 +290,7 @@ const Home = () => {
 
       {/* PRODUCTS */}
       <section className="py-12 container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-8">
-          ✨ Our Picks ✨
-        </h2>
+        <h2 className="text-3xl font-bold text-center mb-8">✨ Our Picks ✨</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {memoizedProducts}
         </div>
