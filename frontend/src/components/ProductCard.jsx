@@ -70,7 +70,7 @@ const ProductCard = ({
   const cartKey = variant === "grocery" ? "groceryCart" : "foodCart";
 
   const cartItem = user?.[cartKey]?.find(
-    (i) => i.productId?.toString() === product?._id?.toString()
+    (i) => i.productId?.toString() === product?._id?.toString(),
   );
 
   const addProductToCart = async () => {
@@ -84,7 +84,7 @@ const ProductCard = ({
         { productId: product._id, cartKey },
         {
           withCredentials: true,
-        }
+        },
       );
       if (!data.success) throw new Error(data.message);
       toast.success("Product added to cart!");
@@ -112,7 +112,7 @@ const ProductCard = ({
     setUser((prev) => ({
       ...prev,
       [cartKey]: prev[cartKey].map((i) =>
-        i.productId === productId ? { ...i, quantity: i.quantity + 1 } : i
+        i.productId === productId ? { ...i, quantity: i.quantity + 1 } : i,
       ),
     }));
 
@@ -120,7 +120,7 @@ const ProductCard = ({
       const { data } = await api.post(
         `/api/cart/incrementQty`,
         { productId, cartKey },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (!data.success) throw new Error(data.message);
     } catch {
@@ -139,7 +139,7 @@ const ProductCard = ({
     setUser((prev) => ({
       ...prev,
       [cartKey]: prev[cartKey].map((i) =>
-        i.productId === productId ? { ...i, quantity: i.quantity - 1 } : i
+        i.productId === productId ? { ...i, quantity: i.quantity - 1 } : i,
       ),
     }));
 
@@ -147,7 +147,7 @@ const ProductCard = ({
       const { data } = await api.post(
         `/api/cart/decrementQty`,
         { productId, cartKey },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (!data.success) throw new Error(data.message);
     } catch {
@@ -170,7 +170,7 @@ const ProductCard = ({
       const { data } = await api.post(
         `/api/cart/removeFromCart`,
         { productId, cartKey },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (!data.success) throw new Error(data.message);
       toast.success("Product removed from cart!");
@@ -189,7 +189,7 @@ const ProductCard = ({
       const { data } = await api.post(
         "/api/cart/replaceCart",
         { productId: product._id, cartKey },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (!data.success) throw new Error(data.message);
 
@@ -221,187 +221,169 @@ const ProductCard = ({
 
   return (
     <>
+      {/* PRODUCT CARD */}
       <div
         onClick={() => setOpenQuickView(true)}
-        className="relative rounded-2xl overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-md hover:shadow-red-300/30 transition-all duration-300 hover:-translate-y-1"
+        className="
+      relative rounded-2xl overflow-hidden
+      bg-white/80 dark:bg-gray-800/80
+      backdrop-blur-md
+      shadow-md hover:shadow-red-300/30
+      transition-all duration-300
+      hover:-translate-y-1
+    "
       >
-        <div
-          className="
-    relative rounded-2xl overflow-hidden
-    bg-white/80 dark:bg-gray-800/80
-    backdrop-blur-md
-    shadow-md hover:shadow-red-300/30
-    transition-all duration-300
-    hover:-translate-y-1
-  "
-        >
-          {/* 🎁 DISCOUNT TAG */}
-          {product.basePrice > product.price && (
-            <span
-              className={`absolute top-0 left-2 bg-yellow-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-lg z-10 ${
-                Math.round(
-                  ((product.basePrice - product.price) / product.basePrice) *
-                    100
-                ) > 20 && "animate-pulse"
-              }`}
-            >
-              {Math.round(
-                ((product.basePrice - product.price) / product.basePrice) * 100
-              )}
-              %<p>OFF</p>
+        {/* 🎁 DISCOUNT TAG (BASE PRICE) */}
+        {product.basePrice > product.price && (
+          <span
+            className={`absolute top-0 left-2 bg-yellow-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-lg z-20 ${
+              Math.round(
+                ((product.basePrice - product.price) / product.basePrice) * 100,
+              ) > 20 && "animate-pulse"
+            }`}
+          >
+            {Math.round(
+              ((product.basePrice - product.price) / product.basePrice) * 100,
+            )}
+            %<p>OFF</p>
+          </span>
+        )}
+
+        {/* 🎁 SHOP DISCOUNT */}
+        {product?.shop?.shopDiscount > 0 && (
+          <span className="absolute top-0 left-2 bg-gradient-to-r from-red-600 to-orange-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-xl z-20">
+            {product?.shop?.shopDiscount}%<p>OFF</p>
+          </span>
+        )}
+
+        {/* 🖼 IMAGE */}
+        <div className="relative overflow-hidden">
+          {bestSeller && (
+            <span className="absolute top-0 left-1/2 -translate-x-1/2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-b-lg z-20">
+              Bestseller
             </span>
           )}
 
-          {product?.shop?.shopDiscount > 0 && (
-            <span className="absolute top-0 left-2 bg-gradient-to-r from-red-600 to-orange-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-xl z-50">
-              {product?.shop?.shopDiscount}%<p>OFF</p>
-            </span>
+          <img
+            src={
+              product.images?.[0] ||
+              "https://tse3.mm.bing.net/th/id/OIP.j9lwZI84idgGDQj02DAXCgHaHa?pid=Api"
+            }
+            alt={product.name}
+            className="
+          w-full h-36 object-cover
+          transition-transform duration-500
+          hover:scale-110
+        "
+          />
+
+          {product.dietType && (
+            <div className="absolute top-2 right-2 z-20">
+              <DietIcon type={product.dietType} />
+            </div>
           )}
 
-          {/* 🖼 IMAGE CONTAINER */}
-          <div className="relative">
-            {bestSeller && (
-              <span className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-b-lg z-10">
-                {" "}
-                Bestseller{" "}
+          {/* 🚫 OUT OF STOCK */}
+          {!product.inStock && (
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-30">
+              <span className="text-white font-bold text-sm">
+                Not Available
               </span>
-            )}
+            </div>
+          )}
 
-            <img
-              src={
-                product.images?.[0] ||
-                "https://tse3.mm.bing.net/th/id/OIP.j9lwZI84idgGDQj02DAXCgHaHa?pid=Api"
-              }
-              alt={product.name}
-              className="
-        w-full h-36 object-cover
-        transition-transform duration-500
-        hover:scale-110
-      "
-            />
-
-            {product.dietType && (
-              <div className="absolute top-2 right-2">
-                <DietIcon type={product.dietType} />
+          {/* 🛒 CTA */}
+          {product.inStock &&
+            (loading ? (
+              <div className="absolute bottom-0 w-full text-center text-xs py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white z-20">
+                Adding...
               </div>
-            )}
-
-            {/* 🚫 STOCK */}
-            {!product.inStock && (
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">
-                  Not Available
-                </span>
-              </div>
-            )}
-
-            {/* 🛒 CTA */}
-            {product.inStock &&
-              (loading ? (
-                <div className="absolute bottom-0 w-full text-center text-xs py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white">
-                  Adding...
-                </div>
-              ) : (
-                <div className="absolute bottom-0 w-full">
-                  {cartItem ? (
-                    <div
-                      className="
-            bg-gradient-to-r from-green-500 to-emerald-500
-            flex items-center justify-evenly
-            text-white py-1
-          "
-                    >
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDecrement(product._id);
-                        }}
-                      >
-                        −
-                      </button>
-
-                      <span className="text-sm font-semibold">
-                        {cartItem.quantity}
-                      </span>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleIncrement(product._id);
-                        }}
-                      >
-                        +
-                      </button>
-                    </div>
-                  ) : (
+            ) : (
+              <div className="absolute bottom-0 w-full z-20">
+                {cartItem ? (
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-evenly text-white py-1">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        addProductToCart();
+                        handleDecrement(product._id);
                       }}
-                      className="
-            w-full py-1 text-xs font-semibold
-            bg-gradient-to-r from-green-500 to-emerald-500
-            text-white hover:brightness-110
-          "
                     >
-                      Add
+                      −
                     </button>
-                  )}
-                </div>
-              ))}
-          </div>
 
-          {/* 📝 INFO */}
-          <div className="p-3">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-              {product.name.substr(0, 30)} <span className="text-green-500 hover:text-green-600" >{product?.name.length > 30 && " ...More"}</span>
-            </h3>
+                    <span className="text-sm font-semibold">
+                      {cartItem.quantity}
+                    </span>
 
-            {variant === "food" && (
-              <p className="text-xs text-red-500 mt-1">{product.shopName}</p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleIncrement(product._id);
+                      }}
+                    >
+                      +
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addProductToCart();
+                    }}
+                    className="w-full py-1 text-xs font-semibold bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:brightness-110"
+                  >
+                    Add
+                  </button>
+                )}
+              </div>
+            ))}
+        </div>
+
+        {/* 📝 INFO */}
+        <div className="p-3">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+            {product.name.substr(0, 30)}
+            <span className="text-green-500">
+              {product.name.length > 30 && " ...More"}
+            </span>
+          </h3>
+
+          {variant === "food" && (
+            <p className="text-xs text-red-500 mt-1">{product.shopName}</p>
+          )}
+
+          {/* 💰 PRICE */}
+          <div className="mt-1 text-sm">
+            {product.basePrice > product.price ? (
+              <p>
+                <span className="line-through text-gray-400 mr-2">
+                  ₹{product.basePrice}
+                </span>
+                <span className="text-green-500 font-semibold">
+                  ₹{product.price}
+                </span>
+              </p>
+            ) : product?.shop?.shopDiscount > 0 ? (
+              <p>
+                <span className="line-through text-gray-400 mr-2">
+                  ₹{product.price}
+                </span>
+                <span className="text-red-500 font-semibold">
+                  ₹
+                  {(
+                    product.price -
+                    (product.price * product?.shop?.shopDiscount) / 100
+                  ).toFixed(2)}
+                </span>
+              </p>
+            ) : (
+              <p className="text-green-500 font-semibold">₹{product.price}</p>
             )}
-
-            {/* 💰 PRICE */}
-            <div className="mt-1 text-sm">
-              {product.basePrice > product.price ? (
-                <p className="mt-1 text-sm">
-                  {" "}
-                  <span className="line-through text-gray-400 mr-2">
-                    {" "}
-                    ₹{product.basePrice}{" "}
-                  </span>{" "}
-                  <span className="text-green-500 font-semibold">
-                    ₹{product.price}
-                  </span>{" "}
-                </p>
-              ) : product?.shop?.shopDiscount > 0 ? (
-                <p className="mt-1 text-sm">
-                  {" "}
-                  <span className="line-through text-gray-400 mr-2">
-                    {" "}
-                    ₹{product.price}{" "}
-                  </span>{" "}
-                  <span className="text-red-500 font-semibold">
-                    {" "}
-                    ₹{" "}
-                    {(
-                      product.price -
-                      (product.price * product?.shop?.shopDiscount) / 100
-                    ).toFixed(2)}{" "}
-                  </span>{" "}
-                </p>
-              ) : (
-                <p className="mt-1 text-green-500 font-semibold text-sm">
-                  {" "}
-                  ₹{product.price}{" "}
-                </p>
-              )}
-            </div>
           </div>
         </div>
       </div>
 
+      {/* QUICK VIEW */}
       <ProductQuickView
         open={openQuickView}
         onClose={() => setOpenQuickView(false)}

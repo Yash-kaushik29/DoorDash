@@ -144,11 +144,12 @@ const ShopPage = () => {
 
               {/* Categories */}
               <div className="flex flex-col gap-3">
+                <h2>Categories</h2>
                 {shop.productCategories.map((category) => (
                   <button
                     key={category}
                     onClick={() => handleButtonClick(category)}
-                    className={`text-left text-[11px] sm:text-sm
+                    className={`text-left text-[13px] sm:text-sm
                                 font-medium leading-snug transition
                                 ${
                                   selectedCategory === category

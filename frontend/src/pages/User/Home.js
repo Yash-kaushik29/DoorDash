@@ -205,7 +205,7 @@ const Home = () => {
                 className="
       absolute inset-0
       bg-gradient-to-br from-red-900/60 via-black/40 to-green-900/50
-      z-10
+      z-10 pointer-events-none
     "
               />
 
