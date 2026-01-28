@@ -181,7 +181,7 @@ const Navbar = () => {
             <div className="flex justify-center items-center w-8 h-8 rounded-full bg-green-500 text-white hover:bg-green-600 font-semibold">
               {user?.username ? user.username.charAt(0).toUpperCase() : "U"}
             </div>
-            <span className="text-xs ">Profile</span>
+            <span className="text-xs text-gray-600 dark:text-white">Profile</span>
           </Link>
         ) : (
           <Link

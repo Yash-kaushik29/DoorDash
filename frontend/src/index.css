@@ -77,14 +77,5 @@ body {
   }
 }
 
-.imageBg {
-  background-image: url("/public/flag.png");
-  background-size: cover;
-  background-position: center;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
 
 

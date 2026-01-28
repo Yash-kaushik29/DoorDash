@@ -133,22 +133,16 @@ const Home = () => {
         </div>
       )}
 
-      <div
-        className="flex flex-col items-center pt-4 lg:hidden bg-[#FAF5EF]
- dark:bg-gray-900"
-      >
+      <div className="flex flex-col items-center pt-4 lg:hidden">
         <div className="flex items-center gap-2 text-3xl">
-          <span
-            className="heading-font imageBg font-extrabold text-5xl sm:text-6xl"
-            data-text="GullyFoods"
-          >
-            GullyFoods
-          </span>
+          <span className="font-bold text-black dark:text-white heading-font"> Gully<span className="text-green-500">Foods</span> </span>
         </div>
-        <p className="pb-2 text-gray-700 dark:text-white font-semibold" ><span className="text-orange-500" >Grab Your</span> REPUBLIC DAY <span className="text-green-500" >Treat Now</span></p>
+        <span className="italic text-gray-600 font-semibold dark:text-white text-lg text-center">
+          Your lane, your taste, your GullyFoods ✨
+        </span>
       </div>
 
-      <ReviewCarousel />
+      {/* <ReviewCarousel /> */}
 
       {/* Search Bar */}
       <div className="max-w-xl mx-auto mt-4 px-4">
