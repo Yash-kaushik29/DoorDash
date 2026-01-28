@@ -458,7 +458,7 @@ router.put("/update-profile", authenticateSeller, async (req, res) => {
 
 router.get("/get-restaurants", async (req, res) => {
   try {
-    const restaurants = await Shop.find({ category: { $ne: "Grocery" } }).sort({priority: -1});
+    const restaurants = await Shop.find({ category: { $ne: "Grocery" } }).sort({isOpen: -1, priority: -1});
 
     if (!restaurants || restaurants.length === 0) {
       return res
