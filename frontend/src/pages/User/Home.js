@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import api from "../../utils/axiosInstance";
 import { FiRefreshCw } from "react-icons/fi";
 import "../../index.css";
+import ValentineBanner from "../../eventsComponents/ValentineBanner";
 
 const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
@@ -132,6 +133,8 @@ const Home = () => {
           </div>
         </div>
       )}
+
+      {/* <ValentineBanner /> */}
 
       <div className="flex flex-col items-center pt-4 lg:hidden">
         <div className="flex items-center gap-2 text-3xl">
