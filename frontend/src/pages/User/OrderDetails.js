@@ -13,6 +13,7 @@ import { IoIosCart } from "react-icons/io";
 import DownloadInvoiceButton from "../../components/DownloadInvoiceButton";
 import api from "../../utils/axiosInstance";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import DeliveryTimeline from "../../components/DeliveryTimeline";
 
 const OrderDetails = () => {
   const { orderId } = useParams();
@@ -27,7 +28,7 @@ const OrderDetails = () => {
       try {
         const { data } = await api.get(
           `/api/order/getOrderDetails/${orderId}`,
-          { withCredentials: true }
+          { withCredentials: true },
         );
         if (data.success) {
           setOrder(data.order);
@@ -139,7 +140,7 @@ const OrderDetails = () => {
       <Navbar />
 
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200 py-6 px-2 sm:px-6">
-        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 mt-4 relative">
+        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mt-4 relative">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-semibold">Order #{order?.id}</h2>
@@ -150,21 +151,16 @@ const OrderDetails = () => {
           </div>
 
           {/* Status Section */}
-          <div className="flex flex-col gap-3 sm:text-sm mb-3">
-            {/* Delivery Status */}
-            <div className="flex items-center gap-1">
-              <span className="text-gray-600 dark:text-gray-400">
-                Delivery Status :
-              </span>
-              <Badge {...deliveryBadge} className="text-xs px-2 py-0.5">
-                {order?.deliveryStatus}
-              </Badge>
+          <div className="flex flex-col gap-4 sm:text-sm mb-4">
+            {/* Delivery Timeline */}
+            <div className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-700">
+              <DeliveryTimeline currentStatus={order?.deliveryStatus} />
             </div>
 
             {/* Payment Status */}
             <div className="flex items-center gap-1">
               <span className="text-gray-600 dark:text-gray-400">
-                Payment Status :{" "}
+                Payment Status :
               </span>
               <Badge
                 bg={
@@ -210,43 +206,56 @@ const OrderDetails = () => {
           )}
 
           {/* Shipping Address */}
-          <div className="mb-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 shadow-sm">
-            <h3 className="text-lg font-semibold mb-2">Delivering To:</h3>
-            <div className="flex flex-col gap-1">
-              <p>👤 {order?.shippingAddress?.fullName}</p>
-              <p>
-                📍 {order?.shippingAddress?.addressLine},{" "}
-                {order?.shippingAddress?.area}
-              </p>
-              <p>📞 {order?.shippingAddress?.phone}</p>
+          {order?.deliveryStatus !== "Cancelled" && (
+            <div className="mb-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 shadow-sm">
+              <h3 className="text-lg font-semibold mb-2">
+                {order?.deliveryStatus === "Delivered"
+                  ? "Delivered"
+                  : "Delivering"}{" "}
+                To:
+              </h3>
+              <div className="flex flex-col gap-1">
+                <p>👤 {order?.shippingAddress?.fullName}</p>
+                <p>
+                  📍 {order?.shippingAddress?.addressLine},{" "}
+                  {order?.shippingAddress?.area}
+                </p>
+                <p>📞 {order?.shippingAddress?.phone}</p>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Items Ordered */}
           <div className="mt-4">
             <h3 className="text-lg font-semibold mb-3">Items Ordered</h3>
+
+            {/* Food → single shop name */}
+            {order?.orderType === "Food" && order?.items?.length > 0 && (
+              <div className="mb-3 px-3 py-2 rounded-lg bg-gradient-to-r from-green-500 via-emerald-500 to-emerald-600 text-white font-semibold text-center">
+                {order.items[0]?.product?.shopName}
+              </div>
+            )}
+
             <div className="max-h-80 overflow-y-auto border rounded-lg shadow-sm">
               <ul className="divide-y divide-gray-300 dark:divide-gray-600">
                 {order?.items?.map((item, index) => {
                   const itemStatus = getStatusBadge(item.status);
+
                   return (
                     <li
                       key={index}
-                      className={`flex justify-between items-center py-3 px-2 transition-transform hover:scale-[1.01] ${
+                      className={`flex justify-between items-center py-3 px-3 ${
                         item.status === "Cancelled"
                           ? "opacity-50 line-through"
                           : ""
                       }`}
                     >
+                      {/* Item Info */}
                       <div className="flex flex-col gap-1">
                         <p className="font-medium text-gray-800 dark:text-gray-200">
                           {item?.product?.name}
                         </p>
-                        <span className="bg-yellow-200 dark:bg-yellow-600 px-2 py-1 rounded text-sm w-fit">
-                          {item?.product?.shopName}
-                        </span>
                         <p className="flex items-center gap-1 text-sm">
-                          Status:
                           <span
                             className={`font-semibold ${itemStatus.text} flex items-center gap-1`}
                           >
@@ -255,13 +264,9 @@ const OrderDetails = () => {
                         </p>
                       </div>
 
-                      <p className="text-lg mx-2 text-gray-600 dark:text-gray-400 font-semibold">
-                        x{item?.quantity}
-                      </p>
-                      <p className="text-lg font-semibold text-green-600 dark:text-green-400">
-                        {getItemTotal(item) > 0
-                          ? formatPrice(getItemTotal(item))
-                          : "--"}
+                      {/* Quantity */}
+                      <p className="text-lg text-gray-600 dark:text-gray-400 font-semibold">
+                        × {item?.quantity}
                       </p>
                     </li>
                   );
@@ -273,53 +278,59 @@ const OrderDetails = () => {
           {/* Totals */}
           <div className="my-6 text-right flex flex-col gap-1">
             <p className="font-semibold">
-              Cart Total:{" "}
+              Cart Total:
               <span className="text-green-500 ml-2">
                 {formatPrice(order?.amount)}
               </span>
             </p>
             <p className="font-semibold">
-              Tax:{" "}
+              Tax:
               <span className="text-green-500 ml-2">
                 {formatPrice(order?.taxes)}
               </span>
             </p>
             <p className="font-semibold">
-              Delivery Fee:{" "}
+              Delivery Fee:
               <span className="text-green-500 ml-2">
                 {formatPrice(order?.deliveryCharge)}
               </span>
             </p>
+
             {order?.orderType === "Grocery" && (
               <p className="font-semibold">
-                Service Charge:{" "}
+                Service Charge:
                 <span className="text-green-500 ml-2">
                   {formatPrice(order?.serviceCharge)}
                 </span>
               </p>
             )}
+
             {order?.discount > 0 && (
               <p className="font-semibold">
-                Coupon Discount:{" "}
+                Coupon Discount:
                 <span className="text-green-500 ml-2">
                   -{formatPrice(order?.discount)}
                 </span>
               </p>
             )}
-            <div className="h-[1px] bg-black dark:bg-white my-2"></div>
+
+            <div className="h-[1px] bg-black dark:bg-white my-2" />
+
             <p className="font-semibold text-lg">
-              Total:{" "}
+              Total:
               <span className="text-green-700 dark:text-green-300 ml-2 font-bold">
                 {formatPrice(order?.totalAmount)}
               </span>
             </p>
+
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Payment Method:{" "}
-              <span className="font-medium">{order?.paymentMethod}</span>
+              Payment Method:
+              <span className="font-medium ml-1">{order?.paymentMethod}</span>
             </p>
+
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Placed On:{" "}
-              <span className="font-medium">
+              Placed On:
+              <span className="font-medium ml-1">
                 {new Date(order?.createdAt).toLocaleString()}
               </span>
             </p>
@@ -342,7 +353,7 @@ const OrderDetails = () => {
             <button
               onClick={() =>
                 window.open(
-                  "https://wa.me/917409565977?text=Hi, I’d like to cancel my recent order from GullyFoods."
+                  "https://wa.me/917409565977?text=Hi, I’d like to cancel my recent order from GullyFoods.",
                 )
               }
               className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-semibold w-full transition mb-2"

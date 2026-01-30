@@ -5,6 +5,7 @@ import { FaRegCircleDot } from "react-icons/fa6";
 import api from "../utils/axiosInstance";
 import ReplacePopUp from "./ReplacePopUp";
 import ProductQuickView from "./ProductQuickView";
+import "../index.css";
 
 const DietIcon = ({ type, size = 16 }) => {
   switch (type) {
@@ -66,12 +67,18 @@ const ProductCard = ({
   const [showReplacePopup, setShowReplacePopup] = useState(false);
   const [newProduct, setNewProduct] = useState("");
   const [openQuickView, setOpenQuickView] = useState(false);
+  const [showHeart, setShowHeart] = useState(false);
 
   const cartKey = variant === "grocery" ? "groceryCart" : "foodCart";
 
   const cartItem = user?.[cartKey]?.find(
     (i) => i.productId?.toString() === product?._id?.toString(),
   );
+
+  const triggerHeart = () => {
+    setShowHeart(true);
+    setTimeout(() => setShowHeart(false), 600);
+  };
 
   const addProductToCart = async () => {
     if (loading) return;
@@ -223,25 +230,24 @@ const ProductCard = ({
     <>
       {/* PRODUCT CARD */}
       <div
-        onClick={() => setOpenQuickView(true)}
+        onClick={() => {
+          triggerHeart();
+          setOpenQuickView(true);
+        }}
+        onMouseEnter={triggerHeart}
         className="
-      relative rounded-2xl overflow-hidden
-      bg-white/80 dark:bg-gray-800/80
-      backdrop-blur-md
-      shadow-md hover:shadow-red-300/30
-      transition-all duration-300
-      hover:-translate-y-1
-    "
+          relative rounded-2xl overflow-hidden
+          bg-white/80 dark:bg-gray-800/80
+          backdrop-blur-md
+          shadow-md hover:shadow-red-300/30
+          transition-all duration-300
+          hover:-translate-y-1
+          active:scale-[0.97]
+        "
       >
-        {/* 🎁 DISCOUNT TAG (BASE PRICE) */}
+        {/* 🎁 DISCOUNT TAG */}
         {product.basePrice > product.price && (
-          <span
-            className={`absolute top-0 left-2 bg-yellow-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-lg z-20 ${
-              Math.round(
-                ((product.basePrice - product.price) / product.basePrice) * 100,
-              ) > 20 && "animate-pulse"
-            }`}
-          >
+          <span className="absolute top-0 left-2 bg-yellow-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-lg z-20">
             {Math.round(
               ((product.basePrice - product.price) / product.basePrice) * 100,
             )}
@@ -249,15 +255,21 @@ const ProductCard = ({
           </span>
         )}
 
-        {/* 🎁 SHOP DISCOUNT */}
         {product?.shop?.shopDiscount > 0 && (
           <span className="absolute top-0 left-2 bg-gradient-to-r from-red-600 to-orange-500 text-white text-xs text-center font-bold px-2 py-2 rounded-tr-lg rounded-bl-lg shadow-xl z-20">
-            {product?.shop?.shopDiscount}%<p>OFF</p>
+            {product.shop.shopDiscount}%<p>OFF</p>
           </span>
         )}
 
         {/* 🖼 IMAGE */}
         <div className="relative overflow-hidden">
+          {/* ❤️ HEART BEAT */}
+          {showHeart && (
+            <span className="absolute inset-0 flex items-center justify-center text-4xl animate-heartbeat pointer-events-none z-30">
+              ❤️
+            </span>
+          )}
+
           {bestSeller && (
             <span className="absolute top-0 left-1/2 -translate-x-1/2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-b-lg z-20">
               Bestseller
@@ -270,11 +282,7 @@ const ProductCard = ({
               "https://tse3.mm.bing.net/th/id/OIP.j9lwZI84idgGDQj02DAXCgHaHa?pid=Api"
             }
             alt={product.name}
-            className="
-          w-full h-36 object-cover
-          transition-transform duration-500
-          hover:scale-110
-        "
+            className="w-full h-36 object-cover transition-transform duration-500 hover:scale-110"
           />
 
           {product.dietType && (
@@ -372,7 +380,7 @@ const ProductCard = ({
                   ₹
                   {(
                     product.price -
-                    (product.price * product?.shop?.shopDiscount) / 100
+                    (product.price * product.shop.shopDiscount) / 100
                   ).toFixed(2)}
                 </span>
               </p>

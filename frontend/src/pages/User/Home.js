@@ -210,17 +210,17 @@ const Home = () => {
               />
 
               {/* SNOW SPARKLES */}
-              <div className="absolute inset-0 opacity-30 pointer-events-none z-20">
+              {/* <div className="absolute inset-0 opacity-30 pointer-events-none z-20">
                 <span className="absolute top-4 left-6 text-white animate-pulse">
-                  ❄
+                  💞
                 </span>
                 <span className="absolute bottom-6 right-8 text-white animate-pulse delay-300">
-                  ❄
+                  💗
                 </span>
                 <span className="absolute top-1/2 left-1/3 text-white animate-pulse delay-700">
-                  ❄
+                  💓
                 </span>
-              </div>
+              </div> */}
 
               {/* BADGE */}
               <div

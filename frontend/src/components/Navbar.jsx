@@ -98,7 +98,7 @@ const Navbar = () => {
             {user ? (
               <Link
                 to="/user/profile"
-                className="p-2 transition flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white hover:bg-green-600 font-semibold"
+                className="p-2 transition flex items-center justify-center w-8 h-8 rounded-full bg-green-600 text-white hover:bg-green-600 font-semibold"
               >
                 {user?.username ? user.username.charAt(0).toUpperCase() : "U"}
               </Link>
@@ -178,7 +178,7 @@ const Navbar = () => {
             to="/user/profile"
             className="p-2 transition flex flex-col items-center gap-1 text-center"
           >
-            <div className="flex justify-center items-center w-8 h-8 rounded-full bg-green-500 text-white hover:bg-green-600 font-semibold">
+            <div className="flex justify-center items-center w-8 h-8 rounded-full bg-green-600 text-white hover:bg-green-600 font-semibold">
               {user?.username ? user.username.charAt(0).toUpperCase() : "U"}
             </div>
             <span className="text-xs text-gray-600 dark:text-white">Profile</span>

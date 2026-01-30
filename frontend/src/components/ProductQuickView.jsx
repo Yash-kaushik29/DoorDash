@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { createPortal } from "react-dom";
+import '../index.css'
 
 const ProductQuickView = ({
   open,
@@ -22,12 +23,14 @@ const ProductQuickView = ({
   let finalPrice = product.price;
   let discountLabel = "";
 
+  const isValentine = new Date().getMonth() === 1 && new Date().getDate() <= 14;
+
   if (variant === "grocery" && product.basePrice > product.price) {
     hasDiscount = true;
     originalPrice = product.basePrice;
     finalPrice = product.price;
     discountLabel = `${Math.round(
-      ((product.basePrice - product.price) / product.basePrice) * 100
+      ((product.basePrice - product.price) / product.basePrice) * 100,
     )}% OFF`;
   }
 
@@ -35,7 +38,7 @@ const ProductQuickView = ({
     hasDiscount = true;
     originalPrice = product.price;
     finalPrice = (product.price - (product.price * shopDiscount) / 100).toFixed(
-      2
+      2,
     );
     discountLabel = `${shopDiscount}% OFF`;
   }
@@ -68,7 +71,7 @@ const ProductQuickView = ({
               {/* IMAGE + INFO */}
               <div className="relative flex gap-4">
                 {hasDiscount && (
-                  <span className="absolute top-2 left-2 bg-gradient-to-r from-red-600 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
+                  <span className="absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 rounded-lg">
                     {discountLabel}
                   </span>
                 )}
@@ -79,13 +82,17 @@ const ProductQuickView = ({
                   </div>
                 )}
 
+                {isValentine && (
+                  <div className="absolute -inset-1 rounded-xl valentine-ring pointer-events-none" />
+                )}
+
                 <img
                   src={
                     product.images?.[0] ||
                     "https://tse3.mm.bing.net/th/id/OIP.j9lwZI84idgGDQj02DAXCgHaHa?pid=Api"
                   }
                   alt={product.name}
-                  className="w-24 h-24 rounded-lg object-cover"
+                  className="relative w-24 h-24 rounded-lg object-cover z-10"
                 />
 
                 <div className="flex-1">
@@ -94,13 +101,13 @@ const ProductQuickView = ({
                   </h3>
 
                   {variant === "food" && product.shopName && (
-                    <p className="text-xs text-red-500">{product.shopName}</p>
+                    <p className="text-xs text-red-700 font-semibold">{product.shopName}</p>
                   )}
 
                   <div className="mt-2">
                     {hasDiscount ? (
                       <p className="text-sm">
-                        <span className="line-through text-gray-400 mr-2">
+                        <span className="line-through text-gray-800 dark:text-white mr-2">
                           ₹{originalPrice}
                         </span>
                         <span className="text-red-500 font-semibold">
@@ -122,11 +129,11 @@ const ProductQuickView = ({
                 <div className="flex-[3]">
                   {product.inStock ? (
                     loading ? (
-                      <div className="w-full py-2 text-center bg-green-500 text-white rounded-lg">
+                      <div className="w-full py-2 text-center bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg">
                         Adding…
                       </div>
                     ) : cartItem ? (
-                      <div className="flex justify-between items-center bg-green-500 text-white rounded-lg px-4 py-2">
+                      <div className="flex justify-between items-center bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg px-4 py-2">
                         <button onClick={onDec}>−</button>
                         <span className="font-semibold">
                           {cartItem.quantity}
@@ -136,7 +143,7 @@ const ProductQuickView = ({
                     ) : (
                       <button
                         onClick={onAdd}
-                        className="w-full py-2 bg-green-500 text-white rounded-lg font-semibold"
+                        className="w-full py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-semibold"
                       >
                         Add to Cart
                       </button>
@@ -162,7 +169,7 @@ const ProductQuickView = ({
         </>
       )}
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 };
 
