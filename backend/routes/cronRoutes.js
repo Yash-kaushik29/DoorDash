@@ -103,47 +103,47 @@ cron.schedule("0 3 * * *", async () => {
   }
 });
 
-cron.schedule(
-  "1,31 * * * *",
-  async () => {
-    try {
-      const now = new Date();
+// cron.schedule(
+//   "1,31 * * * *",
+//   async () => {
+//     try {
+//       const now = new Date();
 
-      const istTime = new Date(
-        now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-      );
+//       const istTime = new Date(
+//         now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+//       );
 
-      const currentMinutes = istTime.getHours() * 60 + istTime.getMinutes();
+//       const currentMinutes = istTime.getHours() * 60 + istTime.getMinutes();
 
-      const shops = await Shop.find();
+//       const shops = await Shop.find();
 
-      for (const shop of shops) {
-        if (shop.isManuallyClosed) continue;
+//       for (const shop of shops) {
+//         if (shop.isManuallyClosed) continue;
 
-        const openMinutes = timeToMinutes(shop.openingTime);
-        const closeMinutes = timeToMinutes(shop.closingTime);
+//         const openMinutes = timeToMinutes(shop.openingTime);
+//         const closeMinutes = timeToMinutes(shop.closingTime);
 
-        const shouldBeOpen = isShopOpenNow(
-          currentMinutes,
-          openMinutes,
-          closeMinutes
-        );
+//         const shouldBeOpen = isShopOpenNow(
+//           currentMinutes,
+//           openMinutes,
+//           closeMinutes
+//         );
 
-        if (shop.isOpen !== shouldBeOpen) {
-          shop.isOpen = shouldBeOpen;
-          await shop.save();
-        }
-      }
+//         if (shop.isOpen !== shouldBeOpen) {
+//           shop.isOpen = shouldBeOpen;
+//           await shop.save();
+//         }
+//       }
 
-      console.log(
-        "✅ Shops auto-updated at",
-        istTime.toLocaleTimeString("en-IN")
-      );
-    } catch (err) {
-      console.error("❌ Shop cron error:", err.message);
-    }
-  },
-  {
-    timezone: "Asia/Kolkata",
-  }
-);
+//       console.log(
+//         "✅ Shops auto-updated at",
+//         istTime.toLocaleTimeString("en-IN")
+//       );
+//     } catch (err) {
+//       console.error("❌ Shop cron error:", err.message);
+//     }
+//   },
+//   {
+//     timezone: "Asia/Kolkata",
+//   }
+// );

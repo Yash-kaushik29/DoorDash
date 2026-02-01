@@ -48,24 +48,24 @@ const SellerProfile = () => {
     fetchSellerProfile();
   }, [navigate]);
 
-  const handleToggleShopStatus = async () => {
-    try {
-      const updatedStatus = !seller?.shop?.isOpen;
-      await api.put(
-        `/api/shop/update-status`,
-        { isOpen: updatedStatus },
-        { withCredentials: true }
-      );
-      setSeller((prev) => ({
-        ...prev,
-        shop: { ...prev.shop, isOpen: updatedStatus },
-      }));
-      toast.success(`Shop is now ${updatedStatus ? "Open" : "Closed"}!`);
-    } catch (error) {
-      console.error("Error updating shop status:", error);
-      toast.error("Failed to update shop status.");
-    }
-  };
+  // const handleToggleShopStatus = async () => {
+  //   try {
+  //     const updatedStatus = !seller?.shop?.isOpen;
+  //     await api.put(
+  //       `/api/shop/update-status`,
+  //       { isOpen: updatedStatus },
+  //       { withCredentials: true }
+  //     );
+  //     setSeller((prev) => ({
+  //       ...prev,
+  //       shop: { ...prev.shop, isOpen: updatedStatus },
+  //     }));
+  //     toast.success(`Shop is now ${updatedStatus ? "Open" : "Closed"}!`);
+  //   } catch (error) {
+  //     console.error("Error updating shop status:", error);
+  //     toast.error("Failed to update shop status.");
+  //   }
+  // };
 
   const handleGenerateQr = async () => {
     try {
@@ -196,7 +196,7 @@ const SellerProfile = () => {
                   )}
                 </div>
 
-                <button
+                {/* <button
                   onClick={handleToggleShopStatus}
                   className={`mt-4 w-full py-2 rounded-lg font-semibold text-white ${
                     seller.shop.isOpen
@@ -205,7 +205,7 @@ const SellerProfile = () => {
                   } transition`}
                 >
                   {seller.shop.isOpen ? "Close Shop" : "Open Shop"}
-                </button>
+                </button> */}
 
                 {/* ✅ QR Code Section */}
                 <div className="mt-6 border-t border-gray-300 pt-4">
