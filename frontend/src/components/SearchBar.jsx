@@ -5,14 +5,13 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 const PLACEHOLDERS = [
-  // "Flowers 🌹",
   "Cakes 🎂",
   // "Combo 🍕",
-  // "Chocolates 🍫",
+  "Chocolates 🍫",
   "Coffee ☕",
   "Toothpaste 🦷",
-  // "Burger combo 🍔",
-  // "Meals 🍛",
+  "Burger combo 🍔",
+  "Meals 🍛",
   "Biscuit 🍪",
   "Biryani 🍛",
   "🏍️💨💨"

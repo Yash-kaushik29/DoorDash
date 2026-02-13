@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { createPortal } from "react-dom";
-import '../index.css'
 
 const ProductQuickView = ({
   open,
@@ -83,7 +82,7 @@ const ProductQuickView = ({
                 )}
 
                 {isValentine && (
-                  <div className="absolute -inset-1 rounded-xl valentine-ring pointer-events-none" />
+                  <div className="absolute -inset-1 rounded-xl pointer-events-none" />
                 )}
 
                 <img

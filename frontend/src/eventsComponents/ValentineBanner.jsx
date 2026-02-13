@@ -1,35 +1,5 @@
 import React from "react";
 import '../index.css'
-import ValentineCarousel from "./ValentineCarousel";
-
-const valentineProducts = [
-  {
-    id: 1,
-    name: "Valentine Chocolates 🍫",
-    price: 99,
-    image: "https://tse3.mm.bing.net/th/id/OIP.3y-wUgs7fDVANmMTIV3HNgHaHa?pid=Api&P=0&h=180",
-  },
-  {
-    id: 2,
-    name: "Red Rose 🌹",
-    price: 49,
-    image: "https://tse4.mm.bing.net/th/id/OIP.1_bn9xYTxijXbkM7EZbY3QHaKI?pid=Api&P=0&h=180",
-  },
-  {
-    id: 3,
-    name: "Chocolate Combo 💝",
-    price: 129,
-    image: "https://tse1.mm.bing.net/th/id/OIP.n44XC1YMG00yqtXyWcqnnwHaHa?pid=Api&P=0&h=180",
-    featured: true,
-  },
-  {
-    id: 4,
-    name: "Rose + Chocolate 💘",
-    price: 149,
-    image: "https://tse2.mm.bing.net/th/id/OIP.CbeqTSklZ_xY6Jt91GQx3gHaHa?pid=Api&P=0&h=180",
-    featured: true,
-  },
-];
 
 const ValentineBanner = () => {
   return (
@@ -63,9 +33,6 @@ const ValentineBanner = () => {
           Little surprises that say a lot ❤️
         </p>
       </div>
-
-      {/* Product Carousel */}
-      <ValentineCarousel  valentineProducts={valentineProducts} />
     </section>
   );
 };
