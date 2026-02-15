@@ -144,7 +144,7 @@ const Home = () => {
         shadow-sm
         "
         >
-          <div className="flex items-center gap-6 sm:gap-8 p-4 sm:p-6">
+          <div className="flex justify-center items-center gap-6 sm:gap-8 p-4 sm:p-6">
             {/* Logo */}
             <div className="flex-shrink-0">
               <img
@@ -166,6 +166,23 @@ const Home = () => {
                   GullyFoods
                 </span>
               </p>
+
+              <Link
+                to="/shop/6990b9c1ea7538ca04dede20"
+                className="
+    inline-flex items-center gap-2 mt-2
+    px-4 py-2 rounded-lg w-fit
+    bg-orange-500 hover:bg-orange-600
+    dark:bg-orange-500 dark:hover:bg-orange-600
+    text-white font-semibold text-sm sm:text-base
+    shadow-sm hover:shadow-md
+    transition-all duration-200
+    active:scale-95 text-center
+  "
+              >
+                Order Now
+                <span className="text-lg">→</span>
+              </Link>
             </div>
           </div>
 
