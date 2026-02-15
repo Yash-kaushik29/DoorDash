@@ -45,7 +45,7 @@ app.use(
       "https://gullyfoods.app",
     ],
     methods: ["POST", "PUT", "GET", "DELETE"],
-  })
+  }),
 );
 
 app.use(
@@ -54,7 +54,7 @@ app.use(
     max: 200,
     standardHeaders: true,
     legacyHeaders: false,
-  })
+  }),
 );
 
 mongoose
@@ -123,7 +123,7 @@ app.get("/api/location/reverse-geocode", async (req, res) => {
         headers: {
           "User-Agent": "YourAppName/1.0 (your@email.com)",
         },
-      }
+      },
     );
 
     res.json({ success: true, address: data.display_name });
@@ -228,7 +228,7 @@ app.put("/init-shop-fields", async (req, res) => {
         $set: {
           shopDiscount: 0,
         },
-      }
+      },
     );
 
     return res.status(200).json({
@@ -279,7 +279,7 @@ app.post("/update-prices-by-shop", async (req, res) => {
       if (!product.basePrice || product.basePrice <= 0) continue;
 
       const newPrice = Math.round(
-        product.basePrice * (1 + increasePercent / 100)
+        product.basePrice * (1 + increasePercent / 100),
       );
 
       product.price = newPrice;
@@ -334,7 +334,7 @@ app.post("/update-prices-by-category", async (req, res) => {
       if (!product.basePrice) continue;
 
       const newPrice = Math.round(
-        product.basePrice + (product.basePrice * percent) / 100
+        product.basePrice + (product.basePrice * percent) / 100,
       );
 
       product.price = newPrice;
@@ -352,6 +352,42 @@ app.post("/update-prices-by-category", async (req, res) => {
     });
   } catch (err) {
     console.error("Shop-category price update error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+});
+
+app.put("/increase-baseprice", async (req, res) => {
+  try {
+    const { shopName, category } = req.body;
+
+    if (!shopName || !category) {
+      return res.status(400).json({
+        success: false,
+        message: "shopName and category are required",
+      });
+    }
+
+    const result = await Product.updateMany(
+      {
+        shopName: shopName,
+        "categories.0": category, 
+      },
+      {
+        $inc: { basePrice: 5 },
+      },
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Base price updated successfully",
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Server error",

@@ -10,12 +10,10 @@ import ShopCard from "../../components/ShopCard";
 import ProductCard from "../../components/ProductCard";
 import { Link } from "react-router-dom";
 import InstallPrompt from "../../components/InstallPrompt";
-import ReviewCarousel from "../../components/ReviewCarousel";
 import { motion } from "framer-motion";
 import api from "../../utils/axiosInstance";
 import { FiRefreshCw } from "react-icons/fi";
 import "../../index.css";
-import ValentineBanner from "../../eventsComponents/ValentineBanner";
 
 const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
@@ -134,7 +132,49 @@ const Home = () => {
         </div>
       )}
 
-      <ValentineBanner />
+      <section className="w-full">
+        <div
+          className="
+        relative overflow-hidden
+        rounded-b-2xl border
+        border-amber-200 dark:border-gray-700
+        bg-gradient-to-r
+        from-amber-50 via-yellow-50 to-orange-50
+        dark:from-gray-800 dark:via-gray-800 dark:to-gray-900
+        shadow-sm
+        "
+        >
+          <div className="flex items-center gap-6 sm:gap-8 p-4 sm:p-6">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <img
+                src="/waffle.png"
+                alt="Belgian Waffle"
+                className="w-20 h-20 sm:w-24 sm:h-24 object-contain animate-spin-slow drop-shadow-md"
+              />
+            </div>
+
+            {/* Text */}
+            <div className="flex flex-col">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">
+                The Belgian Waffle 🧇
+              </h2>
+
+              <p className="text-base sm:text-lg font-semibold text-amber-500 dark:text-amber-400">
+                now on{" "}
+                <span className="text-orange-400 dark:text-orange-400 font-semibold">
+                  GullyFoods
+                </span>
+              </p>
+            </div>
+          </div>
+
+          {/* Subtle glow overlay */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/5" />
+        </div>
+      </section>
+
+      {/* <ValentineBanner /> */}
 
       {/* <div className="flex flex-col items-center pt-4 lg:hidden">
         <div className="flex items-center gap-2 text-3xl">
