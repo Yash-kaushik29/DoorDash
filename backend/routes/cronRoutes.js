@@ -104,7 +104,7 @@ cron.schedule("0 3 * * *", async () => {
 });
 
 cron.schedule(
-  "1, 31 * * * *",
+  "1,31 * * * *",
   async () => {
     try {
       const now = new Date();
