@@ -194,7 +194,7 @@ const Restaurants = () => {
                         <div className="absolute bottom-3 left-3 z-10">
                           <img
                             src={
-                              r.images?.[0] || "https://via.placeholder.com/100"
+                              r.images?.[1] || r.images?.[0] || "https://via.placeholder.com/100"
                             }
                             alt="thumbnail"
                             className="w-16 h-16 rounded-xl object-cover border-2 border-white dark:border-gray-700 shadow-md"

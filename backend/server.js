@@ -373,10 +373,10 @@ app.put("/increase-baseprice", async (req, res) => {
     const result = await Product.updateMany(
       {
         shopName: shopName,
-        "categories.0": category, 
+        "categories.0": category,
       },
       {
-        $inc: { basePrice: 5 },
+        $inc: { basePrice: -10 }, 
       },
     );
 

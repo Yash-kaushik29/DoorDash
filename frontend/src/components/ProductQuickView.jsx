@@ -88,7 +88,7 @@ const ProductQuickView = ({
                 <img
                   src={
                     product.images?.[0] ||
-                    "https://tse3.mm.bing.net/th/id/OIP.j9lwZI84idgGDQj02DAXCgHaHa?pid=Api"
+                    "/noImage.jpg"
                   }
                   alt={product.name}
                   className="relative w-24 h-24 rounded-lg object-cover z-10"

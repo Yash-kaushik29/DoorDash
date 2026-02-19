@@ -279,7 +279,7 @@ const ProductCard = ({
           <img
             src={
               product.images?.[0] ||
-              "https://tse3.mm.bing.net/th/id/OIP.j9lwZI84idgGDQj02DAXCgHaHa?pid=Api"
+              "/noImage.jpg"
             }
             alt={product.name}
             className="w-full h-36 object-cover transition-transform duration-500 hover:scale-110"

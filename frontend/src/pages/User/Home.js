@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import api from "../../utils/axiosInstance";
 import { FiRefreshCw } from "react-icons/fi";
 import "../../index.css";
+import EventBanner from "../../eventsComponents/eventBanner";
 
 const Home = () => {
   const { user, setUser, ready } = useContext(UserContext);
@@ -132,66 +133,7 @@ const Home = () => {
         </div>
       )}
 
-      <section className="w-full">
-        <div
-          className="
-        relative overflow-hidden
-        rounded-b-2xl border
-        border-amber-200 dark:border-gray-700
-        bg-gradient-to-r
-        from-amber-50 via-yellow-50 to-orange-50
-        dark:from-gray-800 dark:via-gray-800 dark:to-gray-900
-        shadow-sm
-        "
-        >
-          <div className="flex justify-center items-center gap-6 sm:gap-8 p-4 sm:p-6">
-            {/* Logo */}
-            <div className="flex-shrink-0">
-              <img
-                src="/waffle.png"
-                alt="Belgian Waffle"
-                className="w-20 h-20 sm:w-24 sm:h-24 object-contain animate-spin-slow drop-shadow-md"
-              />
-            </div>
-
-            {/* Text */}
-            <div className="flex flex-col">
-              <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white">
-                The Belgian Waffle 🧇
-              </h2>
-
-              <p className="text-base sm:text-lg font-semibold text-amber-500 dark:text-amber-400">
-                now on{" "}
-                <span className="text-orange-400 dark:text-orange-400 font-semibold">
-                  GullyFoods
-                </span>
-              </p>
-
-              <Link
-                to="/shop/6990b9c1ea7538ca04dede20"
-                className="
-    inline-flex items-center gap-2 mt-2
-    px-4 py-2 rounded-lg w-fit
-    bg-orange-500 hover:bg-orange-600
-    dark:bg-orange-500 dark:hover:bg-orange-600
-    text-white font-semibold text-sm sm:text-base
-    shadow-sm hover:shadow-md
-    transition-all duration-200
-    active:scale-95 text-center
-  "
-              >
-                Order Now
-                <span className="text-lg">→</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Subtle glow overlay */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/5" />
-        </div>
-      </section>
-
-      {/* <ValentineBanner /> */}
+      <EventBanner />
 
       {/* <div className="flex flex-col items-center pt-4 lg:hidden">
         <div className="flex items-center gap-2 text-3xl">
