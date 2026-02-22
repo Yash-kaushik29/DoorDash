@@ -3,6 +3,6 @@
       "target": {
         "namespace": "android_app",
         "package_name": "app.gullyfoods.twa",
-        "sha256_cert_fingerprints": ["BD:D6:25:CA:78:2E:8D:A9:E0:48:E2:36:FC:43:27:C7:21:2B:CD:51:59:09:9D:0C:DD:76:AD:40:40:58:A8:17"]
+        "sha256_cert_fingerprints": ["8B:FF:2C:A9:09:06:50:01:FD:4D:94:4E:5A:3D:E7:36:C3:BF:76:F5:0C:FF:3B:7C:CE:8A:9A:EA:15:FD:66:42"]
       }
     }]

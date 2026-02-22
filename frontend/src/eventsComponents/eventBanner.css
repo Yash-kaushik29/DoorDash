@@ -1,0 +1,179 @@
+.holi-intro {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  transform: perspective(800px) rotateX(calc(var(--py, 0) * 0.03))
+    rotateY(calc(var(--px, 0) * -0.03));
+  transition: transform 0.2s ease-out;
+
+  background:
+    radial-gradient(
+      circle at 20% 30%,
+      rgba(255, 77, 109, 0.08),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(77, 150, 255, 0.08),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 50% 80%,
+      rgba(255, 217, 61, 0.08),
+      transparent 40%
+    ),
+    #fafafa;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) inset;
+}
+
+.color-haze {
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(
+      circle at 30% 40%,
+      rgba(255, 77, 109, 0.18),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 70% 30%,
+      rgba(77, 150, 255, 0.18),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 70%,
+      rgba(255, 217, 61, 0.18),
+      transparent 50%
+    );
+
+  transform: translate(var(--px, 0), var(--py, 0)) scale(1.05);
+  transition: transform 0.15s ease-out;
+  z-index: 0;
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("https://www.transparenttextures.com/patterns/noise.png");
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, transparent 60%, rgba(0, 0, 0, 0.08));
+  pointer-events: none;
+  z-index: 2;
+}
+
+.holi-text {
+  font-size: 40px;
+  font-weight: 800;
+  z-index: 5;
+
+  opacity: 0;
+  transform: scale(0.96);
+
+  animation:
+    textFadeIn 900ms cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    glowPulse 4s ease-in-out infinite;
+
+  text-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes textFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+    filter: blur(4px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.02);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    text-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  }
+  50% {
+    text-shadow:
+      0 6px 18px rgba(0, 0, 0, 0.08),
+      0 0 20px rgba(255, 77, 109, 0.12);
+  }
+}
+
+.intro-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.burst-splash {
+  position: absolute;
+  opacity: 0;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
+  animation: burstFade 2.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes burstFade {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  40% {
+    opacity: 0.85;
+    transform: scale(1.1);
+  }
+  70% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.click-splash {
+  position: absolute;
+  pointer-events: none;
+  animation: splashAnim 1.2s ease forwards;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.18))
+    drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12));
+  z-index: 4;
+}
+
+@keyframes splashAnim {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+}

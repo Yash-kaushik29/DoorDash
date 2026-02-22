@@ -546,6 +546,7 @@ router.get("/users", async (req, res) => {
           phone: 1,
           foodCart: 1,
           groceryCart: 1,
+          createdAt: 1,
           foodCartLength: { $size: "$foodCart" },
           groceryCartLength: { $size: "$groceryCart" }
         }
@@ -556,6 +557,8 @@ router.get("/users", async (req, res) => {
       pipeline.push({ $sort: { foodCartLength: -1 } });
     } else if (sortBy === "grocery") {
       pipeline.push({ $sort: { groceryCartLength: -1 } });
+    } else {
+      pipeline.push({ $sort: { createdAt: -1 } });
     }
 
     pipeline.push(

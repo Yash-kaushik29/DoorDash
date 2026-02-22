@@ -62,50 +62,19 @@ body {
   animation: text-shine 3.5s linear infinite;
 }
 
-.animate-heartbeat {
-  animation: heartbeat 0.6s ease-out forwards;
+.animate-float {
+  animation: float 8s ease-in-out infinite;
 }
 
-.animate-spin-slow {
-  animation: spin-slow 10s linear infinite;
-}
-.lantern-wrapper {
-  position: absolute;
-  top: 0;
-  transform-origin: top center;
-  animation: swing 5s ease-in-out infinite;
-}
-
-.lantern-thread {
-  width: 2px;
-  background: linear-gradient(to bottom, #d4af37, #f6e27a);
-  margin: 0 auto;
-}
-
-.lantern-glow {
-  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.7))
-          drop-shadow(0 0 14px rgba(255, 200, 0, 0.4));
-}
-
-.text-glow {
-  text-shadow:
-    0 0 6px rgba(255, 215, 0, 0.6),
-    0 0 12px rgba(255, 215, 0, 0.4),
-    0 0 20px rgba(255, 215, 0, 0.3);
-}
-
-@keyframes swing {
-  0% { transform: rotate(-5deg); }
-  50% { transform: rotate(5deg); }
-  100% { transform: rotate(-5deg); }
-}
-
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
+@keyframes float {
+  0% {
+    transform: translateY(0px) translateX(0px);
   }
-  to {
-    transform: rotate(360deg);
+  50% {
+    transform: translateY(-40px) translateX(20px);
+  }
+  100% {
+    transform: translateY(0px) translateX(0px);
   }
 }
 
@@ -121,23 +90,5 @@ body {
 @keyframes fall {
   to {
     transform: translateY(120vh);
-  }
-}
-
-@keyframes heartbeat {
-  0% {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  30% {
-    transform: scale(1.15);
-    opacity: 1;
-  }
-  60% {
-    transform: scale(0.95);
-  }
-  100% {
-    transform: scale(1.4);
-    opacity: 0;
   }
 }

@@ -143,7 +143,7 @@ const ShopPage = () => {
               />
 
               {/* Categories */}
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 pb-6">
                 <h2>Categories</h2>
                 {shop.productCategories.map((category) => (
                   <button
