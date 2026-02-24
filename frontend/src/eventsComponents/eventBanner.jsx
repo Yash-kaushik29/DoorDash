@@ -91,12 +91,18 @@ const EventBanner = () => {
       </div>
 
       {showText && (
-        <div className="flex flex-col gap-2">
-          <h1 className="holi-text bg-gradient-to-r from-green-400 via-emerald-500 to-green-600 bg-clip-text text-transparent">
-            Happy Holi 
-          </h1>{" "}
-          <p className="text-gray-800 font-semibold">
-            Celebrate Holi with GullyFoods
+        <div className="flex flex-col items-center gap-3 text-center px-4">
+          <h1 className="holi-text bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 bg-clip-text text-transparent">
+            Happy Holi
+          </h1>
+
+          <div className="w-24 h-1 rounded-full bg-gradient-to-r from-pink-400 via-yellow-300 to-purple-400 opacity-80"></div>
+
+          <p className="text-gray-700 font-medium text-sm md:text-base max-w-md leading-relaxed">
+            This Holi,{" "}
+            <span className="font-semibold text-gray-900">
+              celebrate every shade of flavor.
+            </span>
           </p>
         </div>
       )}
