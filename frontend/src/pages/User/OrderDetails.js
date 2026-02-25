@@ -210,6 +210,29 @@ const OrderDetails = () => {
             <ReviewSection order={order} />
           )}
 
+          {order?.deliveryStatus !== "Cancelled" && (
+            <div className="mb-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 shadow-sm">
+              {" "}
+              <h3 className="text-lg font-semibold mb-2">
+                {" "}
+                {order?.deliveryStatus === "Delivered"
+                  ? "Delivered"
+                  : "Delivering"}{" "}
+                To:{" "}
+              </h3>{" "}
+              <div className="flex flex-col gap-1">
+                {" "}
+                <p>👤 {order?.shippingAddress?.fullName}</p>{" "}
+                <p>
+                  {" "}
+                  📍 {order?.shippingAddress?.addressLine},{" "}
+                  {order?.shippingAddress?.area}{" "}
+                </p>{" "}
+                <p>📞 {order?.shippingAddress?.phone}</p>{" "}
+              </div>{" "}
+            </div>
+          )}
+
           {/* Items Ordered */}
           <div className="mt-4">
             <h3 className="text-lg font-semibold mb-3">Items Ordered</h3>
