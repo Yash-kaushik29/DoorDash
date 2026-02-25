@@ -17,12 +17,15 @@ const DeliveryBoyOrder = () => {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const navigate = useNavigate();
   const token = localStorage.getItem("GullyFoodsDeliveryToken");
 
-  if (!token) {
-    navigate("/delivery/login");
-  }
+  useEffect(() => {
+    if (!token) {
+      navigate("/delivery/login");
+    }
+  }, [token, navigate]);
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -31,9 +34,10 @@ const DeliveryBoyOrder = () => {
           withCredentials: true,
         });
         setOrder(response.data);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching order details:", error);
+        toast.error("Failed to load order");
+      } finally {
         setLoading(false);
       }
     };
@@ -41,228 +45,166 @@ const DeliveryBoyOrder = () => {
   }, [orderId]);
 
   const markAsOutForDelivery = async () => {
+    if (
+      order?.deliveryStatus === "Delivered" ||
+      order?.deliveryStatus === "Out For Delivery"
+    ) {
+      toast.info("Order already picked up or delivered");
+      return;
+    }
+
     try {
+      setUpdating(true);
+
       await api.put(
         `/api/delivery/order/confirm-pickup`,
         { orderId },
-        { withCredentials: true }
+        { withCredentials: true },
       );
+
       toast.success("Order marked as Out For Delivery ✅");
-      setOrder({ ...order, deliveryStatus: "Out For Delivery" });
+
+      setOrder((prev) => ({
+        ...prev,
+        deliveryStatus: "Out For Delivery",
+      }));
     } catch (error) {
       console.error("Error updating status:", error);
       toast.error("Failed to update status");
+    } finally {
+      setUpdating(false);
     }
   };
 
   const confirmDelivery = async () => {
+    if (order?.deliveryStatus === "Delivered") {
+      toast.info("This order is already delivered ✅");
+      return;
+    }
+
     try {
+      setUpdating(true);
+
       await api.put(
         `/api/delivery/order/confirm-delivery/${orderId}`,
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
+
       toast.success("Order marked as Delivered 🎉");
-      setOrder({
-        ...order,
+
+      setOrder((prev) => ({
+        ...prev,
         deliveryStatus: "Delivered",
         paymentStatus: "Paid",
-      });
+      }));
     } catch (error) {
       console.error("Error confirming delivery:", error);
       toast.error("Failed to confirm delivery");
+    } finally {
+      setUpdating(false);
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (!order) return <p>Order not found.</p>;
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600 dark:text-gray-300">Loading order...</p>
+      </div>
+    );
+
+  if (!order)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600 dark:text-gray-300">Order not found.</p>
+      </div>
+    );
 
   return (
     <div>
       <DeliveryBoyHeader />
       <ToastContainer position="top-center" autoClose={2000} />
+
       <div className="min-h-screen p-4 bg-gray-100 dark:bg-gray-800">
         <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">
           Order Details
         </h1>
 
-        {/* Order Info Section */}
+        {/* Order Info */}
         <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <IoFastFoodSharp className="text-green-500" /> Order Info
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                <MdDeliveryDining className="text-blue-500" />
-                <span className="font-semibold">Order ID:</span>
-                <span className="text-blue-600 dark:text-blue-400">
-                  #{order.id}
-                </span>
-              </p>
-
-              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                <FaMoneyBillWave className="text-green-500" />
-                <span className="font-semibold">Amount:</span>
-                <span className="font-bold text-green-600 dark:text-green-400">
-                  ₹{order?.totalAmount}
-                </span>
-              </p>
-
-              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                <span className="font-semibold">Payment:</span>
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-bold ${
-                    order?.paymentStatus === "Paid"
-                      ? "bg-green-100 text-green-700 dark:bg-green-700 dark:text-white"
-                      : "bg-red-100 text-red-700 dark:bg-red-700 dark:text-white"
-                  }`}
-                >
-                  {order?.paymentStatus}
-                </span>
-              </p>
-
-              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                <span className="font-semibold">Status:</span>
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-bold ${
-                    order?.deliveryStatus === "Delivered"
-                      ? "bg-green-100 text-green-700 dark:bg-green-700 dark:text-white"
-                      : order?.deliveryStatus === "Out For Delivery"
-                      ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-600 dark:text-white"
-                      : order?.deliveryStatus === "Processing"
-                      ? "bg-blue-100 text-blue-700 dark:bg-blue-600 dark:text-white"
-                      : order?.deliveryStatus === "Cancelled"
-                      ? "bg-red-100 text-red-700 dark:bg-red-700 dark:text-white"
-                      : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
-                  }`}
-                >
-                  {order?.deliveryStatus}
-                </span>
-              </p>
-            </div>
-
-            {/* Customer Info */}
-            <div className="space-y-3">
-              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                <FaUser className="text-purple-500" />
-                <span className="font-semibold">Customer:</span>{" "}
-                {order?.shippingAddress?.fullName}
-              </p>
-
-              <p className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                <FaPhoneAlt className="text-indigo-500" />
-                <span className="font-semibold">Phone:</span>{" "}
-                <a
-                  href={`tel:${order?.shippingAddress?.phone}`}
-                  className="text-blue-500 hover:underline"
-                >
-                  {order?.shippingAddress?.phone}
-                </a>
-              </p>
-
-              <p className="flex items-start gap-2 text-gray-700 dark:text-gray-200">
-                <FaMapMarkerAlt className="text-red-500 mt-1" />
-                <span className="font-semibold">Address:</span>{" "}
-                <span>
-                  {order?.shippingAddress?.addressLine},{" "}
-                  {order?.shippingAddress?.area},{" "}
-                  {order?.shippingAddress?.landMark}
-                </span>
-              </p>
-
-              {order?.shippingAddress?.lat && order?.shippingAddress?.long && (
-                <a
-                  href={`https://www.google.com/maps?q=${order.shippingAddress.lat},${order.shippingAddress.long}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center mt-3 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition w-full sm:w-auto"
-                >
-                  <FaMapMarkerAlt className="mr-2" /> Open in Google Maps
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl p-6 mb-8 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100 flex items-center gap-2">
-            <MdDeliveryDining className="text-orange-500" /> Pickup From
-          </h2>
-
-          <p className="text-gray-700 dark:text-gray-200 mb-2">
-            <span className="font-semibold">Shop Name:</span>{" "}
-            {order?.items?.[0]?.product?.shopName || "GullyFoods Main Outlet"}
+          <p className="mb-2">
+            <strong>Status:</strong>{" "}
+            <span className="font-bold">{order.deliveryStatus}</span>
           </p>
 
-          {order?.shopAddress && (
-            <p className="text-gray-700 dark:text-gray-200 mb-2">
-              <span className="font-semibold">Address:</span>{" "}
-              {order.shopAddress}
-            </p>
-          )}
+          <p className="mb-2">
+            <strong>Amount:</strong> ₹{order.totalAmount}
+          </p>
 
-          {order?.shopPhone && (
-            <p className="text-gray-700 dark:text-gray-200 mb-2">
-              <span className="font-semibold">Phone:</span>{" "}
-              <a
-                href={`tel:${order.shopPhone}`}
-                className="text-blue-500 hover:underline"
-              >
-                {order.shopPhone}
-              </a>
-            </p>
-          )}
-
-          {order?.shopLat && order?.shopLong && (
-            <a
-              href={`https://www.google.com/maps?q=${order.shopLat},${order.shopLong}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition w-full sm:w-auto"
-            >
-              <FaMapMarkerAlt className="mr-2" /> View Shop on Map
-            </a>
-          )}
+          <p>
+            <strong>Payment:</strong> {order.paymentStatus}
+          </p>
         </div>
 
-        {/* Product List */}
-        <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-          Products
-        </h2>
-        <div className="bg-white dark:bg-gray-700 shadow-md rounded-lg p-4 mb-8">
+        {/* Customer Info */}
+        <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <FaUser className="text-purple-500" /> Customer
+          </h2>
+
+          <p>{order.shippingAddress?.fullName}</p>
+          <p>
+            <a href={`tel:${order.shippingAddress?.phone}`}>
+              {order.shippingAddress?.phone}
+            </a>
+          </p>
+        </div>
+
+        {/* Products */}
+        <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold mb-4">Products</h2>
+
           {order?.items?.map((item, i) => (
-            <div
-              key={i}
-              className="flex justify-between items-center border-b border-gray-200 dark:border-gray-600 py-2"
-            >
-              <span className="text-gray-800 dark:text-gray-100">
-                {item.product.name}
-              </span>
-              <span className="text-gray-600 dark:text-gray-300">
-                x{item.quantity}
-              </span>
+            <div key={i} className="flex justify-between py-2 border-b">
+              <span>{item.product.name}</span>
+              <span>x{item.quantity}</span>
             </div>
           ))}
         </div>
 
+        {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-4">
-          {order.deliveryStatus !== "Delivered" && (
+          {/* Pickup Button */}
+          {order.deliveryStatus === "Processing" && (
             <button
               onClick={markAsOutForDelivery}
-              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+              disabled={updating}
+              className={`px-6 py-3 rounded-lg text-white ${
+                updating
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
             >
-              Confirm Pickup (Out For Delivery)
+              {updating ? "Updating..." : "Confirm Pickup"}
             </button>
           )}
 
-          {order?.deliveryStatus === "Out For Delivery" && (
+          {/* Delivery Button */}
+          {order.deliveryStatus === "Out For Delivery" && (
             <button
               onClick={confirmDelivery}
-              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-green-600 text-white hover:bg-green-700"
+              disabled={updating || order.deliveryStatus === "Delivered"}
+              className={`px-6 py-3 rounded-lg text-white ${
+                updating
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700"
+              }`}
             >
-              Confirm Order Delivered
+              {updating ? "Confirming..." : "Confirm Delivered"}
             </button>
           )}
         </div>

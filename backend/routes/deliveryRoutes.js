@@ -58,10 +58,9 @@ router.post("/login", async (req, res) => {
         phone: user.phone || "",
       },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: "15d" }
+      { expiresIn: "15d" },
     );
-    res
-      .json({ success: true, message: "Login successful", token });
+    res.json({ success: true, message: "Login successful", token });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server error" });
@@ -92,7 +91,7 @@ router.get("/orders/:deliveryBoyId", async (req, res) => {
     }
 
     const pendingOrders = orders.filter(
-      (order) => !["Delivered", "Cancelled"].includes(order.deliveryStatus)
+      (order) => !["Delivered", "Cancelled"].includes(order.deliveryStatus),
     ).length;
 
     // ---- Calculate today's commission ----
@@ -103,12 +102,12 @@ router.get("/orders/:deliveryBoyId", async (req, res) => {
     endOfDay.setHours(23, 59, 59, 999);
 
     const todaysCommissions = deliveryBoy.commissionHistory.filter(
-      (entry) => entry.time >= startOfDay && entry.time <= endOfDay
+      (entry) => entry.time >= startOfDay && entry.time <= endOfDay,
     );
 
     const todayCommission = todaysCommissions.reduce(
       (sum, entry) => sum + (entry.commission || 0),
-      0
+      0,
     );
 
     res.json({
@@ -128,7 +127,7 @@ router.get("/outstandingAmounts/:deliveryBoyId", async (req, res) => {
 
     const deliveryBoy = await DeliveryBoy.findById(deliveryBoyId).populate({
       path: "outstandingPayments.orderId",
-      select: "id", 
+      select: "id",
     });
 
     if (!deliveryBoy) {
@@ -166,7 +165,7 @@ router.get("/orders", async (req, res) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit))
-        .lean(), 
+        .lean(),
       Order.countDocuments(filter),
     ]);
 
@@ -219,7 +218,7 @@ router.post("/orders/:orderId/accept", async (req, res) => {
 
     await Order.updateOne(
       { _id: orderId },
-      { deliveryBoy: deliveryBoyId, deliveryBoyAssigned: true }
+      { deliveryBoy: deliveryBoyId, deliveryBoyAssigned: true },
     );
     await order.save();
 
@@ -235,7 +234,7 @@ router.get("/order/:orderId", async (req, res) => {
     const { orderId } = req.params;
     const order = await Order.findById(orderId)
       .select(
-        "items user deliveryStatus createdAt shippingAddress id totalAmount paymentStatus"
+        "items user deliveryStatus createdAt shippingAddress id totalAmount paymentStatus",
       )
       .populate("items.product", "name shopName")
       .populate("user", "name email")
@@ -278,92 +277,134 @@ router.put("/order/confirm-pickup", async (req, res) => {
   }
 });
 
-
 router.put("/order/confirm-delivery/:orderId", async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { orderId } = req.params;
+
     const order = await Order.findById(orderId)
       .populate("items.product")
-      .populate("deliveryBoy");
+      .populate("deliveryBoy")
+      .session(session);
 
-    if (!order) return res.status(404).json({ message: "Order not found" });
+    if (!order) {
+      await session.abortTransaction();
+      return res.status(404).json({ message: "Order not found" });
+    }
 
-    // 1. Update order status
+    // ⭐ Prevent double delivery
+    if (order.deliveryStatus === "Delivered") {
+      await session.abortTransaction();
+      return res.status(400).json({
+        message: "Order already delivered",
+      });
+    }
+
+    // 1️⃣ Update order status
     order.deliveryStatus = "Delivered";
     order.paymentStatus = "Paid";
+
     order.items = order.items.map((item) => ({
-      ...item,
+      ...item.toObject(),
       status: item.status !== "Cancelled" ? "Delivered" : item.status,
     }));
 
-    // 2. Track seller earnings
+    // 2️⃣ Calculate seller earnings
     const sellerSalesMap = {};
+
     for (const item of order.items) {
-      if (item.status !== "Cancelled" && item.product.seller) {
+      if (item.status !== "Cancelled" && item.product?.seller) {
         const sellerId = item.product.seller.toString();
-        const unitPrice = order.orderType === 'Food' ? item.product.basePrice : item.product.price;
+        const unitPrice =
+          order.orderType === "Food"
+            ? item.product.basePrice
+            : item.product.price;
+
         const amount = item.quantity * parseFloat(unitPrice);
 
-        if (!sellerSalesMap[sellerId]) {
-          sellerSalesMap[sellerId] = 0;
-        }
-        sellerSalesMap[sellerId] += amount;
+        sellerSalesMap[sellerId] = (sellerSalesMap[sellerId] || 0) + amount;
       }
     }
 
-    // 3. Update sellers’ sales history
+    // 3️⃣ Update sellers
     for (const sellerId in sellerSalesMap) {
-      const seller = await Seller.findById(sellerId);
-
+      const seller = await Seller.findById(sellerId).session(session);
       if (!seller) continue;
 
       const totalAmount = sellerSalesMap[sellerId];
-      const commissionRate = seller.commissionRate || 0; 
+      const commissionRate = seller.commissionRate || 0;
       const sellerEarnings = totalAmount * (1 - commissionRate);
 
-      await Seller.findByIdAndUpdate(sellerId, {
-        $push: {
-          salesHistory: {
-            order,
-            amount: sellerEarnings,
-            date: new Date(),
-          },
-        },
+      seller.salesHistory.push({
+        orderId: order._id,
+        amount: sellerEarnings,
+        date: new Date(),
       });
+
+      await seller.save({ session });
     }
 
-    // 4. Update delivery boy’s commission
-    if (order.deliveryBoy && order.deliveryCharge) {
-      const deliveryBoy = await DeliveryBoy.findById(order.deliveryBoy._id);
+    // 4️⃣ Update delivery boy
+    if (order.deliveryBoy) {
+      const deliveryBoy = await DeliveryBoy.findById(
+        order.deliveryBoy._id,
+      ).session(session);
 
-      if (!deliveryBoy) return res.status(404).json({ message: "Delivery boy not found" });
-
-      
-      deliveryBoy.commissionHistory.push({
-        commission: (order.deliveryCharge || 0) + (order.convenienceFees || 0),
-      });
-
-      if (order.paymentMethod === "COD") {
-        const totalCOD = order.amount + order.deliveryCharge + order.convenienceFees + order.taxes + order.serviceCharge - order.discount; 
-        deliveryBoy.outstandingPayments.push({
-          orderId,
-          amount: totalCOD,
-          collectedAt: new Date(),
-        });
-        deliveryBoy.outstandingAmount += totalCOD;
+      if (!deliveryBoy) {
+        await session.abortTransaction();
+        return res.status(404).json({ message: "Delivery boy not found" });
       }
 
-      await deliveryBoy.save();
+      // Prevent duplicate commission
+      const alreadyRecorded = deliveryBoy.commissionHistory.some(
+        (c) => c.orderId?.toString() === orderId,
+      );
+
+      if (!alreadyRecorded) {
+        deliveryBoy.commissionHistory.push({
+          commission:
+            (order.deliveryCharge || 0) + (order.convenienceFees || 0),
+          date: new Date(),
+        });
+      }
+
+      // COD handling
+      if (order.paymentMethod === "COD") {
+        const codExists = deliveryBoy.outstandingPayments.some(
+          (p) => p.orderId?.toString() === orderId,
+        );
+
+        if (!codExists) {
+          const totalCOD = order.totalAmount;
+
+          deliveryBoy.outstandingPayments.push({
+            orderId,
+            amount: totalCOD,
+            collectedAt: new Date(),
+          });
+
+          deliveryBoy.outstandingAmount += totalCOD;
+        }
+      }
+
+      await deliveryBoy.save({ session });
     }
 
-    await order.save();
+    await order.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.json({
       success: true,
-      message:
-        "Order confirmed as delivered, seller earnings updated, and delivery boy commission added",
+      message: "Order successfully marked as delivered",
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+
     console.error("Error confirming order delivery:", error);
     res.status(500).json({ message: "Internal server error" });
   }
@@ -372,16 +413,15 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
 router.get("/:deliveryBoyId/commissionHistory", async (req, res) => {
   try {
     const { deliveryBoyId } = req.params;
-    const deliveryBoy = await DeliveryBoy.findById(deliveryBoyId).select(
-      "commissionHistory"
-    );
+    const deliveryBoy =
+      await DeliveryBoy.findById(deliveryBoyId).select("commissionHistory");
 
     if (!deliveryBoy) {
       return res.status(404).json({ message: "Delivery boy not found" });
     }
 
     const sortedHistory = deliveryBoy.commissionHistory.sort(
-      (a, b) => new Date(b.time) - new Date(a.time)
+      (a, b) => new Date(b.time) - new Date(a.time),
     );
 
     res.json({ commissionHistory: sortedHistory });

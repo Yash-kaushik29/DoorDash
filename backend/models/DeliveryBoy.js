@@ -4,10 +4,8 @@ const deliveryBoySchema = new mongoose.Schema({
   name: String,
   phone: String,
   password: { type: String, required: true },
-  // Track how much COD cash is pending to settle
   outstandingAmount: { type: Number, default: 0 },
 
-  // Track individual COD orders
   outstandingPayments: [
     {
       orderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order", required: true },

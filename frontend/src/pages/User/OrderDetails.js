@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import {
   IoCheckmarkCircleOutline,
@@ -22,92 +22,118 @@ const OrderDetails = () => {
   const [error, setError] = useState(null);
   const [showCancelPopup, setShowCancelPopup] = useState(false);
 
-  // Fetch order details
-  useEffect(() => {
-    const fetchOrderDetails = async () => {
-      try {
-        const { data } = await api.get(
-          `/api/order/getOrderDetails/${orderId}`,
-          { withCredentials: true },
-        );
-        if (data.success) {
-          setOrder(data.order);
-        } else {
-          setError(data.message || "Order not found!");
-        }
-      } catch (err) {
-        setError("Failed to fetch order details");
-        console.error(err);
-      } finally {
-        setLoading(false);
+  const fetchOrderDetails = async () => {
+    try {
+      const { data } = await api.get(`/api/order/getOrderDetails/${orderId}`, {
+        withCredentials: true,
+      });
+
+      if (data.success) {
+        setOrder(data.order);
+      } else {
+        setError(data.message || "Order not found!");
       }
-    };
-    fetchOrderDetails();
-    const interval = setInterval(fetchOrderDetails, 60000);
-    return () => clearInterval(interval);
-  }, [orderId]);
-
-  // Memoized function for badges
-  const getStatusBadge = useCallback((status) => {
-    switch (status) {
-      case "Delivered":
-        return {
-          bg: "bg-green-100 dark:bg-green-700",
-          text: "text-green-800 dark:text-white",
-          icon: (
-            <IoCheckmarkCircleOutline className="w-4 h-4 text-green-500 dark:text-green-200" />
-          ),
-        };
-      case "Cancelled":
-        return {
-          bg: "bg-red-100 dark:bg-red-700",
-          text: "text-red-800 dark:text-white",
-          icon: (
-            <IoCloseCircleOutline className="w-4 h-4 text-red-500 dark:text-red-200" />
-          ),
-        };
-      case "Preparing":
-        return {
-          bg: "bg-yellow-100 dark:bg-yellow-600",
-          text: "text-yellow-800 dark:text-white",
-          icon: (
-            <IoTimeOutline className="w-4 h-4 text-yellow-500 dark:text-yellow-200" />
-          ),
-        };
-      case "Out For Delivery":
-        return {
-          bg: "bg-blue-100 dark:bg-blue-600",
-          text: "text-blue-800 dark:text-white",
-          icon: (
-            <FaMotorcycle className="w-4 h-4 text-blue-500 dark:text-blue-200" />
-          ),
-        };
-      default:
-        return {
-          bg: "bg-blue-100 dark:bg-blue-600",
-          text: "text-blue-800 dark:text-white",
-          icon: <IoIosCart className="w-4 h-4" />,
-        };
+    } catch (err) {
+      setError("Failed to fetch order details");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  };
 
-  const deliveryBadge = getStatusBadge(order?.deliveryStatus);
+  useEffect(() => {
+    let interval;
+    fetchOrderDetails();
 
-  // Price formatting
+    interval = setInterval(() => {
+      if (
+        order?.deliveryStatus !== "Delivered" &&
+        order?.deliveryStatus !== "Cancelled"
+      ) {
+        fetchOrderDetails();
+      }
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [orderId, order?.deliveryStatus]);
+
+  const refreshOrder = async () => {
+    await fetchOrderDetails();
+    toast.success("Order status updated");
+  };
+
+  const getStatusMessage = () => {
+    switch (order?.deliveryStatus) {
+      case "Processing":
+      case "Preparing":
+        return "👨‍🍳 Your order is being freshly prepared";
+      case "Out For Delivery":
+        return "🛵 Your order is on the way";
+      case "Delivered":
+        return "🎉 Delivered successfully — enjoy your meal!";
+      case "Cancelled":
+        return "❌ This order was cancelled";
+      default:
+        return "📦 Order received";
+    }
+  };
+
+  const totals = useMemo(() => {
+    if (!order) return {};
+    return {
+      amount: order.amount || 0,
+      taxes: order.taxes || 0,
+      deliveryCharge: order.deliveryCharge || 0,
+      serviceCharge: order.serviceCharge || 0,
+      discount: order.discount || 0,
+      totalAmount: order.totalAmount || 0,
+    };
+  }, [order]);
+
   const formatPrice = (price) =>
     new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",
     }).format(price);
 
-  // Calculate item total
-  const getItemTotal = (item) =>
-    item?.status !== "Cancelled" ? item?.product?.price * item?.quantity : 0;
+  const getStatusBadge = useCallback((status) => {
+    switch (status) {
+      case "Delivered":
+        return {
+          bg: "bg-green-100 dark:bg-green-700",
+          text: "text-green-800 dark:text-green-500",
+          icon: <IoCheckmarkCircleOutline className="w-4 h-4" />,
+        };
+      case "Cancelled":
+        return {
+          bg: "bg-red-100 dark:bg-red-700",
+          text: "text-red-800 dark:text-red-500",
+          icon: <IoCloseCircleOutline className="w-4 h-4" />,
+        };
+      case "Preparing":
+        return {
+          bg: "bg-yellow-100 dark:bg-yellow-600",
+          text: "text-yellow-800 dark:text-yellow-500",
+          icon: <IoTimeOutline className="w-4 h-4" />,
+        };
+      case "Out For Delivery":
+        return {
+          bg: "bg-blue-100 dark:bg-blue-600",
+          text: "text-blue-800 dark:text-blue-400",
+          icon: <FaMotorcycle className="w-4 h-4" />,
+        };
+      default:
+        return {
+          bg: "bg-blue-100 dark:bg-blue-600",
+          text: "text-blue-800 dark:text-blue-400",
+          icon: <IoIosCart className="w-4 h-4" />,
+        };
+    }
+  }, []);
 
-  // Reusable Badge component
   const Badge = ({ bg, text, icon, children }) => (
     <div
-      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold shadow-sm ${bg} ${text}`}
+      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold ${bg} ${text}`}
     >
       {icon} {children}
     </div>
@@ -127,64 +153,43 @@ const OrderDetails = () => {
         </p>
       </div>
     );
+
   if (error)
-    return (
-      <div className="text-center mt-10 text-red-600 dark:text-red-400">
-        {error}
-      </div>
-    );
+    return <div className="text-center mt-10 text-red-600">{error}</div>;
 
   return (
     <div className="mb-16 lg:mb-0">
       <ToastContainer />
       <Navbar />
 
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200 py-6 px-2 sm:px-6">
-        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mt-4 relative">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-6 px-2 sm:px-6">
+        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 sm:p-6 mt-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold">Order #{order?.id}</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-semibold">Order #{order?.id}</h2>
+              <button
+                onClick={refreshOrder}
+                className="text-sm bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-lg hover:bg-gray-300"
+              >
+                Refresh
+              </button>
+            </div>
+
             {order.deliveryStatus === "Delivered" &&
               order.orderType === "Food" && (
                 <DownloadInvoiceButton orderId={order._id} />
               )}
           </div>
 
-          {/* Status Section */}
-          <div className="flex flex-col gap-4 sm:text-sm mb-4">
-            {/* Delivery Timeline */}
-            <div className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-700">
-              <DeliveryTimeline currentStatus={order?.deliveryStatus} />
-            </div>
+          {/* Timeline */}
+          <div className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 mb-3">
+            <DeliveryTimeline currentStatus={order?.deliveryStatus} />
+          </div>
 
-            {/* Payment Status */}
-            <div className="flex items-center gap-1">
-              <span className="text-gray-600 dark:text-gray-400">
-                Payment Status :
-              </span>
-              <Badge
-                bg={
-                  order?.paymentStatus === "Paid"
-                    ? "bg-green-100 dark:bg-green-700"
-                    : "bg-red-100 dark:bg-red-700"
-                }
-                text={
-                  order?.paymentStatus === "Paid"
-                    ? "text-green-800 dark:text-white"
-                    : "text-red-800 dark:text-white"
-                }
-                className="text-xs px-2 py-0.5"
-                icon={
-                  order?.paymentStatus === "Paid" ? (
-                    <IoCheckmarkCircleOutline className="w-3 h-3 text-green-500 dark:text-green-200" />
-                  ) : (
-                    <IoCloseCircleOutline className="w-3 h-3 text-red-500 dark:text-red-200" />
-                  )
-                }
-              >
-                {order?.paymentStatus}
-              </Badge>
-            </div>
+          {/* Status Message */}
+          <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 font-medium mb-4">
+            {getStatusMessage()}
           </div>
 
           {/* Cancel Button */}
@@ -205,31 +210,10 @@ const OrderDetails = () => {
             <ReviewSection order={order} />
           )}
 
-          {/* Shipping Address */}
-          {order?.deliveryStatus !== "Cancelled" && (
-            <div className="mb-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 shadow-sm">
-              <h3 className="text-lg font-semibold mb-2">
-                {order?.deliveryStatus === "Delivered"
-                  ? "Delivered"
-                  : "Delivering"}{" "}
-                To:
-              </h3>
-              <div className="flex flex-col gap-1">
-                <p>👤 {order?.shippingAddress?.fullName}</p>
-                <p>
-                  📍 {order?.shippingAddress?.addressLine},{" "}
-                  {order?.shippingAddress?.area}
-                </p>
-                <p>📞 {order?.shippingAddress?.phone}</p>
-              </div>
-            </div>
-          )}
-
           {/* Items Ordered */}
           <div className="mt-4">
             <h3 className="text-lg font-semibold mb-3">Items Ordered</h3>
 
-            {/* Food → single shop name */}
             {order?.orderType === "Food" && order?.items?.length > 0 && (
               <div className="mb-3 px-3 py-2 rounded-lg bg-gradient-to-r from-green-500 via-emerald-500 to-emerald-600 text-white font-semibold text-center">
                 {order.items[0]?.product?.shopName}
@@ -250,7 +234,6 @@ const OrderDetails = () => {
                           : ""
                       }`}
                     >
-                      {/* Item Info */}
                       <div className="flex flex-col gap-1">
                         <p className="font-medium text-gray-800 dark:text-gray-200">
                           {item?.product?.name}
@@ -264,7 +247,6 @@ const OrderDetails = () => {
                         </p>
                       </div>
 
-                      {/* Quantity */}
                       <p className="text-lg text-gray-600 dark:text-gray-400 font-semibold">
                         × {item?.quantity}
                       </p>
@@ -275,64 +257,62 @@ const OrderDetails = () => {
             </div>
           </div>
 
+          {/* Savings Highlight */}
+          {totals.discount > 0 && (
+            <div className="mb-4 p-3 rounded-lg bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-semibold">
+              🎉 You saved {formatPrice(totals.discount)} on this order
+            </div>
+          )}
+
           {/* Totals */}
           <div className="my-6 text-right flex flex-col gap-1">
-            <p className="font-semibold">
-              Cart Total:
-              <span className="text-green-500 ml-2">
-                {formatPrice(order?.amount)}
+            <p>
+              Cart Total:{" "}
+              <span className="text-green-500 ml-2 font-semibold">
+                {formatPrice(totals.amount)}
               </span>
             </p>
-            <p className="font-semibold">
-              Tax:
-              <span className="text-green-500 ml-2">
-                {formatPrice(order?.taxes)}
+            <p>
+              Tax:{" "}
+              <span className="text-green-500 ml-2 font-semibold">
+                {formatPrice(totals.taxes)}
               </span>
             </p>
-            <p className="font-semibold">
-              Delivery Fee:
-              <span className="text-green-500 ml-2">
-                {formatPrice(order?.deliveryCharge)}
+            <p>
+              Delivery Fee:{" "}
+              <span className="text-green-500 ml-2 font-semibold">
+                {formatPrice(totals.deliveryCharge)}
               </span>
             </p>
-
             {order?.orderType === "Grocery" && (
-              <p className="font-semibold">
-                Service Charge:
-                <span className="text-green-500 ml-2">
-                  {formatPrice(order?.serviceCharge)}
+              <p>
+                Service Charge:{" "}
+                <span className="text-green-500 ml-2 font-semibold">
+                  {formatPrice(totals.serviceCharge)}
                 </span>
               </p>
             )}
-
-            {order?.discount > 0 && (
-              <p className="font-semibold">
-                Coupon Discount:
-                <span className="text-green-500 ml-2">
-                  -{formatPrice(order?.discount)}
-                </span>
-              </p>
-            )}
-
             <div className="h-[1px] bg-black dark:bg-white my-2" />
-
             <p className="font-semibold text-lg">
               Total:
               <span className="text-green-700 dark:text-green-300 ml-2 font-bold">
-                {formatPrice(order?.totalAmount)}
+                {formatPrice(totals.totalAmount)}
               </span>
             </p>
-
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Payment Method:
-              <span className="font-medium ml-1">{order?.paymentMethod}</span>
-            </p>
-
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Placed On:
+              {" "}
+              Payment Method:{" "}
               <span className="font-medium ml-1">
-                {new Date(order?.createdAt).toLocaleString()}
-              </span>
+                {order?.paymentMethod}
+              </span>{" "}
+            </p>{" "}
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {" "}
+              Placed On:{" "}
+              <span className="font-medium ml-1">
+                {" "}
+                {new Date(order?.createdAt).toLocaleString()}{" "}
+              </span>{" "}
             </p>
           </div>
         </div>
@@ -342,13 +322,9 @@ const OrderDetails = () => {
       {showCancelPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg w-80 text-center">
-            <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
-              Cancel Order
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Orders move to <strong>“Preparing”</strong> quickly to ensure
-              on-time delivery. Direct cancellation isn’t available, but our
-              support team can help you.
+            <h3 className="text-lg font-semibold mb-3">Cancel Order</h3>
+            <p className="text-sm mb-4">
+              Our support team can help you cancel this order.
             </p>
             <button
               onClick={() =>
@@ -356,13 +332,13 @@ const OrderDetails = () => {
                   "https://wa.me/917409565977?text=Hi, I’d like to cancel my recent order from GullyFoods.",
                 )
               }
-              className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-semibold w-full transition mb-2"
+              className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg w-full mb-2"
             >
-              Contact Customer Service
+              Contact Support
             </button>
             <button
               onClick={() => setShowCancelPopup(false)}
-              className="w-full border border-gray-400 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+              className="w-full border py-2 rounded-lg"
             >
               Close
             </button>
