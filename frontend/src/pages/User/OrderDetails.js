@@ -24,6 +24,7 @@ const OrderDetails = () => {
 
   const fetchOrderDetails = async () => {
     try {
+      setLoading(true);
       const { data } = await api.get(`/api/order/getOrderDetails/${orderId}`, {
         withCredentials: true,
       });

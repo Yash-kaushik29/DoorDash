@@ -62,6 +62,7 @@ const CheckoutSummary = ({
         </>
       )}
 
+
       {selectedCoupon && discount > 0 && (
         <div className="flex justify-between text-green-600 font-semibold">
           <span>Coupon ({selectedCoupon.coupon.name}) 🎟️:</span>

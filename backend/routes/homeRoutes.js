@@ -18,9 +18,9 @@ router.get("/get-popular-shops", async (req, res) => {
 router.get("/get-popular-products", async (req, res) => {
   try {
     const products = await Product.find({
-      shopName: "TONIQ - Dry Bar & Kitchen",
+      shopName: "Moga Eleven",
       inStock: true,
-    }).populate("shop", "shopDiscount").limit(20);
+    }).populate("shop", "shopDiscount").limit(30);
 
     res.json({ success: true, products });
   } catch (error) {

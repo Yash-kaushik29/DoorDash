@@ -104,8 +104,8 @@ const Checkout = () => {
       Math.sin(dLat / 2) ** 2 +
       Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    setDistance(R * c);
-    return R * c;
+    setDistance(R * c * 1.08);
+    return R * c * 1.08;
   };
 
   const getFoodDeliveryCharge = (distance) => {
