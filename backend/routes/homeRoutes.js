@@ -18,7 +18,7 @@ router.get("/get-popular-shops", async (req, res) => {
 router.get("/get-popular-products", async (req, res) => {
   try {
     const products = await Product.find({
-      shopName: "Moga Eleven",
+      shopName: "Nawabi Kukkad",
       inStock: true,
     }).populate("shop", "shopDiscount").limit(30);
 

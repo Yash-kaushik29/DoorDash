@@ -67,18 +67,12 @@ const ProductCard = ({
   const [showReplacePopup, setShowReplacePopup] = useState(false);
   const [newProduct, setNewProduct] = useState("");
   const [openQuickView, setOpenQuickView] = useState(false);
-  const [showHeart, setShowHeart] = useState(false);
 
   const cartKey = variant === "grocery" ? "groceryCart" : "foodCart";
 
   const cartItem = user?.[cartKey]?.find(
     (i) => i.productId?.toString() === product?._id?.toString(),
   );
-
-  const triggerHeart = () => {
-    setShowHeart(true);
-    setTimeout(() => setShowHeart(false), 600);
-  };
 
   const addProductToCart = async () => {
     if (loading) return;
@@ -231,10 +225,8 @@ const ProductCard = ({
       {/* PRODUCT CARD */}
       <div
         onClick={() => {
-          triggerHeart();
           setOpenQuickView(true);
         }}
-        onMouseEnter={triggerHeart}
         className="
           relative rounded-2xl overflow-hidden
           bg-white/80 dark:bg-gray-800/80
@@ -263,12 +255,6 @@ const ProductCard = ({
 
         {/* 🖼 IMAGE */}
         <div className="relative overflow-hidden">
-          {/* ❤️ HEART BEAT */}
-          {showHeart && (
-            <span className="absolute inset-0 flex items-center justify-center text-4xl animate-heartbeat pointer-events-none z-30">
-              ❤️
-            </span>
-          )}
 
           {bestSeller && (
             <span className="absolute top-0 left-1/2 -translate-x-1/2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded-b-lg z-20">
