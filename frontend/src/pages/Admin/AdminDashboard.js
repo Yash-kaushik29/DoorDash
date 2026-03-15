@@ -87,7 +87,7 @@ const AdminDashboard = () => {
                     <span className="font-bold">{overview.orders.pending}</span>
                   </p>
                   <p>
-                    Pending:{" "}
+                    Preparing:{" "}
                     <span className="font-bold">{overview.orders.preparing}</span>
                   </p>
                   <p>
