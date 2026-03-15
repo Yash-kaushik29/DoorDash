@@ -5,6 +5,7 @@ const Order = require("../models/Order");
 const Seller = require("../models/Seller");
 const User = require("../models/User");
 const Shop = require("../models/Shop");
+const ArchivedOrder = require("../models/ArchivedOrder");
 
 const timeToMinutes = (time) => {
   const [hours, minutes] = time.split(":").map(Number);
@@ -26,11 +27,11 @@ cron.schedule("0 1 * * *", async () => {
 
     const result = await DeliveryBoy.updateMany(
       {},
-      { $pull: { commissionHistory: { time: { $lt: cutoffDate } } } }
+      { $pull: { commissionHistory: { time: { $lt: cutoffDate } } } },
     );
 
     console.log(
-      `✅ Commission cleanup ran at 2 AM. Modified ${result.modifiedCount} records.`
+      `✅ Commission cleanup ran at 2 AM. Modified ${result.modifiedCount} records.`,
     );
   } catch (error) {
     console.error("❌ Error clearing commissions:", error);
@@ -45,32 +46,39 @@ cron.schedule("0 2 * * *", async () => {
     const oldOrders = await Order.find({ createdAt: { $lt: cutoffDate } });
 
     if (!oldOrders.length) {
-      console.log("🗑️ No orders older than 3 months to delete.");
+      console.log("🗑️ No orders older than 3 months to archive.");
       return;
     }
 
     const oldOrderIds = oldOrders.map((order) => order._id);
 
-    // Delete orders
+    const archivedOrders = oldOrders.map((order) => ({
+      id: order.id,
+      amount: order.amount,
+      totalAmount: order.totalAmount,
+      paymentMethod: order.paymentMethod,
+      createdAt: order.createdAt,
+    }));
+
+    await ArchivedOrder.insertMany(archivedOrders);
+
     const result = await Order.deleteMany({ _id: { $in: oldOrderIds } });
 
-    // Remove references from Users
     await User.updateMany(
       { orders: { $in: oldOrderIds } },
-      { $pull: { orders: { $in: oldOrderIds } } }
+      { $pull: { orders: { $in: oldOrderIds } } },
     );
 
-    // Remove references from Sellers
     await Seller.updateMany(
       { orders: { $in: oldOrderIds } },
-      { $pull: { orders: { $in: oldOrderIds } } }
+      { $pull: { orders: { $in: oldOrderIds } } },
     );
 
     console.log(
-      `🗑️ Old orders cleanup completed. Deleted ${result.deletedCount} orders and cleaned references.`
+      `📦 Archived ${archivedOrders.length} orders and deleted ${result.deletedCount} old orders.`,
     );
   } catch (error) {
-    console.error("❌ Error clearing old orders:", error);
+    console.error("❌ Error archiving old orders:", error);
   }
 });
 
@@ -88,13 +96,13 @@ cron.schedule("0 3 * * *", async () => {
     // 1️⃣ Remove old salesHistory (older than 3 months)
     await Seller.updateMany(
       {},
-      { $pull: { salesHistory: { date: { $lt: salesCutoff } } } }
+      { $pull: { salesHistory: { date: { $lt: salesCutoff } } } },
     );
 
     // 2️⃣ Remove old notifications (older than 1 week)
     await Seller.updateMany(
       {},
-      { $pull: { notifications: { createdAt: { $lt: notificationsCutoff } } } }
+      { $pull: { notifications: { createdAt: { $lt: notificationsCutoff } } } },
     );
 
     console.log("✅ [3 AM] Seller cleanup completed successfully.");
@@ -110,7 +118,7 @@ cron.schedule(
       const now = new Date();
 
       const istTime = new Date(
-        now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+        now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }),
       );
 
       const currentMinutes = istTime.getHours() * 60 + istTime.getMinutes();
@@ -126,7 +134,7 @@ cron.schedule(
         const shouldBeOpen = isShopOpenNow(
           currentMinutes,
           openMinutes,
-          closeMinutes
+          closeMinutes,
         );
 
         if (shop.isOpen !== shouldBeOpen) {
@@ -137,7 +145,7 @@ cron.schedule(
 
       console.log(
         "✅ Shops auto-updated at",
-        istTime.toLocaleTimeString("en-IN")
+        istTime.toLocaleTimeString("en-IN"),
       );
     } catch (err) {
       console.error("❌ Shop cron error:", err.message);
@@ -145,5 +153,5 @@ cron.schedule(
   },
   {
     timezone: "Asia/Kolkata",
-  }
+  },
 );

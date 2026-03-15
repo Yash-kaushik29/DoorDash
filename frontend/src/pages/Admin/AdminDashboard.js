@@ -83,17 +83,17 @@ const AdminDashboard = () => {
               {overview ? (
                 <div className="mt-4 space-y-2">
                   <p>
-                    Total Orders:{" "}
-                    <span className="font-bold">{overview.orders.total}</span>
-                  </p>
-                  <p>
-                    Pending:{" "}
+                    Processing Orders:{" "}
                     <span className="font-bold">{overview.orders.pending}</span>
                   </p>
                   <p>
-                    Delivered:{" "}
+                    Pending:{" "}
+                    <span className="font-bold">{overview.orders.preparing}</span>
+                  </p>
+                  <p>
+                    Out For Delivery:{" "}
                     <span className="font-bold">
-                      {overview.orders.delivered}
+                      {overview.orders.outForDelivery}
                     </span>
                   </p>
                 </div>

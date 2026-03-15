@@ -130,16 +130,16 @@ router.get("/dashboard-overview", async (req, res) => {
               DeliveryBoy.countDocuments({ isAvailable: true }),
             ]);
 
-          // Orders Overview
-          const totalOrders = orders.length;
           const pendingOrders = orders.filter(
             (order) => order.deliveryStatus === "Processing"
+          ).length;  
+          const preparingOrders = orders.filter(
+            (order) => order.deliveryStatus === "Preparing"
           ).length;
-          const deliveredOrders = orders.filter(
-            (order) => order.deliveryStatus === "Delivered"
+          const outForDeliveryOrders = orders.filter(
+            (order) => order.deliveryStatus === "Out For Delivery"
           ).length;
 
-          // Sales Calculation
           const totalSales = orders.reduce(
             (sum, order) =>
               sum +
@@ -179,9 +179,9 @@ router.get("/dashboard-overview", async (req, res) => {
             success: true,
             data: {
               orders: {
-                total: totalOrders,
                 pending: pendingOrders,
-                delivered: deliveredOrders,
+                preparing: preparingOrders,
+                outForDelivery: outForDeliveryOrders
               },
               sales: { total: totalSales, today: todaySales },
               deliveryBoys: {

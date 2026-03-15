@@ -66,8 +66,9 @@ const OrderDetails = () => {
   const getStatusMessage = () => {
     switch (order?.deliveryStatus) {
       case "Processing":
+        return "✅ Your order has been placed.";
       case "Preparing":
-        return "👨‍🍳 Your order is being freshly prepared";
+        return order.orderType === "Food" ? "👨‍🍳 Your order is being freshly prepared" : "📦 Your order is getting packed nicely.";
       case "Out For Delivery":
         return "🛵 Your order is on the way";
       case "Delivered":
