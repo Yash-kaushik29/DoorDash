@@ -1,126 +1,88 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./eventBanner.css";
 
-const splashImages = [
-  "/red.png",
-  "/yellow.png",
-  "/blue.png",
-  "/green.png",
-  "/orange.png",
-  "/purple.png",
-];
-
 const EventBanner = () => {
-  const [showText, setShowText] = useState(false);
-  const [clickSplashes, setClickSplashes] = useState([]);
   const bannerRef = useRef(null);
+  const [showText, setShowText] = useState(false);
+  const [pulse, setPulse] = useState(false);
 
-  // text after intro
   useEffect(() => {
-    const timer = setTimeout(() => setShowText(true), 1600);
+    const timer = setTimeout(() => setShowText(true), 1400);
     return () => clearTimeout(timer);
   }, []);
 
   const handleMouseMove = (e) => {
     const rect = bannerRef.current.getBoundingClientRect();
-
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
 
-    bannerRef.current.style.setProperty("--px", `${x * 30}px`);
-    bannerRef.current.style.setProperty("--py", `${y * 30}px`);
+    bannerRef.current.style.setProperty("--rx", `${y * 8}deg`);
+    bannerRef.current.style.setProperty("--ry", `${-x * 8}deg`);
   };
 
-  const handleClick = (e) => {
-    const rect = bannerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const splash = {
-      id: Date.now(),
-      x,
-      y,
-      img: splashImages[Math.floor(Math.random() * splashImages.length)],
-      size: Math.random() * 80 + 60,
-      rotate: Math.random() * 360,
-    };
-
-    setClickSplashes((prev) => [...prev, splash]);
-
-    setTimeout(() => {
-      setClickSplashes((prev) => prev.filter((s) => s.id !== splash.id));
-    }, 1400);
+  const handleClick = () => {
+    setPulse(true);
+    setTimeout(() => setPulse(false), 600);
   };
 
   return (
     <section
-      className="holi-intro"
       ref={bannerRef}
+      className={`navratri-mandala ${pulse ? "pulse" : ""}`}
       onMouseMove={handleMouseMove}
       onClick={handleClick}
     >
-      {/* haze */}
-      <div className="color-haze"></div>
+      {/* Mandala SVG */}
+      <div className="mandala-wrapper">
+        <svg viewBox="0 0 200 200" className="mandala">
+          {/* ✅ Gradient FIX */}
+          <defs>
+            <linearGradient id="grad" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#ff9a00" />
+              <stop offset="50%" stopColor="#ffd700" />
+              <stop offset="100%" stopColor="#ff3c00" />
+            </linearGradient>
+          </defs>
 
-      {/* grain */}
-      <div className="grain"></div>
-
-      {/* vignette */}
-      <div className="vignette"></div>
-
-      {/* intro burst */}
-      <div className="intro-burst">
-        {[...Array(12)].map((_, i) => {
-          const img = splashImages[i % splashImages.length];
-          return (
-            <img
+          {[...Array(10)].map((_, i) => (
+            <circle
               key={i}
-              alt="splash"
-              src={img}
-              className="burst-splash"
+              cx="100"
+              cy="100"
+              r={5 + i * 8}
+              className="mandala-ring"
               style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                width: `${Math.random() * 60 + 30}px`,
-                transform: `rotate(${Math.random() * 360}deg)`,
-                animationDelay: `${i * 0.06}s`,
+                animationDelay: `${i * 0.15}s`,
               }}
             />
-          );
-        })}
+          ))}
+        </svg>
       </div>
 
+      {/* Glow layer */}
+      <div className="mandala-glow"></div>
+
+      <img
+        src="/diya.png" 
+        alt="Left hand"
+        className="diya-img left"
+      />
+
+      <img
+        src="/flower.png" 
+        alt="Right hand"
+        className="diya-img right"
+      />
+
       {showText && (
-        <div className="flex flex-col items-center gap-3 text-center px-4">
-          <h1 className="holi-text bg-gradient-to-r from-pink-500 via-yellow-400 to-purple-500 bg-clip-text text-transparent">
-            Happy Holi
-          </h1>
+        <div className="content text-center px-4">
+          <h1 className="title">Happy Navratri</h1>
 
-          <div className="w-24 h-1 rounded-full bg-gradient-to-r from-pink-400 via-yellow-300 to-purple-400 opacity-80"></div>
-
-          <p className="text-gray-700 font-medium text-sm md:text-base max-w-md leading-relaxed">
-            This Holi,{" "}
-            <span className="font-semibold text-gray-900">
-              celebrate every shade of flavor.
-            </span>
+          <p className="subtitle absolute bottom-1 left-1/2 -translate-x-1/2 text-center">
+            Get <span className="categories" >Fresh Fruits & Pooja Essentials</span> on <span className="font-semibold text-amber-600">GullyFoods</span>.
           </p>
         </div>
       )}
-
-      {clickSplashes.map((s) => (
-        <img
-          key={s.id}
-          src={s.img}
-          alt="splash"
-          className="click-splash"
-          style={{
-            top: s.y,
-            left: s.x,
-            width: s.size,
-            transform: `translate(-50%, -50%) rotate(${s.rotate}deg)`,
-          }}
-        />
-      ))}
     </section>
   );
 };

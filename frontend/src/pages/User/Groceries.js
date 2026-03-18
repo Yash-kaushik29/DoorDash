@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 const groceryCategories = [
   { name: "Vegetables", img: "/groceryImages/veggies.png" },
   { name: "Fruits", img: "/groceryImages/fruits.png" },
+  { name: "Pooja Essentials", img:"/groceryImages/poojaEssentials.png" },
   { name: "Eggs & Chicken", img: "/groceryImages/eggs.png" },
   { name: "Dairy Products", img: "/groceryImages/dairy.png" },
   { name: "Rice, Atta & Dal", img: "/groceryImages/rice.png" },
