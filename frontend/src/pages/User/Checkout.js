@@ -299,6 +299,7 @@ const Checkout = () => {
           setPaymentMethod={setPaymentMethod}
           handleCheckout={handleCheckout}
           selectedAddress={selectedAddress}
+          totalAmount={totalAmount}
         />
 
         {/* Coupon Selection */}
