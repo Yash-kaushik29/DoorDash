@@ -70,15 +70,16 @@ router.post("/create-order", authenticateUser, async (req, res) => {
           priceAtOrder: price,
           shopDiscount,
         };
-      })
+      }),
     );
 
-    const totalAmount =
+    const totalAmount = Math.round(
       subTotal -
-      shopDiscountValue -
-      discount +
-      deliveryCharge +
-      (orderType === "Food" ? taxes + convenienceFees : serviceCharge);
+        shopDiscountValue -
+        discount +
+        deliveryCharge +
+        (orderType === "Food" ? taxes + convenienceFees : serviceCharge),
+    );
 
     const newOrder = new Order({
       user: userId,
@@ -129,12 +130,12 @@ View Order Details
     if (coupon) {
       await User.findOneAndUpdate(
         { _id: userId, "activeCoupons._id": coupon },
-        { $inc: { "activeCoupons.$.count": -1 } }
+        { $inc: { "activeCoupons.$.count": -1 } },
       );
 
       await User.updateOne(
         { _id: userId },
-        { $pull: { activeCoupons: { _id: coupon, count: { $lte: 0 } } } }
+        { $pull: { activeCoupons: { _id: coupon, count: { $lte: 0 } } } },
       );
     }
 
@@ -151,8 +152,8 @@ View Order Details
             },
             orders: newOrder._id,
           },
-        })
-      )
+        }),
+      ),
     );
 
     res.status(201).json({
@@ -265,7 +266,7 @@ router.get("/download-invoice/:orderId", async (req, res) => {
     // ===== ORDER SUMMARY =====
     const totalProducts = order.items.reduce(
       (sum, item) => sum + item.quantity,
-      0
+      0,
     );
     doc
       .fontSize(12)
@@ -283,7 +284,7 @@ router.get("/download-invoice/:orderId", async (req, res) => {
     doc.text(
       `${addr.addressLine}, ${addr.area}${
         addr.landMark ? `, ${addr.landMark}` : ""
-      }`
+      }`,
     );
     doc.moveDown();
 
@@ -350,7 +351,7 @@ router.get("/download-invoice/:orderId", async (req, res) => {
 
     const itemsTotal = order.items.reduce(
       (sum, item) => sum + (item.product?.price || 0) * item.quantity,
-      0
+      0,
     );
     const paymentLines = [];
     paymentLines.push({
@@ -458,7 +459,7 @@ router.get("/getOrder/:orderId", authenticateSeller, async (req, res) => {
     // Mark the notification as read
     await Seller.updateOne(
       { _id: sellerId, "notifications.order": orderId },
-      { $set: { "notifications.$.read": true } }
+      { $set: { "notifications.$.read": true } },
     );
 
     res.status(200).json({
@@ -540,7 +541,7 @@ router.get("/getAllOrders", authenticateSeller, async (req, res) => {
     const filteredOrders = orders.map((order) => ({
       ...order,
       items: order.items.filter(
-        (item) => item.seller.toString() === sellerId.toString()
+        (item) => item.seller.toString() === sellerId.toString(),
       ),
     }));
 

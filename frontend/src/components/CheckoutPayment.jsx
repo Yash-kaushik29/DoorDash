@@ -86,7 +86,7 @@ const CheckoutPayment = ({
 
             <p className="text-gray-600 dark:text-gray-300 mb-6">
               Your order total is{" "}
-              <span className="font-semibold">₹{totalAmount}</span>.
+              <span className="font-semibold">₹{Math.round(totalAmount)}</span>.
               <br />
               Do you want to place the order?
             </p>
