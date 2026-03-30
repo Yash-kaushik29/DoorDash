@@ -1,111 +1,215 @@
-.navratri-mandala {
+.selector-wrapper {
+  padding: 16px 12px;
+  text-align: center;
+  background: linear-gradient(135deg, #f5f5f5, #eaeaea);
+  border-radius: 0 0 16px 16px;
+  color: #111;
+}
+
+.ipl-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.choose-text {
+  font-size: 0.8rem;
+  margin-bottom: 12px;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+.team-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.team-pill:hover {
+  transform: scale(1.08);
+}
+
+.team-pill img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 50%;
+  background: white;
+  padding: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.team-name {
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+
+/* ---------- BANNER ---------- */
+
+.ipl-banner {
+  height: 100px;
+  border-radius: 0 0 14px 14px;
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
   position: relative;
-  height: 220px; 
   overflow: hidden;
-  background: radial-gradient(circle at center, #2a0a0a, #120303);
-  perspective: 800px;
+
+  animation: fadeIn 0.4s ease;
+  background-size: 200% 200%;
+  animation: gradientMove 6s ease infinite;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.ipl-banner::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  top: -30px;
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.banner-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.banner-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.banner-left h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.slogan {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.cta {
+  font-size: 0.7rem;
+}
+
+.banner-left span {
+  color: #ffd700;
+}
+
+.change-btn {
+  font-size: 0.7rem;
+  padding: 6px 10px;
+  border-radius: 20px;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
   cursor: pointer;
 }
 
-.navratri-mandala {
-  transform: rotateX(var(--rx, 0)) rotateY(var(--ry, 0));
-  transition: transform 0.2s ease;
+.change-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
-.mandala-wrapper {
+/* ---------- IPL FALLING LOGOS ---------- */
+
+.ipl-rain-bg {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.mandala {
-  width: 160px; 
-  height: 160px;
-  transform: rotate(0deg);
-  animation: rotateMandala 20s linear infinite;
-}
-
-@keyframes rotateMandala {
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.mandala-ring {
-  fill: none;
-  stroke: url(#grad);
-  stroke-width: 1.2;
-  stroke-dasharray: 400;
-  stroke-dashoffset: 400;
-  animation: draw 1s ease forwards;
-}
-
-@keyframes draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.mandala-glow {
+/* falling logos */
+.rain-logo {
   position: absolute;
-  inset: 0;
-  background: radial-gradient(circle, rgba(255, 140, 0, 0.2), transparent);
+  top: -60px;
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+  opacity: 0.08;
+
+  animation: fallDown linear infinite;
+  animation-duration: 10s;
 }
 
-.navratri-mandala.pulse .mandala {
-  transform: scale(1.1);
-  transition: transform 0.3s ease;
-}
-
-.title {
-  font-size: 1.8rem; 
-  font-weight: 800;
-  background: linear-gradient(to right, #ff9a00, #ffd700, #ff3c00);
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
-.subtitle {
-  color: #f3f3f3;
-  margin-top: 4px; 
-  font-size: 0.8rem; 
-  text-align: center;
-}
-
-.categories {
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.diya-img {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 90px; 
-  height: auto;
-  z-index: 2;
-  pointer-events: none; 
-}
-
-.diya-img.left {
-  left: clamp(0px, 5vw, 25px);
-  animation: revealFromBottom 3.5s ease-out forwards infinite;
-}
-
-.diya-img.right {
-  right: clamp(0px, 5vw, 25px);
-  animation: revealFromBottom 3.5s ease-out forwards infinite;
-}
-
-@keyframes revealFromBottom {
+@keyframes fallDown {
   0% {
-    clip-path: inset(100% 0 0 0); 
+    transform: translateY(0) rotate(0deg);
     opacity: 0;
   }
+  10% {
+    opacity: 0.2;
+  }
+  90% {
+    opacity: 0.1;
+  }
   100% {
-    clip-path: inset(0 0 0 0); 
-    opacity: 1;
+    transform: translateY(110vh) rotate(180deg);
+    opacity: 0;
+  }
+}
+
+@keyframes fallDown {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(10px, 50vh) rotate(90deg);
+  }
+  100% {
+    transform: translate(-10px, 110vh) rotate(180deg);
+    opacity: 0;
   }
 }

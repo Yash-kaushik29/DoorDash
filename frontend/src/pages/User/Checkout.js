@@ -240,7 +240,7 @@ const Checkout = () => {
   };
 
   const totalAmount =
-    cartTotalPrice +
+    cartTotalPrice - discount +
     (isFoodOrder
       ? taxes + convenienceFees + deliveryCharge
       : getGroceryServiceCharge(cartTotalPrice) + deliveryCharge);

@@ -74,7 +74,7 @@ const CheckoutSummary = ({
       <div className="flex justify-between text-xl font-bold">
         <span>Total:</span>
         <span className="text-green-600">
-          ₹{(totalAmount - discount).toFixed(2)}
+          ₹{(totalAmount).toFixed(2)}
         </span>
       </div>
     </div>
