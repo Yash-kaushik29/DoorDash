@@ -3,6 +3,7 @@ const User = require("../models/User");
 const Seller = require("../models/Seller");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
+const DeliveryBoy = require("../models/DeliveryBoy");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const PDFDocument = require("pdfkit");
@@ -10,6 +11,7 @@ const QRCode = require("qrcode");
 const authenticateUser = require("../middleware/authMiddleware");
 const authenticateSeller = require("../middleware/sellerAuthMiddleware");
 const { sendTelegramMessage } = require("../config/telegram.config");
+const { sendOrderStatusNotification, sendDeliveryBoyNotification } = require("../config/firebase.config");
 
 router.post("/create-order", authenticateUser, async (req, res) => {
   const userId = req.user._id;
@@ -155,6 +157,21 @@ View Order Details
         }),
       ),
     );
+
+    // ✅ Send push notifications in background (don't block response)
+    sendOrderStatusNotification(userId, newOrder.id, newOrder._id, "Processing");
+
+    // ✅ Notify available delivery boys in background
+    DeliveryBoy.find({ isAvailable: true }).select("_id").then(availableDeliveryBoys => {
+      for (const deliveryBoy of availableDeliveryBoys) {
+        sendDeliveryBoyNotification(
+          deliveryBoy._id,
+          newOrder.id,
+          newOrder._id,
+          address?.area || "your area"
+        );
+      }
+    });
 
     res.status(201).json({
       success: true,
@@ -511,6 +528,9 @@ router.put("/confirm-order/:orderId", authenticateSeller, async (req, res) => {
       order.amount = Math.max(0, (order.amount || 0) - cancelledAmount);
       await order.save();
     }
+
+    // ✅ Send push notification to user (order preparing) - in background
+    sendOrderStatusNotification(order.user, order.id, order._id, "Preparing");
 
     res
       .status(200)

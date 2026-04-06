@@ -7,6 +7,8 @@ const Order = require("../models/Order");
 const Product = require("../models/Product");
 const DeliveryBoy = require("../models/DeliveryBoy");
 const User = require("../models/User");
+const { sendDeliveryBoyNotification, sendOrderCancellationNotification, sendDeliveryBoyCancellationNotification } = require("../config/firebase.config");
+const { sendTelegramMessage } = require("../config/telegram.config");
 
 const router = express.Router();
 
@@ -392,10 +394,38 @@ router.post("/assignDeliveryBoy", async (req, res) => {
     }
 
     try {
+      const order = await Order.findById(orderId);
+      if (!order) {
+        return res.json({ success: false, message: "Order not found" });
+      }
+
       await Order.updateOne(
         { _id: orderId },
         { deliveryBoy: deliveryBoyId, deliveryBoyAssigned: true }
       );
+
+      // Send push notification to delivery boy - in background
+      sendDeliveryBoyNotification(
+        deliveryBoyId,
+        order.id,
+        order._id,
+        order.shippingAddress?.area || "your area"
+      );
+
+      // Send Telegram notification - in background
+      const deliveryBoy = await DeliveryBoy.findById(deliveryBoyId).select("name phone");
+      sendTelegramMessage(`
+🚚 <b>DELIVERY BOY ASSIGNED</b>
+
+📦 Order ID: <b>#${order.id}</b>
+👤 Delivery Boy: <b>${deliveryBoy?.name || "N/A"}</b>
+📞 Phone: <b>${deliveryBoy?.phone || "N/A"}</b>
+📍 Area: <b>${order.shippingAddress?.area || "N/A"}</b>
+💰 Amount: ₹${order.totalAmount}
+
+⏰ ${new Date().toLocaleString("en-IN")}
+      `);
+
       res.json({
         success: true,
         message: "Delivery boy assigned successfully",
@@ -647,6 +677,37 @@ router.put("/cancelOrder", async (req, res) => {
     }));
 
     await order.save();
+
+    // Send cancellation notifications - in background
+    console.log(`Order ${order.id} cancelled. Sending notifications to user ${order.user} and delivery boy ${order.deliveryBoy}`);
+    
+    sendOrderCancellationNotification(order.user, order.id, order._id);
+    
+    // Notify delivery boy if assigned
+    if (order.deliveryBoy) {
+      sendDeliveryBoyCancellationNotification(order.deliveryBoy, order.id, order._id);
+    }
+
+    // Send Telegram notification - in background
+    let telegramMessage = `
+❌ <b>ORDER CANCELLED</b>
+
+📦 Order ID: <b>#${order.id}</b>
+💰 Amount: ₹${order.totalAmount}
+📍 Area: <b>${order.shippingAddress?.area || "N/A"}</b>
+    `;
+    
+    if (order.deliveryBoy) {
+      const deliveryBoy = await DeliveryBoy.findById(order.deliveryBoy).select("name phone");
+      telegramMessage += `
+🚚 Was Assigned to: <b>${deliveryBoy?.name || "N/A"}</b>
+📞 Phone: <b>${deliveryBoy?.phone || "N/A"}</b>
+      `;
+    }
+    
+    telegramMessage += `\n⏰ ${new Date().toLocaleString("en-IN")}`;
+    
+    sendTelegramMessage(telegramMessage);
 
     res.json({
       success: true,

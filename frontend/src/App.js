@@ -59,26 +59,34 @@ import Users from "./pages/Admin/Users";
 import AccountDetails from "./pages/User/AccountDetails";
 import { OfflineContext } from "./context/OfflineContext";
 import OfflineScreen from "./components/OfflineScreen";
-// import {
-//   initPushNotifications,
-//   listenForegroundMessages,
-// } from "./utils/pushNotifications";
+import {
+  requestNotificationPermission,
+  listenForegroundMessages,
+} from "./utils/pushNotifications";
 
 const App = () => {
   const { isOnline } = useContext(OfflineContext);
 
+  useEffect(() => {
+    // Request notification permission on app load (but don't register token yet)
+    requestNotificationPermission();
+
+    // Listen for foreground messages
+    listenForegroundMessages((payload) => {
+      const { title, body } = payload.notification || {};
+      // Show browser notification
+      if (Notification.permission === "granted") {
+        new Notification(title, {
+          body,
+          icon: "/icons/gullyfoodsLogo192.png",
+        });
+      }
+    });
+  }, []);
+
   if (!isOnline) {
     return <OfflineScreen />;
   }
-
-  // useEffect(() => {
-  //   initPushNotifications();
-
-  //   listenForegroundMessages((payload) => {
-  //     const { title, body } = payload.notification || {};
-  //     alert(`${title}\n${body}`);
-  //   });
-  // }, []);
 
   return (
     <>

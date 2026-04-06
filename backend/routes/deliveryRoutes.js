@@ -7,6 +7,7 @@ const Seller = require("../models/Seller");
 const Product = require("../models/Product");
 const User = require("../models/User");
 const mongoose = require("mongoose");
+const { sendOrderStatusNotification } = require("../config/firebase.config");
 
 const router = express.Router();
 
@@ -267,6 +268,9 @@ router.put("/order/confirm-pickup", async (req, res) => {
 
     await order.save();
 
+    // ✅ Send push notification to user (out for delivery) - in background
+    sendOrderStatusNotification(order.user, order.id, order._id, "Out For Delivery");
+
     res.json({
       success: true,
       message: "Order marked as Out For Delivery!",
@@ -397,6 +401,9 @@ router.put("/order/confirm-delivery/:orderId", async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
+    // ✅ Send push notification to user (order delivered) - in background
+    sendOrderStatusNotification(order.user, order.id, order._id, "Delivered");
+
     res.json({
       success: true,
       message: "Order successfully marked as delivered",
@@ -428,6 +435,46 @@ router.get("/:deliveryBoyId/commissionHistory", async (req, res) => {
   } catch (error) {
     console.error("Error fetching commission history:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Register FCM token for delivery boy
+router.post("/register-token", async (req, res) => {
+  try {
+    const { token } = req.body;
+    const authHeader = req.headers.authorization;
+
+    if (!token) {
+      return res.status(400).json({ message: "FCM token is required" });
+    }
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Authorization token required" });
+    }
+
+    const jwtToken = authHeader.split(" ")[1];
+    const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET_KEY);
+    const deliveryBoyId = decoded.id;
+
+    console.log(`Registering FCM token for delivery boy ${deliveryBoyId}: ${token.substring(0, 20)}...`);
+
+    await DeliveryBoy.updateOne(
+      { _id: deliveryBoyId },
+      { $addToSet: { fcmTokens: token } }
+    );
+
+    console.log(`FCM token saved for delivery boy ${deliveryBoyId}`);
+
+    res.status(200).json({
+      success: true,
+      message: "Push token registered successfully",
+    });
+  } catch (err) {
+    console.error("Push Token Error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to save push token",
+    });
   }
 });
 

@@ -1,31 +1,82 @@
-// import { getToken, onMessage } from "firebase/messaging";
-// import { messaging } from "../config/firebaseConfig";
-// import api from "./axiosInstance"; 
+import { getToken, onMessage } from "firebase/messaging";
+import { messaging } from "../config/firebaseConfig";
+import api from "../config/api";
 
-// const VAPID_KEY = process.env.REACT_APP_FIREBASE_PUBLIC_KEY;
+const VAPID_KEY = process.env.REACT_APP_FIREBASE_PUBLIC_KEY;
 
-// export async function initPushNotifications() {
-//   if (!("Notification" in window)) return;
+// Request notification permission (call this early, e.g., in App.js)
+export async function requestNotificationPermission() {
+  if (!("Notification" in window)) {
+    console.log("This browser does not support notifications");
+    return null;
+  }
 
-//   const permission = await Notification.requestPermission();
-//   if (permission !== "granted") return;
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      console.log("Notification permission denied");
+      return null;
+    }
 
-//   const token = await getToken(messaging, {
-//     vapidKey: VAPID_KEY,
-//   });
+    const token = await getToken(messaging, {
+      vapidKey: VAPID_KEY,
+    });
 
-//   if (!token) return;
+    if (!token) {
+      console.log("No FCM token available");
+      return null;
+    }
 
-//   // Send token to backend
-//   await api.post("http://localhost:5000/api/user-profile/register-token", { token });
+    console.log("FCM Token obtained:", token.substring(0, 20) + "...");
+    return token;
+  } catch (error) {
+    console.error("Error getting FCM token:", error);
+    return null;
+  }
+}
 
-//   console.log("✅ Push token saved", token);
-// }
+// Register push token for user (call this AFTER user logs in)
+export async function registerPushToken() {
+  if (!("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
 
-// // Foreground handler
-// export function listenForegroundMessages(callback) {
-//   onMessage(messaging, (payload) => {
-//     console.log("📩 Push received in foreground", payload);
-//     callback(payload);
-//   });
-// }
+  try {
+    const token = await getToken(messaging, {
+      vapidKey: VAPID_KEY,
+    });
+
+    if (!token) return;
+
+    const response = await api.post("/api/user-profile/register-token", { token });
+    console.log("Push token registered successfully:", response.data);
+  } catch (err) {
+    console.error("Push token registration error:", err.response?.data || err.message);
+  }
+}
+
+// Register push token for delivery boy (call this AFTER delivery boy logs in)
+export async function registerDeliveryBoyPushToken() {
+  if (!("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+
+  try {
+    const token = await getToken(messaging, {
+      vapidKey: VAPID_KEY,
+    });
+
+    if (!token) return;
+
+    const response = await api.post("/api/delivery/register-token", { token });
+    console.log("Delivery boy push token registered successfully:", response.data);
+  } catch (err) {
+    console.error("Delivery boy push token registration error:", err.response?.data || err.message);
+  }
+}
+
+// Foreground message handler
+export function listenForegroundMessages(callback) {
+  onMessage(messaging, (payload) => {
+    console.log("📩 Push received in foreground", payload);
+    callback(payload);
+  });
+}

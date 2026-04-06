@@ -22,6 +22,7 @@ const deliveryBoySchema = new mongoose.Schema({
     },
   ],
   isAvailable: { type: Boolean, default: true },
+  fcmTokens: [{ type: String }],
 });
 
 module.exports = mongoose.model("DeliveryBoy", deliveryBoySchema);

@@ -375,10 +375,14 @@ router.post("/register-token", authenticateUser, async (req, res) => {
 
     const userId = req.user._id || req.user.id;
 
+    console.log(`Registering FCM token for user ${userId}: ${token.substring(0, 20)}...`);
+
     await User.updateOne(
       { _id: userId },
       { $addToSet: { fcmTokens: token } } 
     );
+
+    console.log(`FCM token saved for user ${userId}`);
 
     res.status(200).json({
       success: true,

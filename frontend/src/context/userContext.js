@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 import api from "../utils/axiosInstance";
+import { registerPushToken } from "../utils/pushNotifications";
 
 export const UserContext = createContext();
 
@@ -17,6 +18,8 @@ export function UserContextProvider({ children }) {
 
                 if (response.data.success) {
                     setUser(response.data.user);
+                    // Register push token after successful auth
+                    await registerPushToken();
                 } else {
                     setUser(null);
                 }

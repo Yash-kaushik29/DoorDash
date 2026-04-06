@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../utils/axiosInstance";
+import { registerDeliveryBoyPushToken } from "../../utils/pushNotifications";
 
 const DeliveryBoyLogin = () => {
   const [phone, setPhone] = useState("");
@@ -25,6 +26,10 @@ const DeliveryBoyLogin = () => {
 
       if (res.data.success) {
         localStorage.setItem("GullyFoodsDeliveryToken", res.data.token);
+        
+        // Register push token for delivery boy
+        await registerDeliveryBoyPushToken();
+        
         navigate("/delivery");
       }
     } catch (err) {

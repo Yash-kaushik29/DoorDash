@@ -1,0 +1,289 @@
+const admin = require("firebase-admin");
+const path = require("path");
+const User = require("../models/User");
+const DeliveryBoy = require("../models/DeliveryBoy");
+
+// Initialize Firebase Admin SDK
+let firebaseInitialized = false;
+
+console.log("FIREBASE_SERVICE_ACCOUNT_PATH:", process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
+
+try {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
+    const serviceAccountPath = path.resolve(process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
+    console.log("Loading service account from:", serviceAccountPath);
+    const serviceAccount = require(serviceAccountPath);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+    console.log("Firebase Admin SDK initialized with service account");
+  } else {
+    console.log("No FIREBASE_SERVICE_ACCOUNT_PATH found, trying default...");
+    admin.initializeApp({
+      projectId: "gullyfoods",
+    });
+    console.log("Firebase Admin SDK initialized without credentials");
+  }
+  firebaseInitialized = true;
+} catch (error) {
+  console.log("Firebase Admin SDK initialization failed:", error.message);
+  firebaseInitialized = false;
+}
+
+/**
+ * Send push notification to an array of FCM tokens
+ * @param {string[]} tokens - Array of FCM registration tokens
+ * @param {string} title - Notification title
+ * @param {string} body - Notification body
+ * @param {object} data - Optional data payload
+ */
+async function sendPushNotification(tokens, title, body, data = {}) {
+  if (!firebaseInitialized || !tokens || tokens.length === 0) return;
+
+  const message = {
+    notification: {
+      title,
+      body,
+    },
+    data: Object.fromEntries(
+      Object.entries(data).map(([k, v]) => [k, String(v)])
+    ),
+    webpush: {
+      headers: {
+        Urgency: "high",
+      },
+      notification: {
+        icon: "/icons/gullyfoodsLogo192.png",
+        badge: "/icons/gullyfoodsLogo192.png",
+        tag: data.orderId || "default",
+        requireInteraction: true,
+        renotify: true,
+      },
+      fcm_options: {
+        link: data.url || "/",
+      },
+    },
+    android: {
+      notification: {
+        icon: "@drawable/ic_notification",
+        color: "#16a34a",
+        priority: "high",
+        channelId: "order-status",
+      },
+      priority: "high",
+    },
+    apns: {
+      payload: {
+        aps: {
+          alert: {
+            title,
+            body,
+          },
+          badge: 1,
+          sound: "default",
+        },
+      },
+    },
+  };
+
+  try {
+    // Send to each token individually for better error handling
+    const results = await Promise.allSettled(
+      tokens.map((token) =>
+        admin.messaging().send({ ...message, token })
+      )
+    );
+
+    const successCount = results.filter((r) => r.status === "fulfilled").length;
+    const failCount = results.filter((r) => r.status === "rejected").length;
+
+    if (successCount > 0) {
+      console.log(`Push notifications sent: ${successCount} success, ${failCount} failed`);
+    }
+    if (failCount > 0) {
+      console.log("Some push notifications failed (tokens may be expired)");
+    }
+  } catch (error) {
+    console.error("Error sending push notification:", error.message);
+  }
+}
+
+/**
+ * Send order status update notification to user
+ * @param {string} userId - User ID
+ * @param {string} orderId - Order ID (numeric)
+ * @param {string} orderObjectId - Order MongoDB _id
+ * @param {string} status - New delivery status
+ */
+async function sendOrderStatusNotification(userId, orderId, orderObjectId, status) {
+  console.log(`Sending ${status} notification for order #${orderId} to user ${userId}`);
+  
+  if (!firebaseInitialized) {
+    console.log("Firebase not initialized, skipping notification");
+    return;
+  }
+
+  const userDoc = await User.findById(userId).select("fcmTokens");
+  if (!userDoc || !userDoc.fcmTokens || userDoc.fcmTokens.length === 0) {
+    console.log(`No FCM tokens found for user ${userId}`);
+    return;
+  }
+  
+  console.log(`Found ${userDoc.fcmTokens.length} FCM token(s) for user ${userId}`);
+
+  const statusMessages = {
+    "Processing": {
+      title: "Order Placed!",
+      body: `Your order #${orderId} has been placed successfully.`,
+    },
+    "Preparing": {
+      title: "Order Preparing",
+      body: `Your order #${orderId} is being prepared by the seller.`,
+    },
+    "Out For Delivery": {
+      title: "Out For Delivery!",
+      body: `Your order #${orderId} is on the way!`,
+    },
+    "Delivered": {
+      title: "Order Delivered!",
+      body: `Your order #${orderId} has been delivered. Enjoy!`,
+    },
+    "Cancelled": {
+      title: "Order Cancelled",
+      body: `Your order #${orderId} has been cancelled.`,
+    },
+  };
+
+  const message = statusMessages[status] || {
+    title: "Order Update",
+    body: `Your order #${orderId} status has been updated to ${status}.`,
+  };
+
+  await sendPushNotification(
+    userDoc.fcmTokens,
+    message.title,
+    message.body,
+    { 
+      orderId: orderId.toString(),
+      orderObjectId: orderObjectId.toString(),
+      status,
+      url: `/order/${orderObjectId}`,
+      type: "order_status"
+    }
+  );
+}
+
+/**
+ * Send notification to delivery boy about new available order
+ * @param {string} deliveryBoyId - Delivery Boy ID
+ * @param {string} orderId - Order ID (numeric)
+ * @param {string} orderObjectId - Order MongoDB _id
+ * @param {string} area - Delivery area
+ */
+async function sendDeliveryBoyNotification(deliveryBoyId, orderId, orderObjectId, area) {
+  console.log(`Sending new order notification to delivery boy ${deliveryBoyId} for order #${orderId}`);
+  
+  if (!firebaseInitialized) {
+    console.log("Firebase not initialized, skipping notification");
+    return;
+  }
+
+  const deliveryBoy = await DeliveryBoy.findById(deliveryBoyId).select("fcmTokens");
+  if (!deliveryBoy || !deliveryBoy.fcmTokens || deliveryBoy.fcmTokens.length === 0) {
+    console.log(`No FCM tokens found for delivery boy ${deliveryBoyId}`);
+    return;
+  }
+  
+  console.log(`Found ${deliveryBoy.fcmTokens.length} FCM token(s) for delivery boy ${deliveryBoyId}`);
+
+  await sendPushNotification(
+    deliveryBoy.fcmTokens,
+    "New Order Available!",
+    `A new order #${orderId} is available for delivery in ${area || "your area"}.`,
+    { 
+      orderId: orderId.toString(),
+      orderObjectId: orderObjectId.toString(),
+      url: `/delivery/order/${orderObjectId}`,
+      type: "new_delivery"
+    }
+  );
+}
+
+/**
+ * Send order cancellation notification to user
+ * @param {string} userId - User ID
+ * @param {string} orderId - Order ID (numeric)
+ * @param {string} orderObjectId - Order MongoDB _id
+ */
+async function sendOrderCancellationNotification(userId, orderId, orderObjectId) {
+  console.log(`Sending cancellation notification for order #${orderId} to user ${userId}`);
+  
+  if (!firebaseInitialized) {
+    console.log("Firebase not initialized, skipping notification");
+    return;
+  }
+
+  const userDoc = await User.findById(userId).select("fcmTokens");
+  if (!userDoc || !userDoc.fcmTokens || userDoc.fcmTokens.length === 0) {
+    console.log(`No FCM tokens found for user ${userId}`);
+    return;
+  }
+  
+  console.log(`Found ${userDoc.fcmTokens.length} FCM token(s) for user ${userId}`);
+
+  await sendPushNotification(
+    userDoc.fcmTokens,
+    "Order Cancelled",
+    `Your order #${orderId} has been cancelled.`,
+    { 
+      orderId: orderId.toString(),
+      orderObjectId: orderObjectId.toString(),
+      status: "Cancelled",
+      url: `/order/${orderObjectId}`,
+      type: "order_cancelled"
+    }
+  );
+}
+
+/**
+ * Send order cancellation notification to delivery boy
+ * @param {string} deliveryBoyId - Delivery Boy ID
+ * @param {string} orderId - Order ID (numeric)
+ * @param {string} orderObjectId - Order MongoDB _id
+ */
+async function sendDeliveryBoyCancellationNotification(deliveryBoyId, orderId, orderObjectId) {
+  console.log(`Sending cancellation notification for order #${orderId} to delivery boy ${deliveryBoyId}`);
+  
+  if (!firebaseInitialized) {
+    console.log("Firebase not initialized, skipping notification");
+    return;
+  }
+
+  const deliveryBoy = await DeliveryBoy.findById(deliveryBoyId).select("fcmTokens");
+  if (!deliveryBoy || !deliveryBoy.fcmTokens || deliveryBoy.fcmTokens.length === 0) {
+    console.log(`No FCM tokens found for delivery boy ${deliveryBoyId}`);
+    return;
+  }
+  
+  console.log(`Found ${deliveryBoy.fcmTokens.length} FCM token(s) for delivery boy ${deliveryBoyId}`);
+
+  await sendPushNotification(
+    deliveryBoy.fcmTokens,
+    "Order Cancelled",
+    `Order #${orderId} has been cancelled and removed from your deliveries.`,
+    { 
+      orderId: orderId.toString(),
+      orderObjectId: orderObjectId.toString(),
+      url: `/delivery`,
+      type: "delivery_cancelled"
+    }
+  );
+}
+
+module.exports = { 
+  sendPushNotification, 
+  sendOrderStatusNotification, 
+  sendDeliveryBoyNotification, 
+  sendOrderCancellationNotification, 
+  sendDeliveryBoyCancellationNotification 
+};
