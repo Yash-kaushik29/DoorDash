@@ -57,6 +57,8 @@ app.use(
   }),
 );
 
+console.log("ENV VALUE:", process.env.MONGODB_URI_KEY);
+
 mongoose
   .connect(process.env.MONGODB_URI_KEY, {
     dbName: "doordash",
@@ -65,7 +67,7 @@ mongoose
     console.log("Database connected".yellow.bold);
   })
   .catch((err) => {
-    console.log(err.red);
+    console.error("Mongo Error:", err);
   });
 
 const storage = new CloudinaryStorage({
@@ -376,7 +378,7 @@ app.put("/increase-baseprice", async (req, res) => {
         "categories.0": category,
       },
       {
-        $inc: { basePrice: -10 }, 
+        $inc: { basePrice: -10 },
       },
     );
 
@@ -396,5 +398,5 @@ app.put("/increase-baseprice", async (req, res) => {
 });
 
 app.listen(5000, () => {
-  console.log(`Server is running on PORT 5000`);
+  console.log(`Server is running on PORT 5000`.blue);
 });

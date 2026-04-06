@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/User/Home";
 import Login from "./pages/User/Login";
@@ -57,12 +57,20 @@ import SalesHistory from "./pages/Seller/SalesHistory";
 import { SellerContextProvider } from "./context/sellerContext";
 import Users from "./pages/Admin/Users";
 import AccountDetails from "./pages/User/AccountDetails";
+import { OfflineContext } from "./context/OfflineContext";
+import OfflineScreen from "./components/OfflineScreen";
 // import {
 //   initPushNotifications,
 //   listenForegroundMessages,
 // } from "./utils/pushNotifications";
 
 const App = () => {
+  const { isOnline } = useContext(OfflineContext);
+
+  if (!isOnline) {
+    return <OfflineScreen />;
+  }
+
   // useEffect(() => {
   //   initPushNotifications();
 
@@ -74,34 +82,34 @@ const App = () => {
 
   return (
     <>
-      <UserContextProvider>
-        <Routes>
-          <Route path="/" exact element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/user/profile" element={<UserProfile />} />
-          <Route path="/products/groceries" element={<Groceries />} />
-          <Route
-            path="/products/groceries/:category"
-            element={<GroceryProducts />}
-          />
-          <Route path="/products/restaurants" element={<Restaurants />} />
-          <Route path="/products/medicines" element={<Medicines />} />
-          <Route path="/search/:query" element={<SearchQuery />} />
-          <Route path="/shop/:shopId" element={<ShopPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/order/:orderId" element={<OrderDetails />} />
-          <Route path="/recentOrders" element={<RecentOrders />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/user/addresses/:userId" element={<Addresses />} />
-          <Route path="/help-support" element={<HelpSupport />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/policy" element={<Policy />} />
-          <Route path="/install-guide" element={<InstallGuide />} />
-          <Route path="/my-account" element={<AccountDetails />} />
-        </Routes>
-      </UserContextProvider>
+     <UserContextProvider>
+          <Routes>
+            <Route path="/" exact element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/user/profile" element={<UserProfile />} />
+            <Route path="/products/groceries" element={<Groceries />} />
+            <Route
+              path="/products/groceries/:category"
+              element={<GroceryProducts />}
+            />
+            <Route path="/products/restaurants" element={<Restaurants />} />
+            <Route path="/products/medicines" element={<Medicines />} />
+            <Route path="/search/:query" element={<SearchQuery />} />
+            <Route path="/shop/:shopId" element={<ShopPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order/:orderId" element={<OrderDetails />} />
+            <Route path="/recentOrders" element={<RecentOrders />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/user/addresses/:userId" element={<Addresses />} />
+            <Route path="/help-support" element={<HelpSupport />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/policy" element={<Policy />} />
+            <Route path="/install-guide" element={<InstallGuide />} />
+            <Route path="/my-account" element={<AccountDetails />} />
+          </Routes>
+        </UserContextProvider>
 
       <SellerContextProvider>
         <Routes>
