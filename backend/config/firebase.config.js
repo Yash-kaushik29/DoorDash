@@ -9,16 +9,24 @@ let firebaseInitialized = false;
 console.log("FIREBASE_SERVICE_ACCOUNT_PATH:", process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
 
 try {
-  if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    // Use service account JSON from environment variable
+    console.log("Loading service account from environment variable");
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+    console.log("Firebase Admin SDK initialized with service account from env");
+  } else if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
     const serviceAccountPath = path.resolve(process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
     console.log("Loading service account from:", serviceAccountPath);
     const serviceAccount = require(serviceAccountPath);
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
-    console.log("Firebase Admin SDK initialized with service account");
+    console.log("Firebase Admin SDK initialized with service account file");
   } else {
-    console.log("No FIREBASE_SERVICE_ACCOUNT_PATH found, trying default...");
+    console.log("No Firebase credentials found, trying default...");
     admin.initializeApp({
       projectId: "gullyfoods",
     });
@@ -102,6 +110,12 @@ async function sendPushNotification(tokens, title, body, data = {}) {
     }
     if (failCount > 0) {
       console.log("Some push notifications failed (tokens may be expired)");
+      // Log detailed errors
+      results.forEach((result, index) => {
+        if (result.status === "rejected") {
+          console.error(`Token ${index + 1} failed:`, result.reason?.message || result.reason);
+        }
+      });
     }
   } catch (error) {
     console.error("Error sending push notification:", error.message);
