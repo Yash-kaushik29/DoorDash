@@ -10,6 +10,7 @@ console.log("FIREBASE_SERVICE_ACCOUNT_PATH:", process.env.FIREBASE_SERVICE_ACCOU
 
 try {
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    //viyomog
     // Use service account JSON from environment variable
     console.log("Loading service account from environment variable");
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
