@@ -98,11 +98,11 @@ export default function Signup() {
         setUser(response.data.user);
         setTimeout(() => navigate("/"), 2000);
       } else {
-        toast.error(response.data.message || "OTP verification failed ❌");
+        toast.error(response.data.message || "OTP verification Failed ❌");
       }
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "OTP verification failed ❌");
+      toast.error(err.response?.data?.message || "OTP verification Failed ❌");
     } finally {
       setLoading(false);
     }
