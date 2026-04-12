@@ -35,18 +35,26 @@ export async function requestNotificationPermission() {
   }
 }
 
-// Register push token for user (call this AFTER user logs in)
+// Register push token for user (call this AFTER user logs in or on app load for existing users)
 export async function registerPushToken() {
   if (!("Notification" in window)) return;
-  if (Notification.permission !== "granted") return;
 
   try {
+    // If permission is not granted yet, we request it
+    if (Notification.permission === "default") {
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") return;
+    } else if (Notification.permission !== "granted") {
+      return; // Permisson denied
+    }
+
     const token = await getToken(messaging, {
       vapidKey: VAPID_KEY,
     });
 
     if (!token) return;
 
+    // Save to DB (backend logic uses $addToSet to prevent duplicates)
     const response = await api.post("/api/user-profile/register-token", { token });
     console.log("Push token registered successfully:", response.data);
   } catch (err) {
@@ -57,9 +65,16 @@ export async function registerPushToken() {
 // Register push token for delivery boy (call this AFTER delivery boy logs in)
 export async function registerDeliveryBoyPushToken() {
   if (!("Notification" in window)) return;
-  if (Notification.permission !== "granted") return;
 
   try {
+    // If permission is not granted yet, we request it
+    if (Notification.permission === "default") {
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") return;
+    } else if (Notification.permission !== "granted") {
+      return; // Permisson denied
+    }
+
     const token = await getToken(messaging, {
       vapidKey: VAPID_KEY,
     });

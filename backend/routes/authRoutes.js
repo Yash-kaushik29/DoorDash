@@ -149,6 +149,12 @@ router.post("/user-signup", async (req, res) => {
 
     // Create new user
     const newUser = new User({ username, phone, activeCoupons });
+    
+    // ✅ Store FCM token if provided
+    if (req.body.fcmToken) {
+      newUser.fcmTokens = [req.body.fcmToken];
+    }
+    
     await newUser.save();
 
     const token = jwt.sign(
@@ -331,6 +337,14 @@ router.post("/user-login", async (req, res) => {
     };
 
     res.cookie("authToken", token, cookieOptions);
+
+    // ✅ Store FCM token if provided - in background
+    if (req.body.fcmToken) {
+      User.updateOne(
+        { _id: existingUser._id },
+        { $addToSet: { fcmTokens: req.body.fcmToken } }
+      ).exec().catch(err => console.error("Error saving FCM token during login:", err));
+    }
 
     res.json({
       success: true,

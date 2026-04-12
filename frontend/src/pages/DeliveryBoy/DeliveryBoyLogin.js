@@ -2,7 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../utils/axiosInstance";
-import { registerDeliveryBoyPushToken } from "../../utils/pushNotifications";
+import { registerDeliveryBoyPushToken, requestNotificationPermission } from "../../utils/pushNotifications";
 
 const DeliveryBoyLogin = () => {
   const [phone, setPhone] = useState("");
@@ -18,9 +18,13 @@ const DeliveryBoyLogin = () => {
   const handleLogin = async () => {
     setError("");
     try {
+      // ✅ Get FCM token before login
+      const fcmToken = await requestNotificationPermission();
+
       const res = await api.post(`/api/delivery/login`, {
         phone,
         password,
+        fcmToken,
       });
       console.log(res.data);
 

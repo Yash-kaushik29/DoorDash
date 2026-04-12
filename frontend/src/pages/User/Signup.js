@@ -5,6 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import api from "../../utils/axiosInstance";
+import { requestNotificationPermission } from "../../utils/pushNotifications";
 
 export default function Signup() {
   const { setUser } = useContext(UserContext);
@@ -87,9 +88,13 @@ export default function Signup() {
 
     try {
       setLoading(true);
+      // ✅ Get FCM token before signup
+      const fcmToken = await requestNotificationPermission();
+
       const response = await api.post(`/api/auth/user-signup`, {
         formData,
         otp,
+        fcmToken,
       });
 
       if (response.data.success) {

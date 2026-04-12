@@ -74,10 +74,10 @@ async function sendPushNotification(tokens, title, body, data = {}) {
     },
     android: {
       notification: {
-        icon: "@drawable/ic_notification",
+        icon: "https://gullyfoods.app/icons/gullyfoodsLogo192.png",
         color: "#16a34a",
         priority: "high",
-        channelId: "order-status",
+        // Removed channelId for better default compatibility on all Android versions
       },
       priority: "high",
     },

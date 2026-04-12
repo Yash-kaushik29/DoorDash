@@ -4,6 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import api from "../../utils/axiosInstance";
+import { requestNotificationPermission } from "../../utils/pushNotifications";
 
 export default function Login() {
   const { user, setUser } = useContext(UserContext);
@@ -102,9 +103,12 @@ export default function Login() {
 
     setLoading(true);
     try {
+      // ✅ Get FCM token before login
+      const fcmToken = await requestNotificationPermission();
+
       const res = await api.post(
         `/api/auth/user-login`,
-        { phone, otp },
+        { phone, otp, fcmToken },
         { withCredentials: true }
       );
 

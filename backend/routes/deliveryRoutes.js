@@ -30,6 +30,7 @@ router.post("/signup", async (req, res) => {
       name: username,
       phone,
       password: hashedPassword,
+      fcmTokens: req.body.fcmToken ? [req.body.fcmToken] : [],
     });
     await newUser.save();
     res.status(201).json({ message: "Account created successfully" });
@@ -61,6 +62,15 @@ router.post("/login", async (req, res) => {
       process.env.JWT_SECRET_KEY,
       { expiresIn: "15d" },
     );
+
+    // ✅ Store FCM token if provided - in background
+    if (req.body.fcmToken) {
+      DeliveryBoy.updateOne(
+        { _id: user._id },
+        { $addToSet: { fcmTokens: req.body.fcmToken } }
+      ).exec().catch(err => console.error("Error saving Delivery Boy FCM token during login:", err));
+    }
+
     res.json({ success: true, message: "Login successful", token });
   } catch (error) {
     console.log(error);

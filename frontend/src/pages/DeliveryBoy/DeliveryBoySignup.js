@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import api from '../../utils/axiosInstance';
+import { requestNotificationPermission } from '../../utils/pushNotifications';
 
 const DeliveryBoySignup = () => {
   const [username, setUsername] = useState('');
@@ -14,11 +14,15 @@ const DeliveryBoySignup = () => {
     setError('');
     setSuccess('');
     try {
+      // ✅ Get FCM token before signup
+      const fcmToken = await requestNotificationPermission();
+
       const res = await api.post(`/api/delivery/signup`, {
         username,
         phone,
         password,
         secretKey,
+        fcmToken,
       });
       setSuccess('Account created successfully');
     } catch (err) {
