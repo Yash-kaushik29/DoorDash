@@ -1,6 +1,6 @@
 import { getToken, onMessage } from "firebase/messaging";
 import { messaging } from "../config/firebaseConfig";
-import api from "../config/api";
+import api from "../utils/axiosInstance";
 
 const VAPID_KEY = process.env.REACT_APP_FIREBASE_PUBLIC_KEY;
 

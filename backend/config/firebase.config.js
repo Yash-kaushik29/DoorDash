@@ -2,6 +2,7 @@ const admin = require("firebase-admin");
 const path = require("path");
 const User = require("../models/User");
 const DeliveryBoy = require("../models/DeliveryBoy");
+const Order = require("../models/Order");
 
 // Initialize Firebase Admin SDK
 let firebaseInitialized = false;
@@ -133,45 +134,46 @@ async function sendPushNotification(tokens, title, body, data = {}) {
 async function sendOrderStatusNotification(userId, orderId, orderObjectId, status) {
   console.log(`Sending ${status} notification for order #${orderId} to user ${userId}`);
   
-  if (!firebaseInitialized) {
-    console.log("Firebase not initialized, skipping notification");
-    return;
-  }
+  if (!firebaseInitialized) return;
 
-  const userDoc = await User.findById(userId).select("fcmTokens");
-  if (!userDoc || !userDoc.fcmTokens || userDoc.fcmTokens.length === 0) {
-    console.log(`No FCM tokens found for user ${userId}`);
-    return;
-  }
+  // Fetch tokens and order details in parallel
+  const [userDoc, orderDoc] = await Promise.all([
+    User.findById(userId).select("fcmTokens"),
+    Order.findById(orderObjectId).select("items totalPrice")
+  ]);
+
+  if (!userDoc || !userDoc.fcmTokens || userDoc.fcmTokens.length === 0) return;
   
-  console.log(`Found ${userDoc.fcmTokens.length} FCM token(s) for user ${userId}`);
+  // Create a summary of items (e.g., "Burger, Coke")
+  const itemSummary = orderDoc?.items?.map(item => item.name).join(", ").substring(0, 50) || "your order";
+  const price = orderDoc ? ` (₹${orderDoc.totalPrice})` : "";
 
   const statusMessages = {
     "Processing": {
-      title: "Order Placed!",
-      body: `Your order #${orderId} has been placed successfully.`,
+      title: "GullyFoods: Order Placed! 🎊",
+      body: `Your order for ${itemSummary}${price} is confirmed and being sent to the kitchen.`,
     },
     "Preparing": {
-      title: "Order Preparing",
-      body: `Your order #${orderId} is being prepared by the seller.`,
+      title: "GullyFoods: Chef is cooking! 👨‍🍳",
+      body: `Great news! Your ${itemSummary} is being freshly prepared right now.`,
     },
     "Out For Delivery": {
-      title: "Out For Delivery!",
-      body: `Your order #${orderId} is on the way!`,
+      title: "GullyFoods: On the Way! 🛵",
+      body: `Your delicious ${itemSummary} has left the kitchen and is zooming towards you!`,
     },
     "Delivered": {
-      title: "Order Delivered!",
-      body: `Your order #${orderId} has been delivered. Enjoy!`,
+      title: "GullyFoods: Enjoy your meal! 😋",
+      body: `Your order for ${itemSummary} has been delivered. We hope you love it!`,
     },
     "Cancelled": {
-      title: "Order Cancelled",
-      body: `Your order #${orderId} has been cancelled.`,
+      title: "GullyFoods: Order Update",
+      body: `Your order for ${itemSummary} has been cancelled. Please check the app for details.`,
     },
   };
 
   const message = statusMessages[status] || {
-    title: "Order Update",
-    body: `Your order #${orderId} status has been updated to ${status}.`,
+    title: "GullyFoods: Order Update",
+    body: `Your order #${orderId} has been updated to ${status}.`,
   };
 
   await sendPushNotification(
@@ -213,8 +215,8 @@ async function sendDeliveryBoyNotification(deliveryBoyId, orderId, orderObjectId
 
   await sendPushNotification(
     deliveryBoy.fcmTokens,
-    "New Order Available!",
-    `A new order #${orderId} is available for delivery in ${area || "your area"}.`,
+    "GullyFoods: New Delivery! 🛵",
+    `A new order of ${area || "items"} is available! Tap to accept and start earning.`,
     { 
       orderId: orderId.toString(),
       orderObjectId: orderObjectId.toString(),

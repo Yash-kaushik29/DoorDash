@@ -6,8 +6,18 @@ export function register() {
       `${process.env.REACT_APP_PUBLIC_URL || ""}/service-worker.js`
     );
 
-    // Removed automatic reload on controllerchange to prevent infinite refresh loops
-    // with multiple service workers (offline + messaging).
+    wb.addEventListener("waiting", () => {
+      // Use the 'waiting' worker to skip waiting and take control
+      wb.messageSkipWaiting();
+    });
+
+    // Only reload once when the new worker takes control
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!window.__SW_RELOADING__) {
+        window.__SW_RELOADING__ = true;
+        window.location.reload();
+      }
+    });
 
     wb.register();
   }
