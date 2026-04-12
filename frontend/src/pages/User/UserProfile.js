@@ -33,7 +33,7 @@ const UserProfile = () => {
         {},
         { withCredentials: true }
       );
-      
+
       // ✅ Remove push token from server on logout
       await unregisterPushToken();
 
@@ -198,6 +198,9 @@ const UserProfile = () => {
                   <span className="font-semibold">Privacy Policy</span>
                   <MdPolicy className="text-2xl text-green-500" />
                 </Link>
+              </div>
+              <div className="text-center pb-4 opacity-30 text-[10px] dark:text-white">
+                GullyFoods- Notifications Active
               </div>
             </div>
           )}
