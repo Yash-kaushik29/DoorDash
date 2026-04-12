@@ -38,7 +38,7 @@ export async function requestNotificationPermission() {
 // Register push token for user (call this AFTER user logs in or on app load for existing users)
 export async function registerPushToken() {
   if (!("Notification" in window)) return;
-//Viyom
+//Viyom OG
   try {
     // If permission is not granted yet, we request it
     if (Notification.permission === "default") {
