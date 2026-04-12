@@ -6,9 +6,8 @@ export function register() {
       `${process.env.REACT_APP_PUBLIC_URL || ""}/service-worker.js`
     );
 
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      window.location.reload();
-    });
+    // Removed automatic reload on controllerchange to prevent infinite refresh loops
+    // with multiple service workers (offline + messaging).
 
     wb.register();
   }
