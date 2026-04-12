@@ -18,8 +18,13 @@ export async function requestNotificationPermission() {
       return null;
     }
 
+    // ✅ Explicitly register the messaging service worker for better mobile reliability
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+    console.log("Messaging service worker registered:", registration.scope);
+
     const token = await getToken(messaging, {
       vapidKey: VAPID_KEY,
+      serviceWorkerRegistration: registration, // Use the explicit registration
     });
 
     if (!token) {
@@ -48,8 +53,12 @@ export async function registerPushToken() {
       return; // Permisson denied
     }
 
+    // ✅ Explicitly register the messaging service worker
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+
     const token = await getToken(messaging, {
       vapidKey: VAPID_KEY,
+      serviceWorkerRegistration: registration,
     });
 
     if (!token) return;
@@ -75,8 +84,12 @@ export async function registerDeliveryBoyPushToken() {
       return; // Permisson denied
     }
 
+    // ✅ Explicitly register the messaging service worker
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+
     const token = await getToken(messaging, {
       vapidKey: VAPID_KEY,
+      serviceWorkerRegistration: registration,
     });
 
     if (!token) return;
