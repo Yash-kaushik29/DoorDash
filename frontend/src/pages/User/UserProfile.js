@@ -15,6 +15,7 @@ import {
   MdCameraswitch,
 } from "react-icons/md";
 import api from "../../utils/axiosInstance";
+import { unregisterPushToken, requestNotificationPermission, registerPushToken } from "../../utils/pushNotifications";
 
 const UserProfile = () => {
   const { user, setUser, ready } = useContext(UserContext);
@@ -32,6 +33,9 @@ const UserProfile = () => {
         {},
         { withCredentials: true }
       );
+      
+      // ✅ Remove push token from server on logout
+      await unregisterPushToken();
 
       if (data.success) {
         setUser(null);
@@ -123,13 +127,29 @@ const UserProfile = () => {
 
               {/* Navigation Buttons */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
-                <Link
-                  to="/notifications"
-                  className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl p-4 shadow-sm hover:scale-105 transition"
+                <button
+                  onClick={async () => {
+                    const status = Notification.permission;
+                    if (status === "denied") {
+                      toast.info("Notifications are blocked. Please click the Lock icon in the address bar to Allow them! 🔓", { autoClose: 5000 });
+                    } else {
+                      const token = await requestNotificationPermission();
+                      if (token) {
+                        await registerPushToken();
+                        toast.success("Notifications enabled successfully! 🎉");
+                      }
+                    }
+                  }}
+                  className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl p-4 shadow-sm hover:scale-105 transition w-full text-left"
                 >
-                  <span className="font-semibold">Notifications</span>
-                  <MdNotifications className="text-2xl text-green-500" />
-                </Link>
+                  <div className="flex flex-col">
+                    <span className="font-semibold">Notification Status</span>
+                    <span className={`text-[10px] font-bold ${Notification.permission === 'granted' ? 'text-green-500' : Notification.permission === 'denied' ? 'text-red-500' : 'text-orange-500'}`}>
+                      {Notification.permission === 'granted' ? '● ENABLED' : Notification.permission === 'denied' ? '● BLOCKED (Tap to fix)' : '● TURN ON'}
+                    </span>
+                  </div>
+                  <MdNotifications className={`text-2xl ${Notification.permission === 'granted' ? 'text-green-500' : 'text-gray-400'}`} />
+                </button>
 
                 <Link
                   to="/recentOrders"

@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import notificationSound from "../../sound/notificationSound.mp3";
 import { ToastContainer, toast } from "react-toastify";
 import api from "../../utils/axiosInstance";
+import { registerDeliveryBoyPushToken, requestNotificationPermission } from "../../utils/pushNotifications";
 
 const DeliveryBoyHome = () => {
   const [deliveryBoyStats, setDeliveryBoyStats] = useState({
@@ -97,6 +98,33 @@ const DeliveryBoyHome = () => {
         </Link>
       </div>
       <div className="min-h-screen bg-gray-100 p-4 dark:bg-gray-800">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+           {/* Notification Status Button */}
+           <button
+            onClick={async () => {
+              const status = Notification.permission;
+              if (status === "denied") {
+                toast.info("Notifications are blocked! Please click the Lock icon in your browser URL bar to Allow them. 🔓", { autoClose: 5000 });
+              } else {
+                const token = await requestNotificationPermission();
+                if (token) {
+                  await registerDeliveryBoyPushToken();
+                  toast.success("Notifications enabled! 🎉");
+                }
+              }
+            }}
+            className={`flex items-center justify-between p-4 rounded-2xl shadow-lg transition transform hover:scale-105 ${Notification.permission === 'granted' ? 'bg-green-600' : Notification.permission === 'denied' ? 'bg-red-600' : 'bg-indigo-600'} text-white`}
+          >
+            <div className="flex flex-col text-left">
+              <span className="font-bold">Notification Status</span>
+              <span className="text-xs opacity-90">
+                {Notification.permission === 'granted' ? '● ONLINE (Ready)' : Notification.permission === 'denied' ? '● BLOCKED (Tap to fix)' : '● TAP TO ENABLE'}
+              </span>
+            </div>
+            <Clock className="w-8 h-8 opacity-80" />
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Pending Deliveries */}
           <Link to="/delivery/orders/pending">

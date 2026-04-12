@@ -398,4 +398,21 @@ router.post("/register-token", authenticateUser, async (req, res) => {
 });
 
 
+router.post("/logout-token", authenticateUser, async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ message: "Token required" });
+
+    const userId = req.user._id || req.user.id;
+    console.log(`Removing FCM token for user ${userId}: ${token.substring(0, 20)}...`);
+
+    await User.updateOne({ _id: userId }, { $pull: { fcmTokens: token } });
+
+    res.status(200).json({ success: true, message: "Push token removed" });
+  } catch (err) {
+    console.error("Logout Token Error:", err);
+    res.status(500).json({ success: false, message: "Failed to remove token" });
+  }
+});
+
 module.exports = router;

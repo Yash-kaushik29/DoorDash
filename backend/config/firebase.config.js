@@ -62,8 +62,8 @@ async function sendPushNotification(tokens, title, body, data = {}) {
         Urgency: "high",
       },
       notification: {
-        icon: "/icons/gullyfoodsLogo192.png",
-        badge: "/icons/gullyfoodsLogo192.png",
+        icon: "/icons/AppIcon.jpg",
+        badge: "/icons/AppIcon.jpg",
         tag: data.orderId || "default",
         requireInteraction: true,
         renotify: true,
@@ -74,7 +74,7 @@ async function sendPushNotification(tokens, title, body, data = {}) {
     },
     android: {
       notification: {
-        icon: "https://gullyfoods.app/icons/gullyfoodsLogo192.png",
+        icon: "https://gullyfoods.app/icons/AppIcon.jpg",
         color: "#16a34a",
         priority: "high",
         // Removed channelId for better default compatibility on all Android versions

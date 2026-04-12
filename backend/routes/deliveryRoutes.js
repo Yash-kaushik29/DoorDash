@@ -488,4 +488,27 @@ router.post("/register-token", async (req, res) => {
   }
 });
 
+// Logout FCM token for delivery boy
+router.post("/logout-token", async (req, res) => {
+  try {
+    const { token } = req.body;
+    const authHeader = req.headers.authorization;
+
+    if (!token) return res.status(400).json({ message: "Token required" });
+    if (!authHeader || !authHeader.startsWith("Bearer ")) return res.status(401).json({ message: "Bearer token required" });
+
+    const jwtToken = authHeader.split(" ")[1];
+    const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET_KEY);
+    const deliveryBoyId = decoded.id;
+
+    console.log(`Removing FCM token for delivery boy ${deliveryBoyId}`);
+    await DeliveryBoy.updateOne({ _id: deliveryBoyId }, { $pull: { fcmTokens: token } });
+
+    res.status(200).json({ success: true, message: "Token removed" });
+  } catch (err) {
+    console.error("Delivery Logout Token Error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 module.exports = router;

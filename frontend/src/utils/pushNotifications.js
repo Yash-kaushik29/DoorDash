@@ -110,6 +110,50 @@ export async function registerDeliveryBoyPushToken() {
   }
 }
 
+// Unregister push token for user (call this during logout)
+export async function unregisterPushToken() {
+  if (!("Notification" in window)) return;
+
+  try {
+    const registration = await navigator.serviceWorker.getRegistration("/firebase-messaging-sw.js");
+    if (!registration) return;
+
+    const token = await getToken(messaging, {
+      vapidKey: VAPID_KEY,
+      serviceWorkerRegistration: registration,
+    });
+
+    if (!token) return;
+
+    await api.post("/api/user-profile/logout-token", { token });
+    console.log("Push token removed from server");
+  } catch (err) {
+    console.error("Unregister token error:", err);
+  }
+}
+
+// Unregister push token for delivery boy (call this during logout)
+export async function unregisterDeliveryBoyPushToken() {
+  if (!("Notification" in window)) return;
+
+  try {
+    const registration = await navigator.serviceWorker.getRegistration("/firebase-messaging-sw.js");
+    if (!registration) return;
+
+    const token = await getToken(messaging, {
+      vapidKey: VAPID_KEY,
+      serviceWorkerRegistration: registration,
+    });
+
+    if (!token) return;
+
+    await api.post("/api/delivery/logout-token", { token });
+    console.log("Delivery boy push token removed from server");
+  } catch (err) {
+    console.error("Unregister delivery token error:", err);
+  }
+}
+
 // Foreground message handler
 export function listenForegroundMessages(callback) {
   onMessage(messaging, (payload) => {

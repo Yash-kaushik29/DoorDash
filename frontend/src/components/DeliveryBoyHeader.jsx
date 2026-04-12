@@ -1,5 +1,6 @@
 import { Menu, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
+import { unregisterDeliveryBoyPushToken } from '../utils/pushNotifications';
 
 const DeliveryBoyHeader = () => {
      const [isDarkMode, setIsDarkMode] = useState(false);
@@ -25,8 +26,13 @@ const DeliveryBoyHeader = () => {
         }
       };
 
-      const handleLogout = () => {
+      const handleLogout = async () => {
+        // ✅ Remove push token from server on logout
+        await unregisterDeliveryBoyPushToken();
+        
         localStorage.setItem("token", "");
+        localStorage.setItem("GullyFoodsDeliveryToken", "");
+        window.location.reload(); // Force reload to clear state and redirect
       }
 
   return (
