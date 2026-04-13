@@ -103,12 +103,9 @@ export default function Login() {
 
     setLoading(true);
     try {
-      // ✅ Get FCM token before login
-      const fcmToken = await requestNotificationPermission();
-
       const res = await api.post(
         `/api/auth/user-login`,
-        { phone, otp, fcmToken },
+        { phone, otp },
         { withCredentials: true }
       );
 

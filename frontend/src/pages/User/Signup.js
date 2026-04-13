@@ -88,13 +88,10 @@ export default function Signup() {
 
     try {
       setLoading(true);
-      // ✅ Get FCM token before signup
-      const fcmToken = await requestNotificationPermission();
 
       const response = await api.post(`/api/auth/user-signup`, {
         formData,
         otp,
-        fcmToken,
       });
 
       if (response.data.success) {
