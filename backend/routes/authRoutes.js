@@ -179,9 +179,8 @@ router.post("/user-signup", async (req, res) => {
       expires: new Date(Date.now() + maxAge),
       httpOnly: true,
       secure: isProduction,
-      sameSite: "Lax",
+      sameSite: isProduction ? "None" : "Lax",
       path: "/",
-      domain: domainName,
     };
 
     res.cookie("authToken", token, cookieOptions);
@@ -331,9 +330,8 @@ router.post("/user-login", async (req, res) => {
       expires: new Date(Date.now() + maxAge),
       httpOnly: true,
       secure: isProduction,
-      sameSite: "Lax",
+      sameSite: isProduction ? "None" : "Lax",
       path: "/",
-      domain: domainName,
     };
 
     res.cookie("authToken", token, cookieOptions);
@@ -506,10 +504,9 @@ router.post("/logout", (req, res) => {
 
     res.clearCookie("authToken", {
       httpOnly: true,
-      sameSite: "Lax",
+      sameSite: isProduction ? "None" : "Lax",
       secure: isProduction,
       path: "/",
-      domain: domainName,
     });
 
     return res.status(200).json({
@@ -626,9 +623,8 @@ router.post("/switch-to-seller", async (req, res) => {
       expires: new Date(Date.now() + maxAge),
       httpOnly: true,
       secure: isProduction,
-      sameSite: "Lax",
+      sameSite: isProduction ? "None" : "Lax",
       path: "/",
-      domain: domainName,
     };
 
     res.cookie("gullyfoods_seller_session", token, cookieOptions);
