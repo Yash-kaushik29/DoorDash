@@ -18,8 +18,12 @@ export function UserContextProvider({ children }) {
 
                 if (response.data.success) {
                     setUser(response.data.user);
-                    // Register push token after successful auth
-                    await registerPushToken();
+                    // ✅ Run push registration in background without blocking login
+                    try {
+                        registerPushToken();
+                    } catch (pushErr) {
+                        console.warn("Push registration skipped:", pushErr);
+                    }
                 } else {
                     setUser(null);
                 }
