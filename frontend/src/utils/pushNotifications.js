@@ -18,10 +18,12 @@ export async function requestNotificationPermission() {
       return null;
     }
 
-    // ✅ Get or register the messaging service worker
-    let registration = await navigator.serviceWorker.getRegistration("/firebase-messaging-sw.js");
+    // ✅ Get or register the messaging service worker with a specific scope
+    let registration = await navigator.serviceWorker.getRegistration("/firebase-cloud-messaging-push-scope");
     if (!registration) {
-      registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+      registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js", {
+        scope: "/firebase-cloud-messaging-push-scope"
+      });
       console.log("Messaging service worker registered:", registration.scope);
     }
 
@@ -56,10 +58,12 @@ export async function registerPushToken() {
       return; // Permisson denied
     }
 
-    // ✅ Get or register the messaging service worker
-    let registration = await navigator.serviceWorker.getRegistration("/firebase-messaging-sw.js");
+    // ✅ Get or register the messaging service worker with a specific scope
+    let registration = await navigator.serviceWorker.getRegistration("/firebase-cloud-messaging-push-scope");
     if (!registration) {
-      registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+      registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js", {
+        scope: "/firebase-cloud-messaging-push-scope"
+      });
     }
 
     const token = await getToken(messaging, {
@@ -90,10 +94,12 @@ export async function registerDeliveryBoyPushToken() {
       return; // Permisson denied
     }
 
-    // ✅ Get or register the messaging service worker
-    let registration = await navigator.serviceWorker.getRegistration("/firebase-messaging-sw.js");
+    // ✅ Get or register the messaging service worker with a specific scope
+    let registration = await navigator.serviceWorker.getRegistration("/firebase-cloud-messaging-push-scope");
     if (!registration) {
-      registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+      registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js", {
+        scope: "/firebase-cloud-messaging-push-scope"
+      });
     }
 
     const token = await getToken(messaging, {
@@ -115,7 +121,7 @@ export async function unregisterPushToken() {
   if (!("Notification" in window)) return;
 
   try {
-    const registration = await navigator.serviceWorker.getRegistration("/firebase-messaging-sw.js");
+    const registration = await navigator.serviceWorker.getRegistration("/firebase-cloud-messaging-push-scope");
     if (!registration) return;
 
     const token = await getToken(messaging, {
@@ -137,7 +143,7 @@ export async function unregisterDeliveryBoyPushToken() {
   if (!("Notification" in window)) return;
 
   try {
-    const registration = await navigator.serviceWorker.getRegistration("/firebase-messaging-sw.js");
+    const registration = await navigator.serviceWorker.getRegistration("/firebase-cloud-messaging-push-scope");
     if (!registration) return;
 
     const token = await getToken(messaging, {

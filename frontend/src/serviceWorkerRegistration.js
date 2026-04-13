@@ -11,12 +11,9 @@ export function register() {
       wb.messageSkipWaiting();
     });
 
-    // Only reload once when the new worker takes control
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (!window.__SW_RELOADING__) {
-        window.__SW_RELOADING__ = true;
-        window.location.reload();
-      }
+    // Only reload when the PRIMARY website service worker updates
+    wb.addEventListener("controlling", () => {
+      window.location.reload();
     });
 
     wb.register();
