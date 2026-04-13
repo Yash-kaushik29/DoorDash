@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { fixImageUrl } from "../utils/axiosInstance";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { FaRegCircleDot } from "react-icons/fa6";
@@ -264,7 +263,10 @@ const ProductCard = ({
           )}
 
           <img
-            src={fixImageUrl(product.images?.[0])}
+            src={
+              product.images?.[0] ||
+              "/noImage.jpg"
+            }
             alt={product.name}
             className="w-full h-36 object-cover transition-transform duration-500 hover:scale-110"
           />

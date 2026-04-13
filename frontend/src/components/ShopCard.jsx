@@ -1,5 +1,4 @@
 import React from "react";
-import { fixImageUrl } from "../utils/axiosInstance";
 import { Link } from "react-router-dom";
 
 const ShopCard = ({ shop }) => {
@@ -9,7 +8,7 @@ const ShopCard = ({ shop }) => {
         {/* Image wrapper to FORCE circle */}
         <div className="w-24 h-24 rounded-full overflow-hidden border border-gray-300 shadow-sm">
           <img
-            src={fixImageUrl(shop?.images?.[1] || shop?.images?.[0])}
+            src={shop?.images?.[1] || shop?.images?.[0] || "/placeholder.png"}
             alt={shop.name}
             className="w-full h-full object-cover"
           />

@@ -6,12 +6,4 @@ const api = axios.create({
   withCredentials: true,
 });
 
-export const fixImageUrl = (url) => {
-  if (!url) return "/placeholder.png";
-  if (url.includes("localhost:5000")) {
-    return url.replace("http://localhost:5000", API_BASE_URL);
-  }
-  return url;
-};
-
 export default api;
